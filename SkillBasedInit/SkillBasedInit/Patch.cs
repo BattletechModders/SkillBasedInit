@@ -142,22 +142,57 @@ namespace SkillBasedInit {
     }
 
     [HarmonyPatch(typeof(Mech), "DamageLocation")]
-    [HarmonyPatch(new Type[] { typeof(int), typeof(WeaponHitInfo), typeof(ArmorLocation), typeof(Weapon),
-        typeof(float), typeof(int), typeof(AttackImpactQuality), typeof(DamageType)
-    })]
+    [HarmonyPatch(new Type[] { typeof(int), typeof(WeaponHitInfo), typeof(ArmorLocation), typeof(Weapon), typeof(float), typeof(int), typeof(AttackImpactQuality), typeof(DamageType) })]
     public static class Mech_DamageLocation {
         public static void Postfix(Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, AttackImpactQuality impactQuality, DamageType damageType) {            
-            SkillBasedInit.Logger.Log($"Mech:DamageLocation:post - Init");
+            if (weapon.Category == WeaponCategory.Melee) {
+                SkillBasedInit.Logger.Log($"Mech:DamageLocation:post - mech {__instance.DisplayName} has suffered a melee attack.");
+                float attackerTonnage = 0.0f;
+                if (weapon.parent.GetType() == typeof(Mech)) {
+                    Mech parent = (Mech)weapon.parent;
+                    attackerTonnage = parent.tonnage;
+                } else if (weapon.parent.GetType() == typeof(Vehicle)) {
+                    Vehicle parent = (Vehicle)weapon.parent;
+                    attackerTonnage = parent.tonnage;
+                }
+                float targetTonnage = __instance.tonnage;
+                int targetTonnageMod = (int)Math.Floor(targetTonnage / 5.0);
+
+                int attackerTonnageMod = (int) Math.Floor(attackerTonnage / 5.0);
+                SkillBasedInit.Logger.Log($"Raw attackerTonnageMod:{attackerTonnageMod} vs targetTonnageMod:{targetTonnageMod}");
+
+                // DamageType DFA increases the shock
+                if (damageType == DamageType.DFA) {
+                    int attackerTonnageWithDFA = (int)Math.Floor(attackerTonnageMod * 1.5);
+                    SkillBasedInit.Logger.Log($"DFA attack inficting additional slowdown - from {attackerTonnageMod} to {attackerTonnageWithDFA}");
+                    attackerTonnageMod = attackerTonnageWithDFA;
+                }
+
+                // Check for juggernaut
+                foreach (Ability ability in weapon.parent.GetPilot().Abilities) {
+                    if (ability.Def.Id == "AbilityDefGu5") {
+                        attackerTonnageMod = attackerTonnageMod * 2;
+                        SkillBasedInit.Logger.Log($"Pilot {weapon.parent.GetPilot()} has the Juggernaught skill, doubled their impact to {attackerTonnageMod}!");
+                    }
+                }
+                
+                float delta = Math.Min(1, attackerTonnageMod - targetTonnageMod);
+                SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
+
+                ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
+                actorInit.AddMeleeImpact(delta);
+            }
+
         }
     }
 
     [HarmonyPatch(typeof(Vehicle), "DamageLocation")]
-    [HarmonyPatch(new Type[] { typeof(WeaponHitInfo), typeof(int), typeof(VehicleChassisLocations),
-        typeof(Weapon), typeof(float), typeof(AttackImpactQuality)
-    })]
+    [HarmonyPatch(new Type[] { typeof(WeaponHitInfo), typeof(int), typeof(VehicleChassisLocations), typeof(Weapon), typeof(float), typeof(AttackImpactQuality) })]
     public static class Vehicle_DamageLocation {
         public static void Postfix(Vehicle __instance, WeaponHitInfo hitInfo, VehicleChassisLocations vLoc, Weapon weapon, AttackImpactQuality impactQuality) {
-            SkillBasedInit.Logger.Log($"Vehicle:DamageLocation:post - Init");
+            if (weapon.Category == WeaponCategory.Melee) {
+                SkillBasedInit.Logger.Log($"Vehicle:DamageLocation:post - vehicle {__instance.DisplayName} has suffered a melee attack.");                
+            }                
         }
     }
 
@@ -165,7 +200,9 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(WeaponHitInfo), typeof(BuildingLocation), typeof(Weapon), typeof(float) })]
     public static class Turret_DamageLocation {
         public static void Postfix(Turret __instance, WeaponHitInfo hitInfo, BuildingLocation bLoc, Weapon weapon) {
-            SkillBasedInit.Logger.Log($"Turret:DamageLocation:post - Init");
+            if (weapon.Category == WeaponCategory.Melee) {
+                SkillBasedInit.Logger.Log($"Turret:DamageLocation:post - turret {__instance.DisplayName} has suffered a melee attack.");
+            }
         }
     }
 
@@ -237,6 +274,7 @@ namespace SkillBasedInit {
             PhaseBeginMessage phaseBeginMessage = message as PhaseBeginMessage;
             string phaseText = string.Format("{0} - Phase {1}", phaseBeginMessage.Round, 31 - phaseBeginMessage.Phase);
             ___roundCounterText.SetText(phaseText, new object[0]);
+            //SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack::OnPhaseBegin::post - for {phaseText}");
         }
     }
 
@@ -283,7 +321,7 @@ namespace SkillBasedInit {
     public static class LanceLoadoutSlot_RefreshInitiativeData {
         public static void Postfix(LanceLoadoutSlot __instance, GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText) {
             //SkillBasedInit.Logger.Log($"LanceLoadoutSlot::RefreshInitiativeData::post - disabling text");
-            if (___initiativeObj.activeSelf) {
+            if (___initiativeObj != null && ___initiativeText != null && ___initiativeObj.activeSelf) {
                 ___initiativeText.SetText("{0}", new object[] { "-" });
             }
         }

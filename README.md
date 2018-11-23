@@ -15,3 +15,4 @@ New model
 TODO:
 * Melee attacks reduce your initiative by the difference in tonnage; a 100t vs. 100t has limited impact, a 100t vs. 20t a bigger impact. Piloting skill mitigates this.
 * Test interactions with init modifying abilities; Juggernaught, Offensive Push, etc
+* On knockdown, apply guts range as penalty instead of just -1

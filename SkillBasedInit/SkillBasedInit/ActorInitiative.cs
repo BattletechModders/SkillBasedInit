@@ -6,9 +6,9 @@ using System.Linq;
 
 namespace SkillBasedInit {
 
-    enum ActorType { Mech, Vehicle, Turret };
+    public enum ActorType { Mech, Vehicle, Turret };
 
-    class ActorInitiative {
+    public class ActorInitiative {
         readonly string pilotId;
         readonly string pilotName;
         public ActorType type = ActorType.Mech;
@@ -19,7 +19,9 @@ namespace SkillBasedInit {
         readonly public double pilotingEffectMulti;        
 
         readonly public int[] injuryBounds;
-        readonly public int ignoredInjuries; 
+        readonly public int ignoredInjuries;
+
+        public float meleeImpact;
 
         // Const values
         private const double PilotingCrippledMultiplier = 0.05;
@@ -157,6 +159,12 @@ namespace SkillBasedInit {
             return new int[] { roundMin, roundMax };
         }
 
+        public void AddMeleeImpact(float impactDelta) {
+            if (impactDelta >= this.meleeImpact) {
+                this.meleeImpact = impactDelta;
+            }
+        }
+
         public void CalculateRoundInit(AbstractActor actor) {                  
 
             // Generate a random element            
@@ -164,7 +172,7 @@ namespace SkillBasedInit {
             int roundInitiative = this.chassisBaseMod + roundVariance;
 
             // Check for inspired status
-            if (actor.IsMoraleInspired) {
+            if (actor.IsMoraleInspired || actor.IsFuryInspired) {
                 int inspiredBonus = SkillBasedInit.Random.Next(1, 3);
                 SkillBasedInit.Logger.Log($"Pilot {this.pilotName} is inspired, adding {inspiredBonus} to init.");
                 roundInitiative += inspiredBonus;
@@ -236,7 +244,7 @@ namespace SkillBasedInit {
     public static class ActorInitiativeHolder {
 
         private static readonly Dictionary<string, ActorInitiative> actorInitMap = new Dictionary<string, ActorInitiative>();
-        private static Dictionary<string, ActorInitiative> ActorInitMap { get => actorInitMap; }
+        public static Dictionary<string, ActorInitiative> ActorInitMap { get => actorInitMap; }
 
         public static void OnRoundBegin(AbstractActor actor) {
             if (actor != null) {
@@ -249,6 +257,7 @@ namespace SkillBasedInit {
                 // Recalculate the random part of their initiative for the round
                 actorInit.CalculateRoundInit(actor);
 
+                actorInit.meleeImpact = 0.0f;
 
             }
         }

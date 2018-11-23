@@ -36,6 +36,7 @@ namespace SkillBasedInit {
                 return;
             }
 
+            Logger.ClearAppender(name);
             Logger.AddAppender(name, LogAppender);
             if (LoggerLevels.TryGetValue(name, out var level)) {
                 Logger.SetLoggerLevel(name, level);
