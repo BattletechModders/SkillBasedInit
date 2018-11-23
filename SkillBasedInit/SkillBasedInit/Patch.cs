@@ -12,19 +12,15 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(AbstractActor), "OnNewRound")]
     public static class AbstractActor_OnNewRound {
         public static void Postfix(AbstractActor __instance, int round) {
-            try {
-                SkillBasedInit.Logger.Log($"AbstractActor: Starting new round {round}, recalculating initiative element.");
-                ActorInitiativeHolder.OnRoundBegin(__instance);
-            } catch (Exception e) {
-                SkillBasedInit.Logger.Log("Failed execute patch for OnNewRound!" + e);
-            }
+            SkillBasedInit.Logger.Log($"AbstractActor: Starting new round {round}, recalculating initiative element for actor:{__instance.DisplayName}");
+            ActorInitiativeHolder.OnRoundBegin(__instance);
         }
     }
 
     [HarmonyPatch(typeof(AbstractActor), "DeferUnit")]
     public static class AbstractActor_DeferUnit {
         public static void Postfix(AbstractActor __instance) {
-            SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
+            //SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
             var deferJump = SkillBasedInit.Random.Next(0, 5);
             __instance.Initiative += deferJump;
             SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit - Reducing actorInit by an additional {deferJump} to {__instance.Initiative} ");
@@ -176,7 +172,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(TurnDirector), "OnCombatGameDestroyed")]
     public static class TurnDirector_OnCombatGameDestroyed {
         public static void Postfix(TurnDirector __instance) {
-            SkillBasedInit.Logger.Log($"TurnDirector; Combat complete, destroying initiative map.");
+            //SkillBasedInit.Logger.Log($"TurnDirector; Combat complete, destroying initiative map.");
             ActorInitiativeHolder.OnCombatComplete();
         }
     }
@@ -203,15 +199,8 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD) })]
     public static class CombatHUDPhaseTrack_Init {
 
-        public static void Prefix(CombatHUDPhaseTrack __instance, CombatGameState combat, CombatHUD HUD) {
-            SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack::Init::Pre - entered");
-            foreach (GameObject phaseBarHolder in __instance.phaseBarHolders) {
-                SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack::Init::Pre - GameObject is {phaseBarHolder} with typeof {phaseBarHolder.GetType().FullName}");
-            }
-        }
-
         public static void Postfix(CombatHUDPhaseTrack __instance, CombatGameState combat, CombatHUD HUD, List<CombatHUDPhaseIcons> ___PhaseIcons, CombatHUDReserveButton ___reserveButton) {
-            SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack::Init - entered");
+            //SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack::Init - entered");
 
             __instance.OnCombatGameDestroyed();
 
@@ -228,7 +217,7 @@ namespace SkillBasedInit {
         public static void Postfix(CombatHUDPhaseTrack __instance, MessageCenterMessage message, 
             TextMeshProUGUI ___roundCounterText, List<CombatHUDIconTracker> ___IconTrackers, 
             GameObject ___phaseTrack, GameObject[] ___phaseBarHolders ) {
-            SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack::OnRoundBegin::post - Init");
+            //SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack::OnRoundBegin::post - Init");
             for (int i = 0; i < ___IconTrackers.Count; i++) {
                 ___IconTrackers[i].Visible = false;
             }
@@ -244,7 +233,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(MessageCenterMessage)} )]
     public static class CombatHUDPhaseTrack_OnPhaseBegin {
         public static void Postfix(CombatHUDPhaseTrack __instance, MessageCenterMessage message, TextMeshProUGUI ___roundCounterText) {
-            SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack::OnPhaseBegin::post - Init");
+            //SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack::OnPhaseBegin::post - Init");
             PhaseBeginMessage phaseBeginMessage = message as PhaseBeginMessage;
             string phaseText = string.Format("{0} - Phase {1}", phaseBeginMessage.Round, 31 - phaseBeginMessage.Phase);
             ___roundCounterText.SetText(phaseText, new object[0]);
@@ -263,7 +252,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD), typeof(UnityEngine.UI.LayoutElement), typeof(HBSDOTweenToggle)})]
     public static class CombatHUDPortrait_Init {
         public static void Postfix(CombatHUDPortrait __instance, TextMeshProUGUI ___ioText, DOTweenAnimation ___initiativeOverlay) {
-            SkillBasedInit.Logger.Log($"CombatHUDPortrait::Init::post - Init");
+            //SkillBasedInit.Logger.Log($"CombatHUDPortrait::Init::post - Init");
             ___ioText.enableWordWrapping = false;
             ___initiativeOverlay.isActive = false;
         }
@@ -273,7 +262,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD) })]
     public static class CombatHUDPhaseDisplay_Init {
         public static void Postfix(CombatHUDPhaseDisplay __instance, TextMeshProUGUI ___NumText) {
-            SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay::Init::post - Init");
+            //SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay::Init::post - Init");
             ___NumText.enableWordWrapping = false;
         }
     }
@@ -282,8 +271,19 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { })]
     public static class MechBayMechInfoWidget_SetInitiative {
         public static void Postfix(MechBayMechInfoWidget __instance, GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText) {
-            SkillBasedInit.Logger.Log($"MechBayMechInfoWidget::SetInitiative::post - disabling text");
-            if (___initiativeObj.active) {
+            //SkillBasedInit.Logger.Log($"MechBayMechInfoWidget::SetInitiative::post - disabling text");
+            if (___initiativeObj.activeSelf) {
+                ___initiativeText.SetText("{0}", new object[] { "-" });
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(LanceLoadoutSlot), "RefreshInitiativeData")]
+    [HarmonyPatch(new Type[] { })]
+    public static class LanceLoadoutSlot_RefreshInitiativeData {
+        public static void Postfix(LanceLoadoutSlot __instance, GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText) {
+            //SkillBasedInit.Logger.Log($"LanceLoadoutSlot::RefreshInitiativeData::post - disabling text");
+            if (___initiativeObj.activeSelf) {
                 ___initiativeText.SetText("{0}", new object[] { "-" });
             }
         }
