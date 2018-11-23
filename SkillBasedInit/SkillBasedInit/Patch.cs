@@ -142,13 +142,34 @@ namespace SkillBasedInit {
         }
     }
 
+    [HarmonyPatch(typeof(Mech), "CompleteKnockdown")]
+    [HarmonyPatch(new Type[] { typeof(string), typeof(int) })]
+    public static class Mech_CompleteKnockdown {
+
+        public static string KnockdownSourceID;
+        public static int KnockdownStackItemUID;
+
+        public static bool Prefix(Mech __instance, string sourceID, int stackItemUID) {
+            SkillBasedInit.Logger.Log($"Mech:CompleteKnockdown:prefix - Recording sourceID:{sourceID} stackItemUID:{stackItemUID}");
+            KnockdownSourceID = sourceID;
+            KnockdownStackItemUID = stackItemUID;            
+            return true;
+        }
+
+        public static void Postfix(Mech __instance) {
+            SkillBasedInit.Logger.Log($"Mech:CompleteKnockdown:prefix - Removing record.");
+            KnockdownSourceID = null;
+            KnockdownStackItemUID = -1;
+        }
+    }
+
     [HarmonyPatch(typeof(AbstractActor), "ForceUnitOnePhaseDown")]
     [HarmonyPatch(new Type[] { typeof(string), typeof(int), typeof(bool) })]
     public static class AbstractActor_ForceUnitOnePhaseDown {
         public static bool Prefix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf) {
-            SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Init");
+            SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Init - sourceID:{sourceID} vs actor: {__instance.GUID}");
             bool shouldReturn;
-            if (!addedBySelf) {
+            if (sourceID != Mech_CompleteKnockdown.KnockdownSourceID || stackItemUID != Mech_CompleteKnockdown.KnockdownStackItemUID) {
                 SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Not from knockdown, deferring to original call");
                 shouldReturn = true;
             } else {
