@@ -4,6 +4,7 @@ using DG.Tweening;
 using Harmony;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
 using UnityEngine;
 
@@ -141,6 +142,33 @@ namespace SkillBasedInit {
         }
     }
 
+    [HarmonyPatch(typeof(AbstractActor), "ForceUnitOnePhaseDown")]
+    [HarmonyPatch(new Type[] { typeof(string), typeof(int), typeof(bool) })]
+    public static class AbstractActor_ForceUnitOnePhaseDown {
+        public static bool Prefix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf) {
+            SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Init");
+            bool shouldReturn;
+            if (!addedBySelf) {
+                SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Not from knockdown, deferring to original call");
+                shouldReturn = true;
+            } else {
+                SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - From knockdown, executing changed logic");
+                shouldReturn = false;
+                if (__instance.Combat.TurnDirector.IsInterleaved && __instance.Initiative != SkillBasedInit.MaxPhase) {
+                    ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
+                    int knockDownMod = SkillBasedInit.Random.Next(actorInit.injuryBounds[0], actorInit.injuryBounds[1]);
+                    SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown modifying unit initiative by {knockDownMod} due to knockdown!");
+                    __instance.Initiative = __instance.Initiative + knockDownMod;
+                    __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
+                    __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                    string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
+                    __instance.StatCollection.ModifyStat<int>(sourceID, stackItemUID, statName, StatCollection.StatOperation.Int_Add, knockDownMod, -1, true);
+                }
+            }            
+            return shouldReturn;
+        }
+    }
+
     [HarmonyPatch(typeof(Mech), "DamageLocation")]
     [HarmonyPatch(new Type[] { typeof(int), typeof(WeaponHitInfo), typeof(ArmorLocation), typeof(Weapon), typeof(float), typeof(int), typeof(AttackImpactQuality), typeof(DamageType) })]
     public static class Mech_DamageLocation {
@@ -176,7 +204,7 @@ namespace SkillBasedInit {
                     }
                 }
                 
-                float delta = Math.Min(1, attackerTonnageMod - targetTonnageMod);
+                float delta = Math.Max(1, attackerTonnageMod - targetTonnageMod);
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
 
                 ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];

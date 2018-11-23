@@ -223,7 +223,14 @@ namespace SkillBasedInit {
                 delta = actor.Initiative - this.priorRoundInit;
                 roundInitiative += delta;
                 SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} has init:{actor.Initiative} but priorInit:{this.priorRoundInit} - applying delta:{delta} to roundInit:{roundInitiative} reflect init changes during round.");
+                /* 
+                 * TODO: Should this be instead                 
+                    string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
+                    __instance.StatCollection.ModifyStat<int>(sourceID, stackItemUID, statName, StatCollection.StatOperation.Int_Add, 1, -1, true);
+                */
             }
+            
+
 
             if (roundInitiative < 0) {
                 roundInitiative = 1;
