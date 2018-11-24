@@ -230,8 +230,6 @@ namespace SkillBasedInit {
                 */
             }
             
-
-
             if (roundInitiative < 0) {
                 roundInitiative = 1;
                 SkillBasedInit.Logger.Log($"Round init {roundInitiative} less than 0.");
