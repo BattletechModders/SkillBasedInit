@@ -26,18 +26,20 @@ The sections below detail some of the calculations used by the mod.
 ### Tonnage Impact
 The tonnage of a unit determines a multipler applied to the lower (6) and upper (12) bounds of the phase calculation. After multiplication, the lower bound is rounded down, while the upper bound is rounded up.
 
-* 00-05 tons: x1.6 for bounds of [9, 20]
-* 10-15 tons: x1.5 for bounds of [9, 20]
-* 20-25 tons: x1.4 for bounds of [8, 17]
-* 30-35 tons: x1.3 for bounds of [7, 16]
-* 40-45 tons: x1.2 for bounds of [7, 14]
-* 50-55 tons: x1.1 for bounds of [6, 14]
-* 60-65 tons: x1.0 for bounds of [6, 12]
-* 70-75 tons: x0.9 for bounds of [5, 11]
-* 80-85 tons: x0.8 for bounds of [4, 10]
-* 90-95 tons: x0.7 for bounds of [4, 9]
-*   100 tons: x0.6 for bounds of [3, 8]
-*  100+ tons: x0.2 for bounds of [1, 3]
+Tonnage | Modifier | Initiative Range
+--------|----------|---------------
+00-05   | x1.6 |  9 to 20
+10-15   | x1.5 | 9 to 20
+20-25   | x1.4 | 8 to 17
+30-35   | x1.3 | 7 to 16
+40-45   | x1.2 | 7 to 14
+50-55   | x1.1 | 6 to 14
+60-65   | x1.0 | 6 to 12
+70-75   | x0.9 | 5 to 11
+80-85   | x0.8 | 4 to 10
+90-95   | x0.7 | 4 to 9
+100     | x0.6 | 3 to 8
+100+    | x0.2 | 1 to 3
 
 ### Impact of Tactics Skill
 A MechWarriors's Tactics rating makes a significant difference on when it acts in the initiative order. The tactics and piloting skills are combined and converted into an additional .1 to 1.0 added to the tonnage modifier above. The tactics skill has twice the impact of the piloting skill on this calculation, which follows the formula:
@@ -46,10 +48,10 @@ A MechWarriors's Tactics rating makes a significant difference on when it acts i
 
 Some examples illustrate the interplay between Tactics and Piloting:
 
-* A mechwarrior with Tactics 1 and Piloting 1 increase the tonnage modifier by ((2 + 1) / 3) / 10.0 = 0.1. In a 50 ton mech, their phase bounds wound be x1.1 + 0.1 = x1.2.
-* A mechwarrior with Tactics 6 and Piloting 3 increase the tonnage modifier by((12 + 3) / 3) / 10.0 = 0.5. In a 50 ton mech, their phase bounds wound be x1.1 + 0.5 = x1.6.
-* A mechwarrior with Tactics 10 and Piloting 1 increase the tonnage modifier by ((20 + 2) / 3) / 10.0 = 0.7. In a 50 ton mech, their phase bounds wound be x1.1 + 1.0 = x2.1.
-* A mechwarrior with Tactics 1 and Piloting 10 increase the tonnage modifier by((2 + 10) / 3) / 10.0 = 0.4. In a 50 ton mech, their phase bounds wound be x1.1 + 0.4 = x1.5.
+* A mechwarrior with Tactics 1 and Piloting 1 increase the tonnage modifier by `((2 + 1) / 3) / 10.0 = 0.1`. In a 50 ton mech, their phase bounds would be `x1.1 + 0.1 = x1.2`.
+* A mechwarrior with Tactics 6 and Piloting 3 increase the tonnage modifier by `((12 + 3) / 3) / 10.0 = 0.5`. In a 50 ton mech, their phase bounds would be `x1.1 + 0.5 = x1.6`.
+* A mechwarrior with Tactics 10 and Piloting 1 increase the tonnage modifier by `((20 + 2) / 3) / 10.0 = 0.7`. In a 50 ton mech, their phase bounds would be `x1.1 + 1.0 = x2.1`.
+* A mechwarrior with Tactics 1 and Piloting 10 increase the tonnage modifier by `((2 + 10) / 3) / 10.0 = 0.4`. In a 50 ton mech, their phase bounds would be `x1.1 + 0.4 = x1.5`.
 
 
 ### Impact of Piloting
@@ -60,10 +62,12 @@ Many battlefield conditions reduce your initiative. Your piloting skill reduces 
 
 When a battlefield condition would stun or injure a mechwarrior, the size of the penalty is determined by the Mechwarrior's Guts skill rating. The following lits defines the penalty range in terms of the skill level:
 
-* Skill 1, 2, 3, 4 = range of -4 to -7.
-* Skill 5, 6, 7, 8 = range of -3 to -6
-* Skill 9 = range of -2 to -5
-* Skill 10 = range of -1 to -4
+Guts Rating | Initiative Range
+------------|---------------
+1, 2, 3, 4 |  -4 to -7.
+5, 6, 7, 8 |  -3 to -6
+9 |  -2 to -5
+10 |  -1 to -4
 
 Mechwarriors lose initiative anytime they are injured. Mechwarriors with additional health pips due to high guts ratings ignore one injury per each additional health pip they have. 
 
