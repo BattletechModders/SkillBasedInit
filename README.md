@@ -12,6 +12,7 @@ Battlefield conditions that impact your place in the initiative order include:
 * Mechs with a missing leg or vehicles with a missing side count as crippled and suffer an initiative penalty of -13. This penalty is reduced 5% for each point of piloting (rounded down). A mechwarrior with skill 5 reduces this penalty by 25% to -13 * 0.75 = 9.
 * Mechwarriors with the High Spirits tag gain a +2 initiative bonus. Mechwarriors with the Low Spirits tag suffer a -2 initiative penalty.
 * Mechwarriors that are Inspired by Morale or Fury gain a bonus between +1 to +3.
+* Any chassis or component that modifies the **BaseInititiative** of the unit should be honored. This value is normalized against the expected values for the weight classes (light=2, medium=3, heavy=4, assault=5).
 
 Work in progress or planned effects include:
 
@@ -71,6 +72,10 @@ Guts Rating | Initiative Range
 
 Mechwarriors lose initiative anytime they are injured. Mechwarriors with additional health pips due to high guts ratings ignore one injury per each additional health pip they have. 
 
+### Miscellaneous
+
+Turrets suffer a -4 penalty, while tanks suffer a -2. These will likely be removed in the future once it's been confirmed that init bonuses on chassis and components will flow through the system.
+
 ## TODO
 
 These items are known bugs or issues that should be resolved before declaring a 1.0 version.
@@ -78,6 +83,7 @@ These items are known bugs or issues that should be resolved before declaring a 
 * Melee attacks reduce your initiative by the difference in tonnage; a 100t vs. 100t has limited impact, a 100t vs. 20t a bigger impact. Piloting skill mitigates this. Mechanics in place, but penalty not yet applied.Vehicles and turrets need tested; no way to apply DFA penalty against them (no DamageType in signatures)
 * Test interactions with init modifying abilities; Juggernaught, Offensive Push, etc
 * Test interactions with init modifying components; primitive cockpits should offer no bonus, basic IS +1, Clan +2, DNI +3, EI +4
+* Determine if there are other stats that should be evaluated. In particular "PhaseModifier" : "PhaseModifierSelf" may be appropriate to check on each round.
 * Extract logging from HBS.Logging to prevent duplication of logs
 * Show init bonus/malus on Lance/MechBay screens. Currently replaced with a - character to signify it's meaningless. 
 * Consider if only tactics should influence your init order, while Piloting influences the reduction of negative modifiers. Piloting is already overly strong, as it adds to dodge changes and evasion pips. However, requiring both skills for the highest modifiers makes it harder to find a pilot that reaches the 1.0 modifier.
