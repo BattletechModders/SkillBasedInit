@@ -80,6 +80,7 @@ Turrets suffer a -4 penalty, while tanks suffer a -2. These will likely be remov
 
 These items are known bugs or issues that should be resolved before declaring a 1.0 version.
 
+* Make the various penalties configurable through mod config.
 * Melee attacks reduce your initiative by the difference in tonnage; a 100t vs. 100t has limited impact, a 100t vs. 20t a bigger impact. Piloting skill mitigates this. Mechanics in place, but penalty not yet applied.Vehicles and turrets need tested; no way to apply DFA penalty against them (no DamageType in signatures)
 * Test interactions with init modifying abilities; Juggernaught, Offensive Push, etc
 * Test interactions with init modifying components; primitive cockpits should offer no bonus, basic IS +1, Clan +2, DNI +3, EI +4
