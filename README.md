@@ -40,17 +40,17 @@ The tonnage of a unit determines a multipler applied to the lower (6) and upper 
 *  100+ tons: x0.2 for bounds of [1, 3]
 
 ### Impact of Tactics Skill
-The MechWarrior's piloting and tactics skill increases these bounds. The tactics and piloting skills are combined and converted into an additional .1 to 1.0 added to the tonnage modifier above. The tactics skill has twice the impact of the piloting skill on this calculation, which follows the formula:
+A MechWarriors's Tactics rating makes a significant difference on when it acts in the initiative order. The tactics and piloting skills are combined and converted into an additional .1 to 1.0 added to the tonnage modifier above. The tactics skill has twice the impact of the piloting skill on this calculation, which follows the formula:
 
-Math.Floor((pilot.Tactics * 2.0 + pilot.Piloting) / 3.0) / 10.0;
+`Math.Floor((pilot.Tactics * 2.0 + pilot.Piloting) / 3.0) / 10.0;`
 
-Some example:
-    * A mechwarrior with Tactics 1 and Piloting 1 increase the tonnage modifier by ((2 + 1) / 3) / 10.0 = 0.1. In a 50 ton mech, their phase bounds wound be x1.1 + 0.1 = x1.2.
-    * A mechwarrior with Tactics 6 and Piloting 3 increase the tonnage modifier by((12 + 3) / 3) / 10.0 = 0.5. In a 50 ton mech, their phase bounds wound be x1.1 + 0.5 = x1.6.
-    * A mechwarrior with Tactics 10 and Piloting 1 increase the tonnage modifier by ((20 + 2) / 3) / 10.0 = 0.7. In a 50 ton mech, their phase bounds wound be x1.1 + 1.0 = x2.1.
-    * A mechwarrior with Tactics 1 and Piloting 10 increase the tonnage modifier by((2 + 10) / 3) / 10.0 = 0.4. In a 50 ton mech, their phase bounds wound be x1.1 + 0.4 = x1.5.
+Some examples illustrate the interplay between Tactics and Piloting:
 
-Tactics makes a significant difference on your initiative order. 
+* A mechwarrior with Tactics 1 and Piloting 1 increase the tonnage modifier by ((2 + 1) / 3) / 10.0 = 0.1. In a 50 ton mech, their phase bounds wound be x1.1 + 0.1 = x1.2.
+* A mechwarrior with Tactics 6 and Piloting 3 increase the tonnage modifier by((12 + 3) / 3) / 10.0 = 0.5. In a 50 ton mech, their phase bounds wound be x1.1 + 0.5 = x1.6.
+* A mechwarrior with Tactics 10 and Piloting 1 increase the tonnage modifier by ((20 + 2) / 3) / 10.0 = 0.7. In a 50 ton mech, their phase bounds wound be x1.1 + 1.0 = x2.1.
+* A mechwarrior with Tactics 1 and Piloting 10 increase the tonnage modifier by((2 + 10) / 3) / 10.0 = 0.4. In a 50 ton mech, their phase bounds wound be x1.1 + 0.4 = x1.5.
+
 
 ### Impact of Piloting
 
@@ -76,3 +76,4 @@ These items are known bugs or issues that should be resolved before declaring a 
 * Test interactions with init modifying components; primitive cockpits should offer no bonus, basic IS +1, Clan +2, DNI +3, EI +4
 * Extract logging from HBS.Logging to prevent duplication of logs
 * Show init bonus/malus on Lance/MechBay screens. Currently replaced with a - character to signify it's meaningless. 
+* Consider if only tactics should influence your init order, while Piloting influences the reduction of negative modifiers. Piloting is already overly strong, as it adds to dodge changes and evasion pips. However, requiring both skills for the highest modifiers makes it harder to find a pilot that reaches the 1.0 modifier.
