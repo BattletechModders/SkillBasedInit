@@ -16,7 +16,7 @@ Battlefield conditions that impact your place in the initiative order include:
 
 Work in progress or planned effects include:
 
-* WIP: Units that suffer a melee attack suffer an initaitive penalty. Defenders that are heavier than attackers only suffer -1 penalty (before DFA and Juggernaught mods). Defenders that are ligher than the attacker suffer a -1 penalty for each 5 tons they are lighter than the attacker. The defender reduces this effect by 5% for each point of piloting. DFA attacks increase this bonus by 1.5 (rounded down). Juggernaught attacks multiply the final value by 2. A 100 ton Mech performing DFA on a 20 ton Mech would impose a 20 - 4 = -16 penalty, times 1.5 for DFA = -24. If the attacking pilot has Juggernaught, this comes -48. 
+* WIP: Units that suffer a melee attack suffer an initiative penalty. Defenders that are heavier than attackers only suffer -1 penalty (before DFA and Juggernaught mods). Defenders that are ligher than the attacker suffer a -1 penalty for each 5 tons they are lighter than the attacker. The defender reduces this effect by 5% for each point of piloting. DFA attacks increase this bonus by 1.5 (rounded down). Juggernaught attacks multiply the final value by 2. A 100 ton Mech performing DFA on a 20 ton Mech would impose a 20 - 4 = -16 penalty, times 1.5 for DFA = -24. If the attacking pilot has Juggernaught, this comes -48. 
 * Planned: Units that are unsettled, panicked or similar will have a reduced initiative.
 
 
@@ -88,3 +88,4 @@ These items are known bugs or issues that should be resolved before declaring a 
 * Extract logging from HBS.Logging to prevent duplication of logs
 * Show init bonus/malus on Lance/MechBay screens. Currently replaced with a - character to signify it's meaningless. 
 * Consider if only tactics should influence your init order, while Piloting influences the reduction of negative modifiers. Piloting is already overly strong, as it adds to dodge changes and evasion pips. However, requiring both skills for the highest modifiers makes it harder to find a pilot that reaches the 1.0 modifier.
+* Check out Cyclops init aura interacts with this

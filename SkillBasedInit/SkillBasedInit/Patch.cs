@@ -207,12 +207,12 @@ namespace SkillBasedInit {
                 float targetTonnage = __instance.tonnage;
                 int targetTonnageMod = (int)Math.Floor(targetTonnage / 5.0);
 
-                int attackerTonnageMod = (int) Math.Floor(attackerTonnage / 5.0);
+                int attackerTonnageMod = (int)Math.Floor(attackerTonnage / 5.0);
                 SkillBasedInit.Logger.Log($"Raw attackerTonnageMod:{attackerTonnageMod} vs targetTonnageMod:{targetTonnageMod}");
 
-                // DamageType DFA increases the shock
+                // DamageType DFA increases the shock for mechs
                 if (damageType == DamageType.DFA) {
-                    int attackerTonnageWithDFA = (int)Math.Floor(attackerTonnageMod * 1.5);
+                    int attackerTonnageWithDFA = (int)Math.Floor(attackerTonnageMod * SkillBasedInit.settings.MechMeleeDFAMulti);
                     SkillBasedInit.Logger.Log($"DFA attack inficting additional slowdown - from {attackerTonnageMod} to {attackerTonnageWithDFA}");
                     attackerTonnageMod = attackerTonnageWithDFA;
                 }
@@ -220,7 +220,7 @@ namespace SkillBasedInit {
                 // Check for juggernaut
                 foreach (Ability ability in weapon.parent.GetPilot().Abilities) {
                     if (ability.Def.Id == "AbilityDefGu5") {
-                        attackerTonnageMod = attackerTonnageMod * 2;
+                        attackerTonnageMod = (int)Math.Floor(attackerTonnageMod * SkillBasedInit.settings.MeleeAttackerJuggerMulti);
                         SkillBasedInit.Logger.Log($"Pilot {weapon.parent.GetPilot()} has the Juggernaught skill, doubled their impact to {attackerTonnageMod}!");
                     }
                 }

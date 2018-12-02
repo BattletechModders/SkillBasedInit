@@ -2,7 +2,7 @@
 using HBS.Collections;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+
 
 namespace SkillBasedInit {
 
@@ -21,13 +21,9 @@ namespace SkillBasedInit {
         readonly public int[] injuryBounds;
         readonly public int ignoredInjuries;
 
-        public float meleeImpact;
+        public float meleeImpact = 0.0f;
 
-        // Const values
-        private const double PilotingCrippledMultiplier = 0.05;
-        private const int MeleedModifier = 6;
-        private const int ProneOrShutdownModifier = -6;
-        private const double CrippledMovementModifier = -13.0;        
+        // Const values 
         private const float TurretTonnage = 100.0f;
 
         private static readonly Dictionary<int, int[]> GutsInjuryBounds = new Dictionary<int, int[]> {
@@ -112,16 +108,16 @@ namespace SkillBasedInit {
 
             // Check morale status
             if (actor.HasHighMorale) {
-                this.chassisBaseMod += 2;
+                this.chassisBaseMod += SkillBasedInit.settings.PilotSpiritsModifier;
             } else if (actor.HasLowMorale) {
-                this.chassisBaseMod -= 2;
+                this.chassisBaseMod -= SkillBasedInit.settings.PilotSpiritsModifier;
             }
 
             // TODO: Temporary mods for testing 
             if (actor.GetType() == typeof(Vehicle)) {
-                chassisBaseMod -= 2;
+                chassisBaseMod -= SkillBasedInit.settings.VehicleROCModifier;
             } else if (actor.GetType() == typeof(Turret)) {
-                chassisBaseMod -= 4;
+                chassisBaseMod -= SkillBasedInit.settings.TurretROCModifier;
             }
 
             var pilot = actor.GetPilot();
@@ -131,7 +127,7 @@ namespace SkillBasedInit {
             double skillsInitModifier = Math.Floor((pilot.Tactics * 2.0 + pilot.Piloting) / 3.0) / 10.0;
             this.roundInitBounds = RoundInitFromTonnage(this.tonnage, skillsInitModifier);
 
-            this.pilotingEffectMulti = 1.0 - (pilot.Piloting * PilotingCrippledMultiplier);
+            this.pilotingEffectMulti = 1.0 - (pilot.Piloting * SkillBasedInit.settings.PilotingMultiplier);
 
             this.injuryBounds = GutsInjuryBounds[pilot.Guts];
             this.ignoredInjuries = pilot.BonusHealth;       
@@ -159,6 +155,7 @@ namespace SkillBasedInit {
             return new int[] { roundMin, roundMax };
         }
 
+        // Ensures that only the greatest impact from a given round is applied
         public void AddMeleeImpact(float impactDelta) {
             if (impactDelta >= this.meleeImpact) {
                 this.meleeImpact = impactDelta;
@@ -196,7 +193,7 @@ namespace SkillBasedInit {
                 isMovementCrippled = vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right) ? true : false;
             }
             if (isMovementCrippled) {
-                int crippledLoss = (int)Math.Floor(CrippledMovementModifier * pilotingEffectMulti);
+                int crippledLoss = (int)Math.Floor(SkillBasedInit.settings.MovementCrippledMalus * pilotingEffectMulti);
                 SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} has crippled movement! Reduced {roundInitiative} by {crippledLoss}");
                 roundInitiative += crippledLoss;
             }
@@ -204,17 +201,18 @@ namespace SkillBasedInit {
 
             // Check for melee impacts
             // TODO: Compare weights on impact to determine modifer? Or just make it part of a knockdown mod?            
-            if (actor.WasMeleedSinceLastActivation) {
-                SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} was meleed! Reduced {roundInitiative} by {MeleedModifier}");
-                roundInitiative -= MeleedModifier;
+            if (actor.WasMeleedSinceLastActivation && this.meleeImpact >= 0) {
+                int delay = (int)Math.Floor(this.meleeImpact * pilotingEffectMulti);
+                SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} was meleed! Impact of {this.meleeImpact} was reduced to {delay} by piloting. Reduced {roundInitiative} by {delay}");
+                roundInitiative -= delay;
             }
 
             // Check for knockdown / prone / shutdown
             // TODO: Piloting skill impacts this
             if (actor.IsProne || actor.IsShutDown) {
-                int initDelay = (int)Math.Floor(ProneOrShutdownModifier * pilotingEffectMulti);
-                SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} is prone or shutdown! Reduced {roundInitiative} by {ProneOrShutdownModifier}");
-                roundInitiative += ProneOrShutdownModifier;
+                int delay = (int)Math.Floor(SkillBasedInit.settings.ProneOrShutdownMalus * pilotingEffectMulti);
+                SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} is prone or shutdown! Reduced {roundInitiative} by {delay}");
+                roundInitiative += delay;
             }
 
             // Check to see if the actor's initative changed in the prior round
@@ -263,7 +261,6 @@ namespace SkillBasedInit {
                 actorInit.CalculateRoundInit(actor);
 
                 actorInit.meleeImpact = 0.0f;
-
             }
         }
 
