@@ -1,0 +1,30 @@
+{
+    "Name": "SkillBasedInit",
+    "Enabled": true,
+
+    "Version": "v1.0",
+    "Description": "Revamps the initiative system.",
+    "Author": "FrostRaptor",
+    "Website": "https://github.com/FrostRaptor/SkillBasedInit",
+    "Contact": "",
+    "DLL": "SkillBasedInit.dll",
+    "Settings": {
+        "Debug" : false,
+        "PilotingMultiplier" : 0.05,
+        "PilotSpiritsModifier" : 2,
+        "ProneOrShutdownMalus" : 6,
+        "MovementCrippledMalus" : 13,
+        "MeleeTonnageMalus" : 1,
+        "MeleeAttackerJuggerMulti" : 1.5,
+        "MechMeleeMulti" : 0,
+        "MechMeleeDFAMulti" : 1.25,
+        "VehicleROCModifier" : 2,
+        "VehicleMeleeMulti" : 1.0,
+        "TurretROCModifier" : 4,
+        "TurretMeleeMulti" : 0,
+        "TurretTonnageTagUnitLight" : 60.0,
+        "TurretTonnageTagUnitMedium" : 80.0,
+        "TurretTonnageTagUnitHeavy" : 100.0,
+        "TurretTonnageTagUnitNone" : 120.0
+    }
+}

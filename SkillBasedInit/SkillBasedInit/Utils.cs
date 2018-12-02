@@ -2,12 +2,12 @@
 namespace SkillBasedInit {
     public class Settings {
         // If true, extra logging will be printed
-        public bool debug = false;
+        public bool Debug = false;
 
         // The init malus per point of difference in tonnage
         public float MeleeTonnageMalus = 1;
         // The init malus multiplier used if the pilot has the Juggernaught skill
-        public float MeleeJuggerMulti = 1.5f;
+        public float MeleeAttackerJuggerMulti = 1.5f;
 
         // The init malus when a unit starts the round prone or shutdown
         public int ProneOrShutdownMalus = 6;
@@ -20,10 +20,17 @@ namespace SkillBasedInit {
 
         public int PilotSpiritsModifier = 2;
 
+        public float MechMeleeMulti = 0f;
+        public float MechMeleeDFAMulti = 1.25f;
+
         public int VehicleROCModifier = 2;
-        public float VehicleMeleeMulti = 2.0f;
+        public float VehicleMeleeMulti = 1.0f;
 
         public int TurretROCModifier = 4;
-        public float TurretMeleeMulti = 1.5f;
+        public float TurretMeleeMulti = 0f;
+        public float TurretTonnageTagUnitLight = 60.0f;
+        public float TurretTonnageTagUnitMedium = 80.0f;
+        public float TurretTonnageTagUnitHeavy = 100.0f;
+        public float TurretTonnageTagUnitNone = 120.0f;
     }
 }

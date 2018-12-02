@@ -22,13 +22,12 @@ namespace SkillBasedInit {
             try {
                 SetupLogger(modDirectory);
 
-                using (StreamReader r = new StreamReader(settingsJSON)) {
-                    string json = r.ReadToEnd();
-                    SkillBasedInit.settings = JsonConvert.DeserializeObject<Settings>(json);
-                }
+                SkillBasedInit.Logger.Log($"Reading settings from {settingsJSON}");
+                SkillBasedInit.settings = JsonConvert.DeserializeObject<Settings>(settingsJSON);
             } catch (Exception e) {
                 Logger.LogError(e);
                 Logger.Log("Error loading mod settings - using defaults.");
+                settings = new Settings();
             }
 
             var harmony = HarmonyInstance.Create("us.frostraptor.SkillBasedInit");

@@ -56,6 +56,7 @@ namespace SkillBasedInit {
         };
 
         public ActorInitiative(AbstractActor actor) {
+            SkillBasedInit.Logger.Log($"Initializing ActorInitiative for {actor.DisplayName} with GUID {actor.GUID}.");
 
             // Mech and vehicles has weightclass, tonnage. Turrets do not.
             WeightClass weightClass;
@@ -69,27 +70,33 @@ namespace SkillBasedInit {
                 weightClass = ((Vehicle)actor).weightClass;
 
                 // TODO: Temporary malus for testing purposes
+                chassisBaseMod -= SkillBasedInit.settings.VehicleROCModifier;
             } else {
                 this.type = ActorType.Turret;
                 this.tonnage = TurretTonnage;
                 
-                TagSet actorTags = actor.GetTags();
-                if (actorTags.Contains("unit_light")) {
+                TagSet actorTags = actor.GetTags();                
+                if (actorTags != null && actorTags.Contains("unit_light")) {
                     weightClass = WeightClass.LIGHT;
-                } else if (actorTags.Contains("unit_medium")) {
+                    this.tonnage = SkillBasedInit.settings.TurretTonnageTagUnitLight;
+                } else if (actorTags != null && actorTags.Contains("unit_medium")) {
                     weightClass = WeightClass.MEDIUM;
-                } else if (actorTags.Contains("unit_heavy")) {
+                    this.tonnage = SkillBasedInit.settings.TurretTonnageTagUnitMedium;
+                } else if (actorTags != null && actorTags.Contains("unit_heavy")) {
                     weightClass = WeightClass.HEAVY;
+                    this.tonnage = SkillBasedInit.settings.TurretTonnageTagUnitHeavy;
                 } else {
                     weightClass = WeightClass.ASSAULT;
+                    this.tonnage = SkillBasedInit.settings.TurretTonnageTagUnitNone;
                 }
 
-                // TODO: Apply turret init malus
+                // TODO: Temporary malus for testing
+                chassisBaseMod -= SkillBasedInit.settings.TurretROCModifier;
             }
 
             // Determine if the mech has any special tags on it that grant bonus init
             // TODO: This must be compared against the 'base' value to see what the modifier is
-            if (actor.StatCollection.ContainsStatistic("BaseInitiative")) {
+            if (actor.StatCollection != null && actor.StatCollection.ContainsStatistic("BaseInitiative")) {
                 var rawModifier = actor.StatCollection.GetValue<int>("BaseInitiative");
                 // Normalize the value
                 if (weightClass == WeightClass.LIGHT) {
@@ -113,13 +120,6 @@ namespace SkillBasedInit {
                 this.chassisBaseMod -= SkillBasedInit.settings.PilotSpiritsModifier;
             }
 
-            // TODO: Temporary mods for testing 
-            if (actor.GetType() == typeof(Vehicle)) {
-                chassisBaseMod -= SkillBasedInit.settings.VehicleROCModifier;
-            } else if (actor.GetType() == typeof(Turret)) {
-                chassisBaseMod -= SkillBasedInit.settings.TurretROCModifier;
-            }
-
             var pilot = actor.GetPilot();
             this.pilotId = pilot.GUID;
             this.pilotName = pilot.Name;
@@ -130,12 +130,13 @@ namespace SkillBasedInit {
             this.pilotingEffectMulti = 1.0 - (pilot.Piloting * SkillBasedInit.settings.PilotingMultiplier);
 
             this.injuryBounds = GutsInjuryBounds[pilot.Guts];
-            this.ignoredInjuries = pilot.BonusHealth;       
+            this.ignoredInjuries = pilot.BonusHealth;
+
             SkillBasedInit.Logger.Log($"Pilot {pilot.GUID} with name: {pilot.Name} has " +
                 $"skillsMod:{skillsInitModifier} (from piloting:{pilot.Piloting} tactics:{pilot.Tactics}) " +
                 $"injuryBounds: {injuryBounds[0]}-{injuryBounds[1]} ignoredInjuries:{ignoredInjuries} " +
                 $"roundInitBounds:{roundInitBounds[0]}-{roundInitBounds[1]} chassisBaseMod: {chassisBaseMod} " +
-                $"crippledMulti:{pilotingEffectMulti}");
+                $"pilotingEffectMulti:{pilotingEffectMulti}");
         }
 
         private int[] RoundInitFromTonnage(float tonnage, double skillInitModifier) {
@@ -201,7 +202,7 @@ namespace SkillBasedInit {
 
             // Check for melee impacts
             // TODO: Compare weights on impact to determine modifer? Or just make it part of a knockdown mod?            
-            if (actor.WasMeleedSinceLastActivation && this.meleeImpact >= 0) {
+            if (this.meleeImpact > 0) {
                 int delay = (int)Math.Floor(this.meleeImpact * pilotingEffectMulti);
                 SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} was meleed! Impact of {this.meleeImpact} was reduced to {delay} by piloting. Reduced {roundInitiative} by {delay}");
                 roundInitiative -= delay;
@@ -242,6 +243,35 @@ namespace SkillBasedInit {
         SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} ends up with roundInitiative {roundInitiative} from bounds {roundInitBounds[0]}-{roundInitBounds[1]}");
         }
 
+
+        public  static float CalculateMeleeDelta(float targetTonnage, Weapon weapon) {
+            float delta = 0.0f;
+
+            int targetTonnageMod = (int)Math.Floor(targetTonnage / 5.0);
+
+            float attackerTonnage = 0.0f;
+            if (weapon.parent.GetType() == typeof(Mech)) {
+                Mech parent = (Mech)weapon.parent;
+                attackerTonnage = parent.tonnage;
+            } else if (weapon.parent.GetType() == typeof(Vehicle)) {
+                Vehicle parent = (Vehicle)weapon.parent;
+                attackerTonnage = parent.tonnage;
+            }
+            int attackerTonnageMod = (int)Math.Floor(attackerTonnage / 5.0);
+            SkillBasedInit.Logger.Log($"Raw attackerTonnageMod:{attackerTonnageMod} vs targetTonnageMod:{targetTonnageMod}");
+
+            // Check for juggernaut
+            foreach (Ability ability in weapon.parent.GetPilot().Abilities) {
+                if (ability.Def.Id == "AbilityDefGu5") {
+                    attackerTonnageMod = (int)Math.Floor(attackerTonnageMod * SkillBasedInit.settings.MeleeAttackerJuggerMulti);
+                    SkillBasedInit.Logger.Log($"Pilot {weapon.parent.GetPilot()} has the Juggernaught skill, increasing their impact to {attackerTonnageMod}!");
+                }
+            }
+
+            delta = Math.Max(1, attackerTonnageMod - targetTonnageMod);
+
+            return delta;
+        }
     }
 
     public static class ActorInitiativeHolder {
@@ -270,10 +300,6 @@ namespace SkillBasedInit {
 
         private static void AddActor(AbstractActor actor) {
             var actorInit = new ActorInitiative(actor);
-
-            // Recalc init in case we're coming from a save
-            //actorInit.CalculateRoundInit(actor);
-
             ActorInitMap[actor.GUID] = actorInit;
         }
 

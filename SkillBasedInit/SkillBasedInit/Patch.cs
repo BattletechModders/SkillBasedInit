@@ -10,6 +10,47 @@ using UnityEngine;
 
 namespace SkillBasedInit {
 
+    [HarmonyPatch(typeof(TurnDirector), MethodType.Constructor)]
+    [HarmonyPatch(new Type[] { typeof(CombatGameState) })]
+    public static class TurnDirector_ctor {
+        public static void Postfix(TurnDirector __instance) {
+            SkillBasedInit.Logger.Log($"TurnDirector::ctor::post - patching values");
+            int ___FirstPhase = (int)Traverse.Create(__instance).Property("FirstPhase").GetValue();
+            int ___LastPhase = (int)Traverse.Create(__instance).Property("LastPhase").GetValue();
+            SkillBasedInit.Logger.Log($"TurnDirector::ctor::post - was initialized with {___FirstPhase} / {___LastPhase}");
+
+            Traverse.Create(__instance).Property("FirstPhase").SetValue(1);
+            Traverse.Create(__instance).Property("LastPhase").SetValue(SkillBasedInit.MaxPhase);
+        }
+    }
+
+    [HarmonyPatch(typeof(TurnDirector), "OnCombatGameDestroyed")]
+    public static class TurnDirector_OnCombatGameDestroyed {
+        public static void Postfix(TurnDirector __instance) {
+            SkillBasedInit.Logger.Log($"TurnDirector; Combat complete, destroying initiative map.");
+            ActorInitiativeHolder.OnCombatComplete();
+        }
+    }
+
+    //[HarmonyPatch(typeof(TurnDirector))]
+    //[HarmonyPatch("FirstPhase", MethodType.Getter)]
+    //public static class TurnDirector_FirstPhase {
+    //    public static void Postfix(TurnDirector __instance, ref int __result) {
+    //        SkillBasedInit.Logger.Log($"TurnDirector::LastPhase::post - returning 1");
+    //        __result = 1;
+    //    }
+    //}
+
+    //[HarmonyPatch(typeof(TurnDirector))]
+    //[HarmonyPatch("LastPhase", MethodType.Getter)]
+    //public static class TurnDirector_LastPhase {
+    //    public static void Postfix(TurnDirector __instance, ref int __result) {
+    //        SkillBasedInit.Logger.Log($"TurnDirector::LastPhase::post - returning {SkillBasedInit.MaxPhase}");
+    //        __result = SkillBasedInit.MaxPhase;
+    //    }
+    //}
+
+
     [HarmonyPatch(typeof(AbstractActor), "OnNewRound")]
     public static class AbstractActor_OnNewRound {
         public static void Postfix(AbstractActor __instance, int round) {
@@ -193,45 +234,25 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(Mech), "DamageLocation")]
     [HarmonyPatch(new Type[] { typeof(int), typeof(WeaponHitInfo), typeof(ArmorLocation), typeof(Weapon), typeof(float), typeof(int), typeof(AttackImpactQuality), typeof(DamageType) })]
     public static class Mech_DamageLocation {
-        public static void Postfix(Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, AttackImpactQuality impactQuality, DamageType damageType) {            
+        public static void Postfix(Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, AttackImpactQuality impactQuality, DamageType damageType) {
             if (weapon.Category == WeaponCategory.Melee) {
                 SkillBasedInit.Logger.Log($"Mech:DamageLocation:post - mech {__instance.DisplayName} has suffered a melee attack.");
-                float attackerTonnage = 0.0f;
-                if (weapon.parent.GetType() == typeof(Mech)) {
-                    Mech parent = (Mech)weapon.parent;
-                    attackerTonnage = parent.tonnage;
-                } else if (weapon.parent.GetType() == typeof(Vehicle)) {
-                    Vehicle parent = (Vehicle)weapon.parent;
-                    attackerTonnage = parent.tonnage;
-                }
-                float targetTonnage = __instance.tonnage;
-                int targetTonnageMod = (int)Math.Floor(targetTonnage / 5.0);
-
-                int attackerTonnageMod = (int)Math.Floor(attackerTonnage / 5.0);
-                SkillBasedInit.Logger.Log($"Raw attackerTonnageMod:{attackerTonnageMod} vs targetTonnageMod:{targetTonnageMod}");
-
-                // DamageType DFA increases the shock for mechs
-                if (damageType == DamageType.DFA) {
-                    int attackerTonnageWithDFA = (int)Math.Floor(attackerTonnageMod * SkillBasedInit.settings.MechMeleeDFAMulti);
-                    SkillBasedInit.Logger.Log($"DFA attack inficting additional slowdown - from {attackerTonnageMod} to {attackerTonnageWithDFA}");
-                    attackerTonnageMod = attackerTonnageWithDFA;
-                }
-
-                // Check for juggernaut
-                foreach (Ability ability in weapon.parent.GetPilot().Abilities) {
-                    if (ability.Def.Id == "AbilityDefGu5") {
-                        attackerTonnageMod = (int)Math.Floor(attackerTonnageMod * SkillBasedInit.settings.MeleeAttackerJuggerMulti);
-                        SkillBasedInit.Logger.Log($"Pilot {weapon.parent.GetPilot()} has the Juggernaught skill, doubled their impact to {attackerTonnageMod}!");
-                    }
-                }
-                
-                float delta = Math.Max(1, attackerTonnageMod - targetTonnageMod);
-                SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
 
                 ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
+                float delta = ActorInitiative.CalculateMeleeDelta(actorInit.tonnage, weapon);
+
+                if (delta != 0) {
+                    // DamageType DFA increases the shock for mechs
+                    if (damageType == DamageType.DFA) {
+                        int deltaWithDFA = (int)Math.Floor(delta * SkillBasedInit.settings.MechMeleeDFAMulti);
+                        SkillBasedInit.Logger.Log($"DFA attack inficting additional slowdown - from {delta} to {deltaWithDFA}");
+                        delta = deltaWithDFA;
+                    }
+                }
+
+                SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
                 actorInit.AddMeleeImpact(delta);
             }
-
         }
     }
 
@@ -240,7 +261,13 @@ namespace SkillBasedInit {
     public static class Vehicle_DamageLocation {
         public static void Postfix(Vehicle __instance, WeaponHitInfo hitInfo, VehicleChassisLocations vLoc, Weapon weapon, AttackImpactQuality impactQuality) {
             if (weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.Logger.Log($"Vehicle:DamageLocation:post - vehicle {__instance.DisplayName} has suffered a melee attack.");                
+                SkillBasedInit.Logger.Log($"Vehicle:DamageLocation:post - vehicle {__instance.DisplayName} has suffered a melee attack.");
+
+                ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
+                float delta = ActorInitiative.CalculateMeleeDelta(actorInit.tonnage, weapon);
+
+                SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
+                actorInit.AddMeleeImpact(delta);
             }                
         }
     }
@@ -251,35 +278,15 @@ namespace SkillBasedInit {
         public static void Postfix(Turret __instance, WeaponHitInfo hitInfo, BuildingLocation bLoc, Weapon weapon) {
             if (weapon.Category == WeaponCategory.Melee) {
                 SkillBasedInit.Logger.Log($"Turret:DamageLocation:post - turret {__instance.DisplayName} has suffered a melee attack.");
+
+                ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
+                float delta = ActorInitiative.CalculateMeleeDelta(actorInit.tonnage, weapon);
+
+                SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");                
+                actorInit.AddMeleeImpact(delta);
             }
         }
     }
-
-    [HarmonyPatch(typeof(TurnDirector), "OnCombatGameDestroyed")]
-    public static class TurnDirector_OnCombatGameDestroyed {
-        public static void Postfix(TurnDirector __instance) {
-            //SkillBasedInit.Logger.Log($"TurnDirector; Combat complete, destroying initiative map.");
-            ActorInitiativeHolder.OnCombatComplete();
-        }
-    }
-
-    [HarmonyPatch(typeof(TurnDirector))]
-    [HarmonyPatch("FirstPhase", MethodType.Getter)]
-    public static class TurnDirector_FirstPhase {
-        public static void Postfix(TurnDirector __instance, ref int __result) {
-            __result = 1;
-        }
-    }
-
-    [HarmonyPatch(typeof(TurnDirector))]
-    [HarmonyPatch("LastPhase", MethodType.Getter)]
-    public static class TurnDirector_LastPhase {
-        [HarmonyPostfix]
-        public static void Postfix(TurnDirector __instance, ref int __result) {
-            __result = SkillBasedInit.MaxPhase;
-        }
-    }
-
 
     [HarmonyPatch(typeof(CombatHUDPhaseTrack), "Init")]
     [HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD) })]
