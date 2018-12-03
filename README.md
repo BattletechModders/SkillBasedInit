@@ -89,3 +89,8 @@ These items are known bugs or issues that should be resolved before declaring a 
 * Show init bonus/malus on Lance/MechBay screens. Currently replaced with a - character to signify it's meaningless. 
 * Consider if only tactics should influence your init order, while Piloting influences the reduction of negative modifiers. Piloting is already overly strong, as it adds to dodge changes and evasion pips. However, requiring both skills for the highest modifiers makes it harder to find a pilot that reaches the 1.0 modifier.
 * Check out Cyclops init aura interacts with this
+* Why does a melee attack show a -1 init bubble
+* Why doesn't wrapping happen on the icon
+* Can cause an error - init can wrap below 0
+* Melee is being modifed by piloting below 0
+* Percentages have too many significant digits (looks ugly)
