@@ -252,6 +252,9 @@ namespace SkillBasedInit {
 
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
                 actorInit.AddMeleeImpact(delta);
+
+                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
+                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
         }
     }
@@ -268,7 +271,10 @@ namespace SkillBasedInit {
 
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
                 actorInit.AddMeleeImpact(delta);
-            }                
+
+                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
+                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            }
         }
     }
 
@@ -284,6 +290,9 @@ namespace SkillBasedInit {
 
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");                
                 actorInit.AddMeleeImpact(delta);
+
+                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
+                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
         }
     }
@@ -334,6 +343,7 @@ namespace SkillBasedInit {
         }
     }
 
+    // Prevents the init tracker line at the top from loading
     [HarmonyPatch(typeof(CombatHUDPhaseTrack), "SetTrackerPhase")]
     [HarmonyPatch(new Type[] { typeof(CombatHUDIconTracker), typeof(int) })]
     public static class CombatHUDPhaseTrack_SetTrackerPhase {
@@ -342,25 +352,40 @@ namespace SkillBasedInit {
         }
     }
 
+    // Corrects the init overlay displayed on the Mechwarrior
     [HarmonyPatch(typeof(CombatHUDPortrait), "Init")]
     [HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD), typeof(UnityEngine.UI.LayoutElement), typeof(HBSDOTweenToggle)})]
     public static class CombatHUDPortrait_Init {
-        public static void Postfix(CombatHUDPortrait __instance, TextMeshProUGUI ___ioText, DOTweenAnimation ___initiativeOverlay) {
+        public static void Postfix(CombatHUDPortrait __instance, ref TextMeshProUGUI ___ioText, ref DOTweenAnimation ___initiativeOverlay) {
             //SkillBasedInit.Logger.Log($"CombatHUDPortrait::Init::post - Init");
             ___ioText.enableWordWrapping = false;
             ___initiativeOverlay.isActive = false;
         }
     }
 
+    // Manipulates the icon to the upper left of the mech panel
     [HarmonyPatch(typeof(CombatHUDPhaseDisplay), "Init")]
     [HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD) })]
     public static class CombatHUDPhaseDisplay_Init {
-        public static void Postfix(CombatHUDPhaseDisplay __instance, TextMeshProUGUI ___NumText) {
-            //SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay::Init::post - Init");
+        public static void Postfix(CombatHUDPhaseDisplay __instance, ref TextMeshProUGUI ___NumText) {
+            SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay::Init::post - Init");
             ___NumText.enableWordWrapping = false;
+            ___NumText.fontSize = 18;
         }
     }
 
+    // Manipulates the badge icon to the left of the mech's floating damage/status bars
+    [HarmonyPatch(typeof(CombatHUDPhaseDisplay), "RefreshInfo")]
+    [HarmonyPatch(new Type[] { })]
+    public static class CombatHUDPhaseDisplay_RefreshInfo {
+        public static void Postfix(CombatHUDPhaseDisplay __instance, ref TextMeshProUGUI ___NumText) {
+            SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay::RefreshInfo::post - Init");
+            ___NumText.enableWordWrapping = false;
+            ___NumText.fontSize = 18;
+        }
+    }
+
+    // Sets the initiative value in the mech-bay
     [HarmonyPatch(typeof(MechBayMechInfoWidget), "SetInitiative")]
     [HarmonyPatch(new Type[] { })]
     public static class MechBayMechInfoWidget_SetInitiative {
@@ -372,6 +397,7 @@ namespace SkillBasedInit {
         }
     }
 
+    // Sets the initiative value in the lance loading screen
     [HarmonyPatch(typeof(LanceLoadoutSlot), "RefreshInitiativeData")]
     [HarmonyPatch(new Type[] { })]
     public static class LanceLoadoutSlot_RefreshInitiativeData {

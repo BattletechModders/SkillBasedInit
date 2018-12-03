@@ -156,11 +156,9 @@ namespace SkillBasedInit {
             return new int[] { roundMin, roundMax };
         }
 
-        // Ensures that only the greatest impact from a given round is applied
         public void AddMeleeImpact(float impactDelta) {
-            if (impactDelta >= this.meleeImpact) {
-                this.meleeImpact = impactDelta;
-            }
+            // TODO: Should only the highest apply? This could make the messaging confusing.
+            this.meleeImpact += impactDelta;
         }
 
         public void CalculateRoundInit(AbstractActor actor) {                  
@@ -196,7 +194,7 @@ namespace SkillBasedInit {
             if (isMovementCrippled) {
                 int crippledLoss = (int)Math.Floor(SkillBasedInit.settings.MovementCrippledMalus * pilotingEffectMulti);
                 SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} has crippled movement! Reduced {roundInitiative} by {crippledLoss}");
-                roundInitiative += crippledLoss;
+                roundInitiative -= crippledLoss;
             }
             // TODO: Check for 'solid' impacts
 
@@ -213,7 +211,7 @@ namespace SkillBasedInit {
             if (actor.IsProne || actor.IsShutDown) {
                 int delay = (int)Math.Floor(SkillBasedInit.settings.ProneOrShutdownMalus * pilotingEffectMulti);
                 SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} is prone or shutdown! Reduced {roundInitiative} by {delay}");
-                roundInitiative += delay;
+                roundInitiative -= delay;
             }
 
             // Check to see if the actor's initative changed in the prior round
