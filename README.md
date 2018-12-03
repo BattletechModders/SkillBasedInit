@@ -13,12 +13,28 @@ Battlefield conditions that impact your place in the initiative order include:
 * Mechwarriors with the High Spirits tag gain a +2 initiative bonus. Mechwarriors with the Low Spirits tag suffer a -2 initiative penalty.
 * Mechwarriors that are Inspired by Morale or Fury gain a bonus between +1 to +3.
 * Any chassis or component that modifies the **BaseInititiative** of the unit should be honored. This value is normalized against the expected values for the weight classes (light=2, medium=3, heavy=4, assault=5).
+* Units that are attacked in melee suffer an initiative penalty. For every 5 tons of difference between the attacker and target, the target suffers a -1 init malus if the attacker is heavier. If the target is heavier, they will only suffer a -1 penalty. Units with the Juggernaught skill (AbilityDefGu5) will multiply this malus by a small amount. This penalty is cumulative so a target that's repeatedly attacked by multiple heavy units can be reduced to the lowest initiative level.
 
-Work in progress or planned effects include:
+## Planned
 
-* WIP: Units that suffer a melee attack suffer an initiative penalty. Defenders that are heavier than attackers only suffer -1 penalty (before DFA and Juggernaught mods). Defenders that are ligher than the attacker suffer a -1 penalty for each 5 tons they are lighter than the attacker. The defender reduces this effect by 5% for each point of piloting. DFA attacks increase this bonus by 1.5 (rounded down). Juggernaught attacks multiply the final value by 2. A 100 ton Mech performing DFA on a 20 ton Mech would impose a 20 - 4 = -16 penalty, times 1.5 for DFA = -24. If the attacking pilot has Juggernaught, this comes -48. 
+Works in progress or planned effects include:
+
 * Planned: Units that are unsettled, panicked or similar will have a reduced initiative.
+* Planned: Units will suffer init penalities as soon as the actor takes an injury. This will be denoted by an 'Ouch!' bubble. (See pilot.SaveInjuryInfo).
 
+### Bugs and Incomplete functions
+
+These items are known bugs or issues that should be resolved before declaring a 1.0 version.
+
+* Test interactions with init modifying abilities; Juggernaught, Offensive Push, etc
+* Test interactions with init modifying components; primitive cockpits should offer no bonus, basic IS +1, Clan +2, DNI +3, EI +4
+* Determine if there are other stats that should be evaluated. In particular "PhaseModifier" : "PhaseModifierSelf" may be appropriate to check on each round.
+* Extract logging from HBS.Logging to prevent duplication of logs
+* Show init bonus/malus on Lance/MechBay screens. Currently replaced with a - character to signify it's meaningless. 
+* Check out Cyclops init aura to see how that bonus interacts in this model.
+* Init can wrap below 0 when it's dynamically applied. This can prevent a unit from activating at all.
+* Melee is being modifed by piloting below 0.
+* Percentages have too many significant digits (looks ugly in logs)
 
 ## Detailed Information
 
@@ -76,21 +92,3 @@ Mechwarriors lose initiative anytime they are injured. Mechwarriors with additio
 
 Turrets suffer a -4 penalty, while tanks suffer a -2. These will likely be removed in the future once it's been confirmed that init bonuses on chassis and components will flow through the system.
 
-## TODO
-
-These items are known bugs or issues that should be resolved before declaring a 1.0 version.
-
-* Make the various penalties configurable through mod config.
-* Melee attacks reduce your initiative by the difference in tonnage; a 100t vs. 100t has limited impact, a 100t vs. 20t a bigger impact. Piloting skill mitigates this. Mechanics in place, but penalty not yet applied.Vehicles and turrets need tested; no way to apply DFA penalty against them (no DamageType in signatures)
-* Test interactions with init modifying abilities; Juggernaught, Offensive Push, etc
-* Test interactions with init modifying components; primitive cockpits should offer no bonus, basic IS +1, Clan +2, DNI +3, EI +4
-* Determine if there are other stats that should be evaluated. In particular "PhaseModifier" : "PhaseModifierSelf" may be appropriate to check on each round.
-* Extract logging from HBS.Logging to prevent duplication of logs
-* Show init bonus/malus on Lance/MechBay screens. Currently replaced with a - character to signify it's meaningless. 
-* Consider if only tactics should influence your init order, while Piloting influences the reduction of negative modifiers. Piloting is already overly strong, as it adds to dodge changes and evasion pips. However, requiring both skills for the highest modifiers makes it harder to find a pilot that reaches the 1.0 modifier.
-* Check out Cyclops init aura interacts with this
-* Why does a melee attack show a -1 init bubble
-* Why doesn't wrapping happen on the icon
-* Can cause an error - init can wrap below 0
-* Melee is being modifed by piloting below 0
-* Percentages have too many significant digits (looks ugly)

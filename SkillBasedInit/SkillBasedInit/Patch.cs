@@ -204,6 +204,7 @@ namespace SkillBasedInit {
         }
     }
 
+    // Required to apply the negative as soon as it happens in the knockdown case
     [HarmonyPatch(typeof(AbstractActor), "ForceUnitOnePhaseDown")]
     [HarmonyPatch(new Type[] { typeof(string), typeof(int), typeof(bool) })]
     public static class AbstractActor_ForceUnitOnePhaseDown {
@@ -244,7 +245,7 @@ namespace SkillBasedInit {
                 if (delta != 0) {
                     // DamageType DFA increases the shock for mechs
                     if (damageType == DamageType.DFA) {
-                        int deltaWithDFA = (int)Math.Floor(delta * SkillBasedInit.settings.MechMeleeDFAMulti);
+                        int deltaWithDFA = (int)Math.Ceiling(delta * SkillBasedInit.settings.MechMeleeDFAMulti);
                         SkillBasedInit.Logger.Log($"DFA attack inficting additional slowdown - from {delta} to {deltaWithDFA}");
                         delta = deltaWithDFA;
                     }
@@ -253,6 +254,7 @@ namespace SkillBasedInit {
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
                 actorInit.AddMeleeImpact(delta);
 
+                __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
@@ -272,6 +274,7 @@ namespace SkillBasedInit {
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
                 actorInit.AddMeleeImpact(delta);
 
+                __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
@@ -291,6 +294,7 @@ namespace SkillBasedInit {
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");                
                 actorInit.AddMeleeImpact(delta);
 
+                __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
@@ -363,6 +367,7 @@ namespace SkillBasedInit {
         }
     }
 
+    // TODO: Dead code? 
     // Manipulates the icon to the upper left of the mech panel
     [HarmonyPatch(typeof(CombatHUDPhaseDisplay), "Init")]
     [HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD) })]

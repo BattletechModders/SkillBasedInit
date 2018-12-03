@@ -192,24 +192,21 @@ namespace SkillBasedInit {
                 isMovementCrippled = vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right) ? true : false;
             }
             if (isMovementCrippled) {
-                int crippledLoss = (int)Math.Floor(SkillBasedInit.settings.MovementCrippledMalus * pilotingEffectMulti);
+                int crippledLoss = (int)Math.Ceiling(SkillBasedInit.settings.MovementCrippledMalus * pilotingEffectMulti);
                 SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} has crippled movement! Reduced {roundInitiative} by {crippledLoss}");
                 roundInitiative -= crippledLoss;
             }
-            // TODO: Check for 'solid' impacts
 
-            // Check for melee impacts
-            // TODO: Compare weights on impact to determine modifer? Or just make it part of a knockdown mod?            
+            // Check for melee impacts        
             if (this.meleeImpact > 0) {
-                int delay = (int)Math.Floor(this.meleeImpact * pilotingEffectMulti);
+                int delay = (int)Math.Ceiling(this.meleeImpact * pilotingEffectMulti);
                 SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} was meleed! Impact of {this.meleeImpact} was reduced to {delay} by piloting. Reduced {roundInitiative} by {delay}");
                 roundInitiative -= delay;
             }
 
             // Check for knockdown / prone / shutdown
-            // TODO: Piloting skill impacts this
             if (actor.IsProne || actor.IsShutDown) {
-                int delay = (int)Math.Floor(SkillBasedInit.settings.ProneOrShutdownMalus * pilotingEffectMulti);
+                int delay = (int)Math.Ceiling(SkillBasedInit.settings.ProneOrShutdownMalus * pilotingEffectMulti);
                 SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} is prone or shutdown! Reduced {roundInitiative} by {delay}");
                 roundInitiative -= delay;
             }
@@ -255,13 +252,13 @@ namespace SkillBasedInit {
                 Vehicle parent = (Vehicle)weapon.parent;
                 attackerTonnage = parent.tonnage;
             }
-            int attackerTonnageMod = (int)Math.Floor(attackerTonnage / 5.0);
+            int attackerTonnageMod = (int)Math.Ceiling(attackerTonnage / 5.0);
             SkillBasedInit.Logger.Log($"Raw attackerTonnageMod:{attackerTonnageMod} vs targetTonnageMod:{targetTonnageMod}");
 
             // Check for juggernaut
             foreach (Ability ability in weapon.parent.GetPilot().Abilities) {
                 if (ability.Def.Id == "AbilityDefGu5") {
-                    attackerTonnageMod = (int)Math.Floor(attackerTonnageMod * SkillBasedInit.settings.MeleeAttackerJuggerMulti);
+                    attackerTonnageMod = (int)Math.Ceiling(attackerTonnageMod * SkillBasedInit.settings.MeleeAttackerJuggerMulti);
                     SkillBasedInit.Logger.Log($"Pilot {weapon.parent.GetPilot()} has the Juggernaught skill, increasing their impact to {attackerTonnageMod}!");
                 }
             }
