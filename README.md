@@ -19,6 +19,7 @@ Battlefield conditions that impact your place in the initiative order include:
 
 Works in progress or planned effects include:
 
+* Planned: Units will gain a small boost to their total initiative rating based upon their engine core. Rating / Tonnage / 10 = % boost.
 * Planned: Units that are unsettled, panicked or similar will have a reduced initiative.
 * Planned: Units will suffer init penalities as soon as the actor takes an injury. This will be denoted by an 'Ouch!' bubble. (See pilot.SaveInjuryInfo).
 

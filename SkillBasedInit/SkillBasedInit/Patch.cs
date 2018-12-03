@@ -221,7 +221,13 @@ namespace SkillBasedInit {
                     ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
                     int knockDownMod = SkillBasedInit.Random.Next(actorInit.injuryBounds[0], actorInit.injuryBounds[1]);
                     SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown modifying unit initiative by {knockDownMod} due to knockdown!");
-                    __instance.Initiative = __instance.Initiative + knockDownMod;
+
+                    if (__instance.Initiative + knockDownMod > SkillBasedInit.MaxPhase) {
+                        __instance.Initiative = SkillBasedInit.MaxPhase;
+                    } else {
+                        __instance.Initiative = __instance.Initiative + knockDownMod;
+                    }
+
                     __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
                     __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
                     string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
@@ -254,7 +260,11 @@ namespace SkillBasedInit {
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
                 actorInit.AddMeleeImpact(delta);
 
-                __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
+                if (__instance.Initiative + (int)Math.Ceiling(delta) > SkillBasedInit.MaxPhase) {
+                    __instance.Initiative = SkillBasedInit.MaxPhase;
+                } else {
+                    __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
+                }
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
@@ -274,7 +284,11 @@ namespace SkillBasedInit {
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
                 actorInit.AddMeleeImpact(delta);
 
-                __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
+                if (__instance.Initiative + (int)Math.Ceiling(delta) > SkillBasedInit.MaxPhase) {
+                    __instance.Initiative = SkillBasedInit.MaxPhase;
+                } else {
+                    __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
+                }
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
@@ -294,7 +308,11 @@ namespace SkillBasedInit {
                 SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");                
                 actorInit.AddMeleeImpact(delta);
 
-                __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
+                if (__instance.Initiative + (int)Math.Ceiling(delta) > SkillBasedInit.MaxPhase) {
+                    __instance.Initiative = SkillBasedInit.MaxPhase;
+                } else {
+                    __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
+                }
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
@@ -369,15 +387,15 @@ namespace SkillBasedInit {
 
     // TODO: Dead code? 
     // Manipulates the icon to the upper left of the mech panel
-    [HarmonyPatch(typeof(CombatHUDPhaseDisplay), "Init")]
-    [HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD) })]
-    public static class CombatHUDPhaseDisplay_Init {
-        public static void Postfix(CombatHUDPhaseDisplay __instance, ref TextMeshProUGUI ___NumText) {
-            SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay::Init::post - Init");
-            ___NumText.enableWordWrapping = false;
-            ___NumText.fontSize = 18;
-        }
-    }
+    //[HarmonyPatch(typeof(CombatHUDPhaseDisplay), "Init")]
+    //[HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD) })]
+    //public static class CombatHUDPhaseDisplay_Init {
+    //    public static void Postfix(CombatHUDPhaseDisplay __instance, ref TextMeshProUGUI ___NumText) {
+    //        //SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay::Init::post - Init");
+    //        ___NumText.enableWordWrapping = false;
+    //        ___NumText.fontSize = 18;
+    //    }
+    //}
 
     // Manipulates the badge icon to the left of the mech's floating damage/status bars
     [HarmonyPatch(typeof(CombatHUDPhaseDisplay), "RefreshInfo")]
