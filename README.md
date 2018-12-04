@@ -13,7 +13,8 @@ Battlefield conditions that impact your place in the initiative order include:
 * Mechwarriors with the High Spirits tag gain a +2 initiative bonus. Mechwarriors with the Low Spirits tag suffer a -2 initiative penalty.
 * Mechwarriors that are Inspired by Morale or Fury gain a bonus between +1 to +3.
 * Any chassis or component that modifies the **BaseInititiative** of the unit should be honored. This value is normalized against the expected values for the weight classes (light=2, medium=3, heavy=4, assault=5).
-* Units that are attacked in melee suffer an initiative penalty. For every 5 tons of difference between the attacker and target, the target suffers a -1 init malus if the attacker is heavier. If the target is heavier, they will only suffer a -1 penalty. Units with the Juggernaught skill (AbilityDefGu5) will multiply this malus by a small amount. This penalty is cumulative so a target that's repeatedly attacked by multiple heavy units can be reduced to the lowest initiative level.
+* Units that are attacked in melee suffer an initiative penalty. For every 5 tons of difference between the attacker and target, the target suffers a -1 init malus if the attacker is heavier. If the target is heavier, they will only suffer a -1 penalty. Units with the Juggernaught skill (AbilityDefGu5) will multiply this malus by a small amount. This penalty is cumulative so a target that's repeatedly attacked by multiple heavy units can be reduced to the lowest initiative level. This penalty is reduced by the 0.05% for each point of Guts the pilot has.
+* Units that reserve lose a random amount of initiative, between 2 and 7 phases.
 
 ## Planned
 
@@ -27,15 +28,15 @@ Works in progress or planned effects include:
 
 These items are known bugs or issues that should be resolved before declaring a 1.0 version.
 
-* Test interactions with init modifying abilities; Juggernaught, Offensive Push, etc
-* Test interactions with init modifying components; primitive cockpits should offer no bonus, basic IS +1, Clan +2, DNI +3, EI +4
+* **Reported Working**: Test interactions with init modifying abilities; Juggernaught, Offensive Push, etc
+* **Reported Working**: Check out Cyclops init aura to see how that bonus interacts in this model.
+* **Reported Working**: Test interactions with init modifying components; primitive cockpits should offer no bonus, basic IS +1, Clan +2, DNI +3, EI +4
 * Determine if there are other stats that should be evaluated. In particular "PhaseModifier" : "PhaseModifierSelf" may be appropriate to check on each round.
 * Extract logging from HBS.Logging to prevent duplication of logs
 * Show init bonus/malus on Lance/MechBay screens. Currently replaced with a - character to signify it's meaningless. 
-* Check out Cyclops init aura to see how that bonus interacts in this model.
 * Init can wrap below 0 when it's dynamically applied. This can prevent a unit from activating at all.
-* Melee is being modifed by piloting below 0.
 * Percentages have too many significant digits (looks ugly in logs)
+*  DFA applies init penalties TWICE, both on attacker and self (if the DFA is failed!). This is because DFA is treated as two attacks. This may be okay, as DFA incurs a significant stability penalty. However, it also applies DFA damage to self on a failed roll - which can be brutal. Needs more investigation.
 
 ## Detailed Information
 

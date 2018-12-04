@@ -13,11 +13,10 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(TurnDirector), MethodType.Constructor)]
     [HarmonyPatch(new Type[] { typeof(CombatGameState) })]
     public static class TurnDirector_ctor {
-        public static void Postfix(TurnDirector __instance) {
-            SkillBasedInit.Logger.Log($"TurnDirector::ctor::post - patching values");
+        public static void Postfix(TurnDirector __instance) {            
             int ___FirstPhase = (int)Traverse.Create(__instance).Property("FirstPhase").GetValue();
             int ___LastPhase = (int)Traverse.Create(__instance).Property("LastPhase").GetValue();
-            SkillBasedInit.Logger.Log($"TurnDirector::ctor::post - was initialized with {___FirstPhase} / {___LastPhase}");
+            //SkillBasedInit.Logger.Log($"TurnDirector::ctor::post - was initialized with {___FirstPhase} / {___LastPhase}");
 
             Traverse.Create(__instance).Property("FirstPhase").SetValue(1);
             Traverse.Create(__instance).Property("LastPhase").SetValue(SkillBasedInit.MaxPhase);
@@ -27,7 +26,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(TurnDirector), "OnCombatGameDestroyed")]
     public static class TurnDirector_OnCombatGameDestroyed {
         public static void Postfix(TurnDirector __instance) {
-            SkillBasedInit.Logger.Log($"TurnDirector; Combat complete, destroying initiative map.");
+            //SkillBasedInit.Logger.Log($"TurnDirector; Combat complete, destroying initiative map.");
             ActorInitiativeHolder.OnCombatComplete();
         }
     }
@@ -54,7 +53,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(AbstractActor), "OnNewRound")]
     public static class AbstractActor_OnNewRound {
         public static void Postfix(AbstractActor __instance, int round) {
-            SkillBasedInit.Logger.Log($"AbstractActor: Starting new round {round}, recalculating initiative element for actor:{__instance.DisplayName}");
+            //SkillBasedInit.Logger.Log($"AbstractActor: Starting new round {round}, recalculating initiative element for actor:{__instance.DisplayName}");
             ActorInitiativeHolder.OnRoundBegin(__instance);
         }
     }
@@ -63,9 +62,10 @@ namespace SkillBasedInit {
     public static class AbstractActor_DeferUnit {
         public static void Postfix(AbstractActor __instance) {
             //SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
-            var deferJump = SkillBasedInit.Random.Next(0, 5);
+            var deferJump = SkillBasedInit.Random.Next(2, 7);
+            SkillBasedInit.LogDebug($"AbstractActor:DeferUnit - Reducing actorInit:{__instance.Initiative} by :{deferJump} to {__instance.Initiative + deferJump}");
+
             __instance.Initiative += deferJump;
-            SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit - Reducing actorInit by an additional {deferJump} to {__instance.Initiative} ");
             if (__instance.Initiative > SkillBasedInit.MaxPhase) {
                 __instance.Initiative = SkillBasedInit.MaxPhase;
             }
@@ -191,14 +191,14 @@ namespace SkillBasedInit {
         public static int KnockdownStackItemUID;
 
         public static bool Prefix(Mech __instance, string sourceID, int stackItemUID) {
-            SkillBasedInit.Logger.Log($"Mech:CompleteKnockdown:prefix - Recording sourceID:{sourceID} stackItemUID:{stackItemUID}");
+            //SkillBasedInit.Logger.Log($"Mech:CompleteKnockdown:prefix - Recording sourceID:{sourceID} stackItemUID:{stackItemUID}");
             KnockdownSourceID = sourceID;
             KnockdownStackItemUID = stackItemUID;            
             return true;
         }
 
         public static void Postfix(Mech __instance) {
-            SkillBasedInit.Logger.Log($"Mech:CompleteKnockdown:prefix - Removing record.");
+            //SkillBasedInit.Logger.Log($"Mech:CompleteKnockdown:prefix - Removing record.");
             KnockdownSourceID = null;
             KnockdownStackItemUID = -1;
         }
@@ -209,30 +209,36 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(string), typeof(int), typeof(bool) })]
     public static class AbstractActor_ForceUnitOnePhaseDown {
         public static bool Prefix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf) {
-            SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Init - sourceID:{sourceID} vs actor: {__instance.GUID}");
+            //SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Init - sourceID:{sourceID} vs actor: {__instance.GUID}");
             bool shouldReturn;
             if (sourceID != Mech_CompleteKnockdown.KnockdownSourceID || stackItemUID != Mech_CompleteKnockdown.KnockdownStackItemUID) {
-                SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Not from knockdown, deferring to original call");
+                //SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Not from knockdown, deferring to original call");
                 shouldReturn = true;
             } else {
-                SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - From knockdown, executing changed logic");
+                //SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - From knockdown, executing changed logic");
                 shouldReturn = false;
-                if (__instance.Combat.TurnDirector.IsInterleaved && __instance.Initiative != SkillBasedInit.MaxPhase) {
-                    ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
-                    int knockDownMod = SkillBasedInit.Random.Next(actorInit.injuryBounds[0], actorInit.injuryBounds[1]);
-                    SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown modifying unit initiative by {knockDownMod} due to knockdown!");
 
-                    if (__instance.Initiative + knockDownMod > SkillBasedInit.MaxPhase) {
-                        __instance.Initiative = SkillBasedInit.MaxPhase;
-                    } else {
+                ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
+                int knockDownMod = SkillBasedInit.Random.Next(actorInit.injuryBounds[0], actorInit.injuryBounds[1]);
+                SkillBasedInit.Logger.Log($"AbstractActor::ForceUnitOnePhaseDown modifying unit initiative by {knockDownMod} due to knockdown!");
+
+                if (__instance.HasActivatedThisRound || __instance.Initiative != SkillBasedInit.MaxPhase) {
+                    SkillBasedInit.Logger.Log($"Knockdown will slow actor:{__instance.DisplayName} by {knockDownMod} init on next activation!");
+                } else {
+                    SkillBasedInit.Logger.Log($"Knockdown immediately slows actor:{__instance.DisplayName} by {knockDownMod} init!");
+                    if (__instance.Combat.TurnDirector.IsInterleaved && __instance.Initiative != SkillBasedInit.MaxPhase) {
                         __instance.Initiative = __instance.Initiative + knockDownMod;
+                        if (__instance.Initiative + knockDownMod > SkillBasedInit.MaxPhase) {
+                            __instance.Initiative = SkillBasedInit.MaxPhase;
+                        } 
+                        __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
                     }
-
-                    __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
-                    __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
-                    string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
-                    __instance.StatCollection.ModifyStat<int>(sourceID, stackItemUID, statName, StatCollection.StatOperation.Int_Add, knockDownMod, -1, true);
                 }
+                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+
+                string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
+                __instance.StatCollection.ModifyStat<int>(sourceID, stackItemUID, statName, StatCollection.StatOperation.Int_Add, knockDownMod, -1, true);
+
             }            
             return shouldReturn;
         }
@@ -243,7 +249,7 @@ namespace SkillBasedInit {
     public static class Mech_DamageLocation {
         public static void Postfix(Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, AttackImpactQuality impactQuality, DamageType damageType) {
             if (weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.Logger.Log($"Mech:DamageLocation:post - mech {__instance.DisplayName} has suffered a melee attack.");
+                SkillBasedInit.LogDebug($"Mech:DamageLocation:post - mech {__instance.DisplayName} has suffered a melee attack from:{weapon.parent.DisplayName}.");
 
                 ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
                 float delta = ActorInitiative.CalculateMeleeDelta(actorInit.tonnage, weapon);
@@ -251,22 +257,13 @@ namespace SkillBasedInit {
                 if (delta != 0) {
                     // DamageType DFA increases the shock for mechs
                     if (damageType == DamageType.DFA) {
-                        int deltaWithDFA = (int)Math.Ceiling(delta * SkillBasedInit.settings.MechMeleeDFAMulti);
-                        SkillBasedInit.Logger.Log($"DFA attack inficting additional slowdown - from {delta} to {deltaWithDFA}");
+                        int deltaWithDFA = (int)Math.Ceiling(delta * SkillBasedInit.Settings.MechMeleeDFAMulti);
+                        SkillBasedInit.LogDebug($"DFA attack inficting additional slowdown - from {delta} to {deltaWithDFA}");
                         delta = deltaWithDFA;
                     }
                 }
 
-                SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
-                actorInit.AddMeleeImpact(delta);
-
-                if (__instance.Initiative + (int)Math.Ceiling(delta) > SkillBasedInit.MaxPhase) {
-                    __instance.Initiative = SkillBasedInit.MaxPhase;
-                } else {
-                    __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
-                }
-                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
-                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                actorInit.ResolveMeleeImpact(__instance, delta);
             }
         }
     }
@@ -276,21 +273,12 @@ namespace SkillBasedInit {
     public static class Vehicle_DamageLocation {
         public static void Postfix(Vehicle __instance, WeaponHitInfo hitInfo, VehicleChassisLocations vLoc, Weapon weapon, AttackImpactQuality impactQuality) {
             if (weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.Logger.Log($"Vehicle:DamageLocation:post - vehicle {__instance.DisplayName} has suffered a melee attack.");
+                SkillBasedInit.LogDebug($"Vehicle:DamageLocation:post - vehicle {__instance.DisplayName} has suffered a melee attack from:{weapon.parent.DisplayName}.");
 
                 ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
                 float delta = ActorInitiative.CalculateMeleeDelta(actorInit.tonnage, weapon);
 
-                SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");
-                actorInit.AddMeleeImpact(delta);
-
-                if (__instance.Initiative + (int)Math.Ceiling(delta) > SkillBasedInit.MaxPhase) {
-                    __instance.Initiative = SkillBasedInit.MaxPhase;
-                } else {
-                    __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
-                }
-                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
-                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                actorInit.ResolveMeleeImpact(__instance, delta);
             }
         }
     }
@@ -300,21 +288,12 @@ namespace SkillBasedInit {
     public static class Turret_DamageLocation {
         public static void Postfix(Turret __instance, WeaponHitInfo hitInfo, BuildingLocation bLoc, Weapon weapon) {
             if (weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.Logger.Log($"Turret:DamageLocation:post - turret {__instance.DisplayName} has suffered a melee attack.");
+                SkillBasedInit.LogDebug($"Turret:DamageLocation:post - turret {__instance.DisplayName} has suffered a melee attack from:{weapon.parent.DisplayName}.");
 
                 ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
                 float delta = ActorInitiative.CalculateMeleeDelta(actorInit.tonnage, weapon);
 
-                SkillBasedInit.Logger.Log($"Impact on actor:{__instance.DisplayName} from:{weapon.parent.DisplayName} will inflict {delta} init slowdown!");                
-                actorInit.AddMeleeImpact(delta);
-
-                if (__instance.Initiative + (int)Math.Ceiling(delta) > SkillBasedInit.MaxPhase) {
-                    __instance.Initiative = SkillBasedInit.MaxPhase;
-                } else {
-                    __instance.Initiative = __instance.Initiative + (int)Math.Ceiling(delta);
-                }
-                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
-                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{delta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                actorInit.ResolveMeleeImpact(__instance, delta);
             }
         }
     }
@@ -402,7 +381,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPhaseDisplay_RefreshInfo {
         public static void Postfix(CombatHUDPhaseDisplay __instance, ref TextMeshProUGUI ___NumText) {
-            SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay::RefreshInfo::post - Init");
+            //SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay::RefreshInfo::post - Init");
             ___NumText.enableWordWrapping = false;
             ___NumText.fontSize = 18;
         }

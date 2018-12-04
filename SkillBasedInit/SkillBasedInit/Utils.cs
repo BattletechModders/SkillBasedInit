@@ -18,6 +18,9 @@ namespace SkillBasedInit {
         // For each point of piloting, reduce negative effects by this percentage
         public float PilotingMultiplier = 0.05f;
 
+        // For each point of guts, reduce negative effects by this percentage
+        public float GutsMultiplier = 0.05f;
+
         public int PilotSpiritsModifier = 2;
 
         public float MechMeleeMulti = 0f;
