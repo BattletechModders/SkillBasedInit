@@ -28,10 +28,7 @@ Works in progress or planned effects include:
 
 These items are known bugs or issues that should be resolved before declaring a 1.0 version.
 
-* **Reported**: Cannot load a save game that is in the middle of combat. Error is:
-2018-12-05T00:27:38 - Error - CombatLog.AbstractActor [ERROR] Loading an AbstractActor of type BattleTech.Mech with an invalid initiative of 21, Reverting to BaseInitiative
-2018-12-05T00:27:38 - Error - GameInstance [ERROR] CombatGameState Hydration Failed:
-System.NullReferenceException: Object reference not set to an instance of an object
+* **Confirmed**: When loading a save that is within a battle, the phasebars are displayed.
 * **Reported Working**: Test interactions with init modifying abilities; Juggernaught, Offensive Push, etc
 * **Reported Working**: Check out Cyclops init aura to see how that bonus interacts in this model.
 * **Reported Working**: Test interactions with init modifying components; primitive cockpits should offer no bonus, basic IS +1, Clan +2, DNI +3, EI +4
@@ -86,12 +83,16 @@ When a battlefield condition would stun or injure a mechwarrior, the size of the
 
 Guts Rating | Initiative Range
 ------------|---------------
-1, 2, 3, 4 |  -4 to -7.
-5, 6, 7, 8 |  -3 to -6
+1 |  -6 to -9
+2, 3, 4 |  -5 to -8
+5, 6, |  -4 to -7
+7, 8 |  -4 to -7
 9 |  -2 to -5
 10 |  -1 to -4
 
-Mechwarriors lose initiative anytime they are injured. Mechwarriors with additional health pips due to high guts ratings ignore one injury per each additional health pip they have. 
+Each injury adds -1 to the upper bound only. A mechwarrior with Guts 5 and 2 injuries would randomly suffer between -4 and -9 when they are injured, and on all subsequent turns. 
+
+Mechwarriors lose initiative anytime they are injured. 
 
 Your guts skill reduces the impact of melee impacts by 5% for each point of the skill. A mechwarrior with guts 5 would reduce any effect by 25%, to a minimum of -1. 
 
