@@ -46,17 +46,17 @@ namespace SkillBasedInit {
 
         private static readonly int SuperHeavyTonnage = 11;
         private static readonly Dictionary<int, double> InitMultiBaseByTonnage = new Dictionary<int, double> {
-            {  0, 1.6 }, // 0-15
-            {  1, 1.5 }, // 10-15
-            {  2, 1.4 }, // 20-25
-            {  3, 1.3 }, // 30-35
-            {  4, 1.2 }, // 40-45
-            {  5, 1.1 }, // 50-55
-            {  6, 1.0 }, // 60-65
-            {  7, 0.9 }, // 70-75
-            {  8, 0.8 }, // 80-85
-            {  9, 0.7 }, // 90-95
-            { 10, 0.6 }, // 100
+            {  0, 4.0 }, // 0-15
+            {  1, 3.8 }, // 10-15
+            {  2, 3.4 }, // 20-25
+            {  3, 3.0 }, // 30-35
+            {  4, 2.5 }, // 40-45
+            {  5, 2.3 }, // 50-55
+            {  6, 1.8 }, // 60-65
+            {  7, 1.5 }, // 70-75
+            {  8, 1.1 }, // 80-85
+            {  9, 0.9 }, // 90-95
+            { 10, 0.7 }, // 100
             { SuperHeavyTonnage, 0.2 }, // 105+
         };
 
@@ -115,8 +115,10 @@ namespace SkillBasedInit {
                 } else if (weightClass == WeightClass.ASSAULT) {
                     rawModifier -= 5;
                 }
-                SkillBasedInit.LogDebug($"Normalized BaseInit from {statCollectionVal} to {rawModifier}");
-                this.chassisBaseMod = rawModifier;
+
+                // Because HBS init values were from 2-5, bonuses will be negative at this point and penalties positive. Invert these.
+                this.chassisBaseMod = rawModifier * -1;
+                SkillBasedInit.LogDebug($"Normalized BaseInit from {statCollectionVal} to {this.chassisBaseMod}");
             } else {
                 this.chassisBaseMod = 0;
             }
@@ -146,7 +148,7 @@ namespace SkillBasedInit {
             int pilotingNormd = NormalizeSkill(pilot.Piloting);
             int tacticsNormd = NormalizeSkill(pilot.Tactics);
             int gutsNormd = NormalizeSkill(pilot.Guts);
-            SkillBasedInit.LogDebug($"Skill profile is - p:{pilot.Piloting}->{pilotingNormd} t:{pilot.Tactics}->{tacticsNormd} g:{pilot.Guts}->{gutsNormd}");
+            SkillBasedInit.LogDebug($"Skill profile is p:{pilot.Piloting}->{pilotingNormd} t:{pilot.Tactics}->{tacticsNormd} g:{pilot.Guts}->{gutsNormd}");
 
             // Set the round init modifier based upon the normalized tactics and piloting skill
             double skillsInitModifier = Math.Ceiling((tacticsNormd * 2.0 + pilotingNormd) / 3.0) / 10.0;
@@ -195,8 +197,8 @@ namespace SkillBasedInit {
             }
 
             double initBoundMulti = initBaseMulti + skillInitModifier;
-            int roundMin = (int)Math.Floor(6 * initBoundMulti);
-            int roundMax = (int)Math.Ceiling(12 * initBoundMulti);
+            int roundMin = (int)Math.Floor(3 * initBoundMulti);
+            int roundMax = (int)Math.Ceiling(5 * initBoundMulti);
             SkillBasedInit.LogDebug($"For skillMod:{skillInitModifier} + baseMod:{initBaseMulti} yielded bounds: {roundMin} - {roundMax}");
             return new int[] { roundMin, roundMax };
         }
@@ -244,7 +246,7 @@ namespace SkillBasedInit {
 
             // Check for melee impacts        
             if (this.meleeImpact > 0) {
-                int delay = (int)Math.Ceiling(this.meleeImpact * pilotingEffectMulti);
+                int delay = (int)Math.Ceiling(this.meleeImpact * gutsEffectMulti);
                 SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} was meleed after activation! Impact of {this.meleeImpact} was reduced to {delay} by piloting. Reduced {roundInitiative} by {delay}");
                 roundInitiative -= delay;
             }
@@ -279,7 +281,7 @@ namespace SkillBasedInit {
 
             // Init is flipped... 1 acts in first phase, then 2, etc.
             actor.Initiative = 31 - roundInitiative;
-            SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} ends up with roundInitiative {roundInitiative} from bounds {roundInitBounds[0]}-{roundInitBounds[1]}");
+            SkillBasedInit.Logger.Log($"Actor:({actor.DisplayName}) ends up with roundInitiative:({roundInitiative}) from bounds {roundInitBounds[0]}-{roundInitBounds[1]}");
         }
 
         public static float CalculateMeleeDelta(float targetTonnage, Weapon weapon) {

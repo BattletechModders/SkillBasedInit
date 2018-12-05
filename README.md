@@ -28,6 +28,10 @@ Works in progress or planned effects include:
 
 These items are known bugs or issues that should be resolved before declaring a 1.0 version.
 
+* **Reported**: Cannot load a save game that is in the middle of combat. Error is:
+2018-12-05T00:27:38 - Error - CombatLog.AbstractActor [ERROR] Loading an AbstractActor of type BattleTech.Mech with an invalid initiative of 21, Reverting to BaseInitiative
+2018-12-05T00:27:38 - Error - GameInstance [ERROR] CombatGameState Hydration Failed:
+System.NullReferenceException: Object reference not set to an instance of an object
 * **Reported Working**: Test interactions with init modifying abilities; Juggernaught, Offensive Push, etc
 * **Reported Working**: Check out Cyclops init aura to see how that bonus interacts in this model.
 * **Reported Working**: Test interactions with init modifying components; primitive cockpits should offer no bonus, basic IS +1, Clan +2, DNI +3, EI +4
@@ -47,18 +51,18 @@ The tonnage of a unit determines a multipler applied to the lower (6) and upper 
 
 Tonnage | Modifier | Initiative Range
 --------|----------|---------------
-00-05   | x1.6 |  9 to 20
+00-05   | x1.6 | 9 to 20
 10-15   | x1.5 | 9 to 20
-20-25   | x1.4 | 8 to 17
-30-35   | x1.3 | 7 to 16
-40-45   | x1.2 | 7 to 14
-50-55   | x1.1 | 6 to 14
-60-65   | x1.0 | 6 to 12
-70-75   | x0.9 | 5 to 11
-80-85   | x0.8 | 4 to 10
-90-95   | x0.7 | 4 to 9
-100     | x0.6 | 3 to 8
-100+    | x0.2 | 1 to 3
+20-25   | x3.4 | 13 to 22
+30-35   | x3.0 | 12 to 20
+40-45   | x2.5 | 10 to 18
+50-55   | x2.3 | 10 to 17
+60-65   | x1.8 | 8 to 14
+70-75   | x1.5 | 7 to 13
+80-85   | x1.1 | 6 to 11
+90-95   | x0.9 | 5 to 10
+100     | x0.7 | 5 to 9
+100+    | x0.2 | 3 to 6
 
 ### Impact of Tactics Skill
 A MechWarriors's Tactics rating makes a significant difference on when it acts in the initiative order. The tactics and piloting skills are combined and converted into an additional .1 to 1.0 added to the tonnage modifier above. The tactics skill has twice the impact of the piloting skill on this calculation, which follows the formula:
@@ -67,15 +71,14 @@ A MechWarriors's Tactics rating makes a significant difference on when it acts i
 
 Some examples illustrate the interplay between Tactics and Piloting:
 
-* A mechwarrior with Tactics 1 and Piloting 1 increase the tonnage modifier by `((2 + 1) / 3) / 10.0 = 0.1`. In a 50 ton mech, their phase bounds would be `x1.1 + 0.1 = x1.2`.
-* A mechwarrior with Tactics 6 and Piloting 3 increase the tonnage modifier by `((12 + 3) / 3) / 10.0 = 0.5`. In a 50 ton mech, their phase bounds would be `x1.1 + 0.5 = x1.6`.
-* A mechwarrior with Tactics 10 and Piloting 1 increase the tonnage modifier by `((20 + 2) / 3) / 10.0 = 0.7`. In a 50 ton mech, their phase bounds would be `x1.1 + 1.0 = x2.1`.
-* A mechwarrior with Tactics 1 and Piloting 10 increase the tonnage modifier by `((2 + 10) / 3) / 10.0 = 0.4`. In a 50 ton mech, their phase bounds would be `x1.1 + 0.4 = x1.5`.
-
+* A mechwarrior with Tactics 1 and Piloting 1 increase the tonnage modifier by `((2 + 1) / 3) / 10.0 = 0.1`. In a 50 ton mech, their phase bounds would be `x2.3 + 0.1 = x2.4`.
+* A mechwarrior with Tactics 6 and Piloting 3 increase the tonnage modifier by `((12 + 3) / 3) / 10.0 = 0.5`. In a 50 ton mech, their phase bounds would be `x2.3 + 0.5 = x2.8`.
+* A mechwarrior with Tactics 10 and Piloting 1 increase the tonnage modifier by `((20 + 2) / 3) / 10.0 = 0.7`. In a 50 ton mech, their phase bounds would be `x2.3 + 1.0 = x3.3`.
+* A mechwarrior with Tactics 1 and Piloting 10 increase the tonnage modifier by `((2 + 10) / 3) / 10.0 = 0.4`. In a 50 ton mech, their phase bounds would be `x2.3 + 0.4 = x2.7`.
 
 ### Impact of Piloting
 
-Many battlefield conditions reduce your initiative. Your piloting skill reduces the impact of these effects by 5% for each point of the skill. A mechwarrior with piloting 5 would reduce any effect by 25%, to a minimum of -1. This is especially important when knocked down or meleed, both of which impose significant penalties that can completely shatter your plan of action.
+Many battlefield conditions reduce your initiative. Your piloting skill reduces the impact of these effects by 5% for each point of the skill. A mechwarrior with piloting 5 would reduce any effect by 25%, to a minimum of -1. This reduction is applied to knockdown, when your movement is crippled, or when the mech is shutdown or prone.
 
 ### Impact of Guts
 
@@ -89,6 +92,8 @@ Guts Rating | Initiative Range
 10 |  -1 to -4
 
 Mechwarriors lose initiative anytime they are injured. Mechwarriors with additional health pips due to high guts ratings ignore one injury per each additional health pip they have. 
+
+Your guts skill reduces the impact of melee impacts by 5% for each point of the skill. A mechwarrior with guts 5 would reduce any effect by 25%, to a minimum of -1. 
 
 ### Miscellaneous
 
