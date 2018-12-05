@@ -51,8 +51,8 @@ The tonnage of a unit determines a multipler applied to the lower (6) and upper 
 
 Tonnage | Modifier | Initiative Range
 --------|----------|---------------
-00-05   | x1.6 | 9 to 20
-10-15   | x1.5 | 9 to 20
+00-05   | x4.0 | 15 to 25
+10-15   | x3.8 | 14 to 24
 20-25   | x3.4 | 13 to 22
 30-35   | x3.0 | 12 to 20
 40-45   | x2.5 | 10 to 18
@@ -61,7 +61,7 @@ Tonnage | Modifier | Initiative Range
 70-75   | x1.5 | 7 to 13
 80-85   | x1.1 | 6 to 11
 90-95   | x0.9 | 5 to 10
-100     | x0.7 | 5 to 9
+100      | x0.7 | 5 to 9
 100+    | x0.2 | 3 to 6
 
 ### Impact of Tactics Skill
