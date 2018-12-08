@@ -353,7 +353,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(int), typeof(WeaponHitInfo), typeof(ArmorLocation), typeof(Weapon), typeof(float), typeof(int), typeof(AttackImpactQuality), typeof(DamageType) })]
     public static class Mech_DamageLocation {
         public static void Postfix(Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, AttackImpactQuality impactQuality, DamageType damageType) {
-            if (weapon.Category == WeaponCategory.Melee) {
+            if (weapon != null && weapon.Category == WeaponCategory.Melee) {
                 SkillBasedInit.LogDebug($"Mech:DamageLocation:post - mech {__instance.DisplayName} has suffered a melee attack from:{weapon.parent.DisplayName}.");
 
                 ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
@@ -377,7 +377,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(WeaponHitInfo), typeof(int), typeof(VehicleChassisLocations), typeof(Weapon), typeof(float), typeof(AttackImpactQuality) })]
     public static class Vehicle_DamageLocation {
         public static void Postfix(Vehicle __instance, WeaponHitInfo hitInfo, VehicleChassisLocations vLoc, Weapon weapon, AttackImpactQuality impactQuality) {
-            if (weapon.Category == WeaponCategory.Melee) {
+            if (weapon != null && weapon.Category == WeaponCategory.Melee) {
                 SkillBasedInit.LogDebug($"Vehicle:DamageLocation:post - vehicle {__instance.DisplayName} has suffered a melee attack from:{weapon.parent.DisplayName}.");
 
                 ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
@@ -392,7 +392,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(WeaponHitInfo), typeof(BuildingLocation), typeof(Weapon), typeof(float) })]
     public static class Turret_DamageLocation {
         public static void Postfix(Turret __instance, WeaponHitInfo hitInfo, BuildingLocation bLoc, Weapon weapon) {
-            if (weapon.Category == WeaponCategory.Melee) {
+            if (weapon != null && weapon.Category == WeaponCategory.Melee) {
                 SkillBasedInit.LogDebug($"Turret:DamageLocation:post - turret {__instance.DisplayName} has suffered a melee attack from:{weapon.parent.DisplayName}.");
 
                 ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
