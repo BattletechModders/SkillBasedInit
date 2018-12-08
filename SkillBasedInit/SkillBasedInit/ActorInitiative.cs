@@ -157,7 +157,14 @@ namespace SkillBasedInit {
             this.pilotingEffectMulti = 1.0 - (pilotingNormd * SkillBasedInit.Settings.PilotingMultiplier);
             this.gutsEffectMulti = 1.0 - (gutsNormd * SkillBasedInit.Settings.GutsMultiplier);
 
-            this.injuryBounds = GutsInjuryBounds[gutsNormd];
+            if (gutsNormd > 13 || gutsNormd < 1) {
+                SkillBasedInit.Logger.Log($"ERROR: Actor:{actor.DisplayName} with pilot:{pilot.Name} has an invalid guts rating!");
+                SkillBasedInit.Logger.Log($"ERROR: Pilot:{pilot.Name} has skills p:{pilot.Piloting}->{pilotingNormd} g:{pilot.Guts}->{gutsNormd} t:{pilot.Tactics}->{tacticsNormd}!");
+                SkillBasedInit.Logger.Log($"ERROR: Reverting pilot to guts 1!");
+                this.injuryBounds = GutsInjuryBounds[1];
+            } else {
+                this.injuryBounds = GutsInjuryBounds[gutsNormd];
+            }
             this.ignoredInjuries = pilot.BonusHealth;
 
             SkillBasedInit.Logger.Log($"Pilot {pilot.GUID} with name: {pilot.Name} has " +
@@ -169,13 +176,13 @@ namespace SkillBasedInit {
 
         private int NormalizeSkill(int rawValue) {
             int normalizedVal = rawValue;
-            if (rawValue > 10 && rawValue < 14) {
+            if (rawValue >= 11 && rawValue <= 14) {
                 // 11, 12, 13, 14 normalizes to 11
                 normalizedVal = 11;
-            } else if (rawValue > 14 && rawValue < 19) {
+            } else if (rawValue >= 15 && rawValue <= 18) {
                 // 15, 16, 17, 18 normalizes to 14
                 normalizedVal = 12;
-            } else if (rawValue > 18 && rawValue < 21) {
+            } else if (rawValue == 19 || rawValue == 20) {
                 // 19, 20 normalizes to 13
                 normalizedVal = 13;
             } else if (rawValue < 0) {
