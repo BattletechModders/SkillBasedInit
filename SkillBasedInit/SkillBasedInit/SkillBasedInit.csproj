@@ -60,16 +60,22 @@
     <Compile Include="ActorInitiative.cs" />
     <Compile Include="SkillBasedInit.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Patch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="patches\CorePatches.cs" />
+    <Compile Include="patches\MeleePatches.cs" />
+    <Compile Include="patches\InjuryPatches.cs" />
+    <Compile Include="patches\HUDPatches.cs" />
+    <Compile Include="patches\LoadoutPatches.cs" />
+    <Compile Include="patches\SerializationPatches.cs" />
+    <Compile Include="patches\KnockdownPatches.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="New Folder\" />
+    <Folder Include="patches\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

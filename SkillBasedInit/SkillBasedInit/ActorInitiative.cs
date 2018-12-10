@@ -12,14 +12,17 @@ namespace SkillBasedInit {
         readonly string pilotName;
         public ActorType type = ActorType.Mech;
         readonly public float tonnage;
-        public int priorRoundInit = -1; // Tracks the previous round init
         readonly public int chassisBaseMod; // base initiative value from the chassis before any effects
         readonly public int[] roundInitBounds;
         readonly public double pilotingEffectMulti;
         readonly public double gutsEffectMulti;
 
         readonly public int[] injuryBounds;
-        readonly public int ignoredInjuries;
+
+        // Track any changes in the previous round init
+        public int priorRoundInit = -1;
+        // If an injury was suffered on a previous round, but not handled, take the full impact on the coming round.
+        public int priorRoundInjuryMod = 0;
 
         public float meleeImpact = 0.0f;
 
@@ -163,11 +166,10 @@ namespace SkillBasedInit {
             } else {
                 this.injuryBounds = GutsInjuryBounds[gutsNormd];
             }
-            this.ignoredInjuries = pilot.BonusHealth;
 
             SkillBasedInit.Logger.Log($"Actor:{actor.DisplayName}_{pilot.Name} has " +
                 $"skillsMod:{skillsInitModifier} (from piloting:{pilotingNormd} tactics:{tacticsNormd}) " +
-                $"injuryBounds: {injuryBounds[0]}-{injuryBounds[1]} ignoredInjuries:{ignoredInjuries} " +
+                $"injuryBounds: {injuryBounds[0]}-{injuryBounds[1]}" +
                 $"roundInitBounds:{roundInitBounds[0]}-{roundInitBounds[1]} chassisBaseMod: {chassisBaseMod} " +
                 $"pilotingEffectMulti:{pilotingEffectMulti} gutsEffectMulti:{gutsEffectMulti}");
         }
@@ -213,7 +215,12 @@ namespace SkillBasedInit {
             this.meleeImpact += impactDelta;
         }
 
-        public void CalculateRoundInit(AbstractActor actor) {                  
+        public void CalculateRoundInit(AbstractActor actor) {
+            if (actor.IsDead) {
+                actor.Initiative = SkillBasedInit.MaxPhase;
+                SkillBasedInit.LogDebug("  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is dead, skipping init.");
+                return;
+            }
 
             // Generate a random element            
             int roundVariance = SkillBasedInit.Random.Next(this.roundInitBounds[0], this.roundInitBounds[1]);
@@ -224,15 +231,20 @@ namespace SkillBasedInit {
                 int inspiredBonus = SkillBasedInit.Random.Next(1, 3);
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is inspired, adding {inspiredBonus} to init.");
                 roundInitiative += inspiredBonus;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INSPIRED! +{inspiredBonus} INITIATIVE", FloatieMessage.MessageNature.Buff));
             }
 
-            // Check for injuries
-            var slowingInjuries = actor.GetPilot().Injuries - this.ignoredInjuries;
-            if (slowingInjuries > 0) {
+            // Check for injuries. If there injuries on the previous round, apply them in full force. Otherwise, reduce them.
+            if (priorRoundInjuryMod != 0) {
+                roundInitiative -= priorRoundInjuryMod;
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was injured on a previous round! Reducing {roundInitiative} by {priorRoundInjuryMod}");
+                priorRoundInjuryMod = 0;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INJURED! -{roundInitiative} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            } else if (actor.GetPilot().Injuries != 0) {
                 int injuryModifier = SkillBasedInit.Random.Next(this.injuryBounds[0], this.injuryBounds[1]);
-                // TODO: Should this always be at least 1?
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has injuries! Reduced {roundInitiative} by {injuryModifier}");
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) previously suffered injuries! Reduced {roundInitiative} by {injuryModifier}");
                 roundInitiative -= injuryModifier;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INJURED! -{injuryModifier} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
             // Check for leg / side loss
@@ -248,6 +260,7 @@ namespace SkillBasedInit {
                 int crippledLoss = (int)Math.Ceiling(SkillBasedInit.Settings.MovementCrippledMalus * pilotingEffectMulti);
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has crippled movement! Reduced {roundInitiative} by {crippledLoss}");
                 roundInitiative -= crippledLoss;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CRIPPLED! -{crippledLoss} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
             // Check for melee impacts        
@@ -255,6 +268,7 @@ namespace SkillBasedInit {
                 int delay = (int)Math.Ceiling(this.meleeImpact * gutsEffectMulti);
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was meleed after activation! Impact of {this.meleeImpact} was reduced to {delay} by piloting. Reduced {roundInitiative} by {delay}");
                 roundInitiative -= delay;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"MELEED! -{delay} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
             // Check for knockdown / prone / shutdown
@@ -262,6 +276,7 @@ namespace SkillBasedInit {
                 int delay = (int)Math.Ceiling(SkillBasedInit.Settings.ProneOrShutdownMalus * pilotingEffectMulti);
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is prone or shutdown! Reduced {roundInitiative} by {delay}");
                 roundInitiative -= delay;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"PRONE OR SHUTDOWN! -{delay} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
             // Check to see if the actor's initative changed in the prior round
