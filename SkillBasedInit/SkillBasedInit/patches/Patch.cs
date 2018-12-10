@@ -5,7 +5,6 @@ using DG.Tweening;
 using Harmony;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 
@@ -32,25 +31,6 @@ namespace SkillBasedInit {
         }
     }
 
-    //[HarmonyPatch(typeof(TurnDirector))]
-    //[HarmonyPatch("FirstPhase", MethodType.Getter)]
-    //public static class TurnDirector_FirstPhase {
-    //    public static void Postfix(TurnDirector __instance, ref int __result) {
-    //        SkillBasedInit.Logger.Log($"TurnDirector::LastPhase::post - returning 1");
-    //        __result = 1;
-    //    }
-    //}
-
-    //[HarmonyPatch(typeof(TurnDirector))]
-    //[HarmonyPatch("LastPhase", MethodType.Getter)]
-    //public static class TurnDirector_LastPhase {
-    //    public static void Postfix(TurnDirector __instance, ref int __result) {
-    //        SkillBasedInit.Logger.Log($"TurnDirector::LastPhase::post - returning {SkillBasedInit.MaxPhase}");
-    //        __result = SkillBasedInit.MaxPhase;
-    //    }
-    //}
-
-
     [HarmonyPatch(typeof(AbstractActor), "OnNewRound")]
     public static class AbstractActor_OnNewRound {
         public static void Postfix(AbstractActor __instance, int round) {
@@ -64,7 +44,7 @@ namespace SkillBasedInit {
         public static void Postfix(AbstractActor __instance) {
             //SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
             var deferJump = SkillBasedInit.Random.Next(2, 7);
-            SkillBasedInit.LogDebug($"AbstractActor:DeferUnit - Reducing actorInit:{__instance.Initiative} by :{deferJump} to {__instance.Initiative + deferJump}");
+            SkillBasedInit.LogDebug($"AbstractActor:DeferUnit - Reducing Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) actorInit:{__instance.Initiative} by :{deferJump} to {__instance.Initiative + deferJump}");
 
             __instance.Initiative += deferJump;
             if (__instance.Initiative > SkillBasedInit.MaxPhase) {
@@ -168,6 +148,7 @@ namespace SkillBasedInit {
                     __result = "1";
                     break;
                 default:
+                    SkillBasedInit.Logger.Log($"AbstractActor:InitiativeToString returning ERROR for initiative value:{initiative}");
                     __result = "ERROR";
                     break;
             }
@@ -179,8 +160,40 @@ namespace SkillBasedInit {
     [HarmonyPatch("HasValidInitiative", MethodType.Getter)]
     public static class AbstractActor_HasValidInitiative {
         public static void Postfix(AbstractActor __instance, bool __result) {
-            __result = __instance.Initiative > 0 && __instance.Initiative < 31;
-            //SkillBasedInit.Logger.Log($"AbstractActor:HasValidInitiative returning {__result} for {__instance.Initiative}");
+            bool isValid = __instance.Initiative >= SkillBasedInit.MinPhase && __instance.Initiative <= SkillBasedInit.MaxPhase;
+            if (!isValid) {
+                SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has invalid initiative {__instance.Initiative}!");
+            }
+            __result = isValid;
+            SkillBasedInit.LogDebug($"AbstractActor:HasValidInitiative returning {__result} for {__instance.Initiative}");
+        }
+    }
+
+    [HarmonyPatch(typeof(AbstractActor))]
+    [HarmonyPatch("BaseInitiative", MethodType.Getter)]
+    public static class AbstractActor_BaseInitiative {
+        public static void Postfix(AbstractActor __instance, ref int __result, StatCollection ___statCollection) {
+            CombatGameState ___Combat = (CombatGameState)Traverse.Create(__instance).Property("Combat").GetValue();
+            if (___Combat.TurnDirector.IsInterleaved) {
+                CombatHUD ___HUD = (CombatHUD)Traverse.Create(__instance).Property("HUD").GetValue();
+
+                int baseInit = ___statCollection.GetValue<int>("BaseInitiative");
+                int phaseMod = ___statCollection.GetValue<int>("PhaseModifier");
+                int modifiedInit = baseInit + phaseMod;
+                SkillBasedInit.LogDebug($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+
+                if (modifiedInit < SkillBasedInit.MinPhase) {
+                    SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) being set to {SkillBasedInit.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    __result = SkillBasedInit.MinPhase;
+                } else if (modifiedInit > SkillBasedInit.MaxPhase) {
+                    SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) being set to {SkillBasedInit.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    __result = SkillBasedInit.MaxPhase;
+                } else {
+                    __result = modifiedInit;
+                    SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has BaseInit:{baseInit} + PhaseMod:{phaseMod} = modifiedInit:{modifiedInit}.");
+                }
+            }
+            __result = ___Combat.TurnDirector.NonInterleavedPhase;
         }
     }
 
@@ -279,7 +292,7 @@ namespace SkillBasedInit {
             if (__instance.CustomHeraldryDef != null) {
                 __instance.CustomHeraldryDef.RequestResources(loadedState.DataManager, true);
             }
-            if (!(__instance.Initiative > 0 && __instance.Initiative < (SkillBasedInit.MaxPhase + 1))) {
+            if (!(__instance.Initiative < 0 && __instance.Initiative > (SkillBasedInit.MaxPhase + 1))) {
                 SkillBasedInit.Logger.Log(string.Format("Loading an AbstractActor of type {0} with an invalid initiative of {1}, Reverting to BaseInitiative", __instance.ClassName, __instance.Initiative));
                 __instance.Initiative = __instance.BaseInitiative;
             }
@@ -296,14 +309,14 @@ namespace SkillBasedInit {
         public static int KnockdownStackItemUID;
 
         public static bool Prefix(Mech __instance, string sourceID, int stackItemUID) {
-            //SkillBasedInit.Logger.Log($"Mech:CompleteKnockdown:prefix - Recording sourceID:{sourceID} stackItemUID:{stackItemUID}");
             KnockdownSourceID = sourceID;
-            KnockdownStackItemUID = stackItemUID;            
+            KnockdownStackItemUID = stackItemUID;
+            SkillBasedInit.LogDebug($"Mech:CompleteKnockdown:prefix - Recording sourceID:{sourceID} stackItemUID:{stackItemUID}");
             return true;
         }
 
         public static void Postfix(Mech __instance) {
-            //SkillBasedInit.Logger.Log($"Mech:CompleteKnockdown:prefix - Removing record.");
+            SkillBasedInit.LogDebug($"Mech:CompleteKnockdown:postfix - Removing sourceID:{KnockdownSourceID} stackItemUID:{KnockdownStackItemUID}.");
             KnockdownSourceID = null;
             KnockdownStackItemUID = -1;
         }
@@ -320,27 +333,28 @@ namespace SkillBasedInit {
                 //SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - Not from knockdown, deferring to original call");
                 shouldReturn = true;
             } else {
-                //SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown:prefix - From knockdown, executing changed logic");
+                SkillBasedInit.LogDebug($"AbstractActor:ForceUnitOnePhaseDown:prefix - Source is knockdown, executing changed logic");
                 shouldReturn = false;
 
                 ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
                 int knockDownMod = SkillBasedInit.Random.Next(actorInit.injuryBounds[0], actorInit.injuryBounds[1]);
-                SkillBasedInit.Logger.Log($"AbstractActor::ForceUnitOnePhaseDown modifying unit initiative by {knockDownMod} due to knockdown!");
+                SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown modifying Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) initiative by {knockDownMod} due to knockdown!");
 
                 if (__instance.HasActivatedThisRound || __instance.Initiative != SkillBasedInit.MaxPhase) {
-                    SkillBasedInit.Logger.Log($"Knockdown will slow actor:{__instance.DisplayName} by {knockDownMod} init on next activation!");
+                    SkillBasedInit.Logger.Log($"Knockdown will slow Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) by {knockDownMod} init on next activation!");
                 } else {
-                    SkillBasedInit.Logger.Log($"Knockdown immediately slows actor:{__instance.DisplayName} by {knockDownMod} init!");
+                    SkillBasedInit.Logger.Log($"Knockdown immediately slows Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) by {knockDownMod} init!");
                     if (__instance.Combat.TurnDirector.IsInterleaved && __instance.Initiative != SkillBasedInit.MaxPhase) {
                         __instance.Initiative = __instance.Initiative + knockDownMod;
-                        if (__instance.Initiative + knockDownMod > SkillBasedInit.MaxPhase) {
+                        if (__instance.Initiative > SkillBasedInit.MaxPhase) {
                             __instance.Initiative = SkillBasedInit.MaxPhase;
                         } 
                         __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
                     }
                 }
-                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"-{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"THUD! -{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
 
+                // TODO: Is this causing the lockup?
                 string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
                 __instance.StatCollection.ModifyStat<int>(sourceID, stackItemUID, statName, StatCollection.StatOperation.Int_Add, knockDownMod, -1, true);
 
@@ -349,57 +363,13 @@ namespace SkillBasedInit {
         }
     }
 
-    [HarmonyPatch(typeof(Mech), "DamageLocation")]
-    [HarmonyPatch(new Type[] { typeof(int), typeof(WeaponHitInfo), typeof(ArmorLocation), typeof(Weapon), typeof(float), typeof(int), typeof(AttackImpactQuality), typeof(DamageType) })]
-    public static class Mech_DamageLocation {
-        public static void Postfix(Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, AttackImpactQuality impactQuality, DamageType damageType) {
-            if (weapon != null && weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.LogDebug($"Mech:DamageLocation:post - mech {__instance.DisplayName} has suffered a melee attack from:{weapon.parent.DisplayName}.");
-
-                ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
-                float delta = ActorInitiative.CalculateMeleeDelta(actorInit.tonnage, weapon);
-
-                if (delta != 0) {
-                    // DamageType DFA increases the shock for mechs
-                    if (damageType == DamageType.DFA) {
-                        int deltaWithDFA = (int)Math.Ceiling(delta * SkillBasedInit.Settings.MechMeleeDFAMulti);
-                        SkillBasedInit.LogDebug($"DFA attack inficting additional slowdown - from {delta} to {deltaWithDFA}");
-                        delta = deltaWithDFA;
-                    }
-                }
-
-                actorInit.ResolveMeleeImpact(__instance, delta);
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Vehicle), "DamageLocation")]
-    [HarmonyPatch(new Type[] { typeof(WeaponHitInfo), typeof(int), typeof(VehicleChassisLocations), typeof(Weapon), typeof(float), typeof(AttackImpactQuality) })]
-    public static class Vehicle_DamageLocation {
-        public static void Postfix(Vehicle __instance, WeaponHitInfo hitInfo, VehicleChassisLocations vLoc, Weapon weapon, AttackImpactQuality impactQuality) {
-            if (weapon != null && weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.LogDebug($"Vehicle:DamageLocation:post - vehicle {__instance.DisplayName} has suffered a melee attack from:{weapon.parent.DisplayName}.");
-
-                ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
-                float delta = ActorInitiative.CalculateMeleeDelta(actorInit.tonnage, weapon);
-
-                actorInit.ResolveMeleeImpact(__instance, delta);
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Turret), "DamageLocation")]
-    [HarmonyPatch(new Type[] { typeof(WeaponHitInfo), typeof(BuildingLocation), typeof(Weapon), typeof(float) })]
-    public static class Turret_DamageLocation {
-        public static void Postfix(Turret __instance, WeaponHitInfo hitInfo, BuildingLocation bLoc, Weapon weapon) {
-            if (weapon != null && weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.LogDebug($"Turret:DamageLocation:post - turret {__instance.DisplayName} has suffered a melee attack from:{weapon.parent.DisplayName}.");
-
-                ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[__instance.GUID];
-                float delta = ActorInitiative.CalculateMeleeDelta(actorInit.tonnage, weapon);
-
-                actorInit.ResolveMeleeImpact(__instance, delta);
-            }
+    // Injure the pilot as soon as it happens
+    [HarmonyPatch(typeof(Pilot), "InjurePilot")]
+    [HarmonyPatch(new Type[] { typeof(string), typeof(int), typeof(int), typeof(DamageType), typeof(Weapon), typeof(AbstractActor) })]
+    public static class Pilot_InjurePilot {
+        //public void InjurePilot (string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor)
+        public static void Postfix(Pilot __instance, string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor) {
+            SkillBasedInit.Logger.Log($"Called after pilot injury on Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}), but still NO-OP");
         }
     }
 
