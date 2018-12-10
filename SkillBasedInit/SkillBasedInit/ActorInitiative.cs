@@ -1,9 +1,7 @@
 ﻿using BattleTech;
 using HBS.Collections;
-using MechEngineer;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SkillBasedInit {
 
@@ -158,8 +156,8 @@ namespace SkillBasedInit {
             this.gutsEffectMulti = 1.0 - (gutsNormd * SkillBasedInit.Settings.GutsMultiplier);
 
             if (gutsNormd > 13 || gutsNormd < 1) {
-                SkillBasedInit.Logger.Log($"ERROR: Actor:{actor.DisplayName} with pilot:{pilot.Name} has an invalid guts rating!");
-                SkillBasedInit.Logger.Log($"ERROR: Pilot:{pilot.Name} has skills p:{pilot.Piloting}->{pilotingNormd} g:{pilot.Guts}->{gutsNormd} t:{pilot.Tactics}->{tacticsNormd}!");
+                SkillBasedInit.Logger.Log($"ERROR: Actor:{actor.DisplayName}_{pilot.Name} has an invalid guts rating!");
+                SkillBasedInit.Logger.Log($"ERROR: Actor:{actor.DisplayName}_{pilot.Name} has skills p:{pilot.Piloting}->{pilotingNormd} g:{pilot.Guts}->{gutsNormd} t:{pilot.Tactics}->{tacticsNormd}!");
                 SkillBasedInit.Logger.Log($"ERROR: Reverting pilot to guts 1!");
                 this.injuryBounds = GutsInjuryBounds[1];
             } else {
@@ -167,7 +165,7 @@ namespace SkillBasedInit {
             }
             this.ignoredInjuries = pilot.BonusHealth;
 
-            SkillBasedInit.Logger.Log($"Pilot {pilot.GUID} with name: {pilot.Name} has " +
+            SkillBasedInit.Logger.Log($"Actor:{actor.DisplayName}_{pilot.Name} has " +
                 $"skillsMod:{skillsInitModifier} (from piloting:{pilotingNormd} tactics:{tacticsNormd}) " +
                 $"injuryBounds: {injuryBounds[0]}-{injuryBounds[1]} ignoredInjuries:{ignoredInjuries} " +
                 $"roundInitBounds:{roundInitBounds[0]}-{roundInitBounds[1]} chassisBaseMod: {chassisBaseMod} " +
@@ -185,7 +183,7 @@ namespace SkillBasedInit {
             } else if (rawValue == 19 || rawValue == 20) {
                 // 19, 20 normalizes to 13
                 normalizedVal = 13;
-            } else if (rawValue < 0) {
+            } else if (rawValue <= 0) {
                 normalizedVal = 1;
             } else if (rawValue > 20) {
                 normalizedVal = 13;
@@ -224,7 +222,7 @@ namespace SkillBasedInit {
             // Check for inspired status
             if (actor.IsMoraleInspired || actor.IsFuryInspired) {
                 int inspiredBonus = SkillBasedInit.Random.Next(1, 3);
-                SkillBasedInit.Logger.Log($"Pilot {this.pilotName} is inspired, adding {inspiredBonus} to init.");
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is inspired, adding {inspiredBonus} to init.");
                 roundInitiative += inspiredBonus;
             }
 
@@ -232,7 +230,8 @@ namespace SkillBasedInit {
             var slowingInjuries = actor.GetPilot().Injuries - this.ignoredInjuries;
             if (slowingInjuries > 0) {
                 int injuryModifier = SkillBasedInit.Random.Next(this.injuryBounds[0], this.injuryBounds[1]);
-                SkillBasedInit.Logger.Log($"Pilot {this.pilotName} has injuries! Reduced {roundInitiative} by {injuryModifier}");
+                // TODO: Should this always be at least 1?
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has injuries! Reduced {roundInitiative} by {injuryModifier}");
                 roundInitiative -= injuryModifier;
             }
 
@@ -247,21 +246,21 @@ namespace SkillBasedInit {
             }
             if (isMovementCrippled) {
                 int crippledLoss = (int)Math.Ceiling(SkillBasedInit.Settings.MovementCrippledMalus * pilotingEffectMulti);
-                SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} has crippled movement! Reduced {roundInitiative} by {crippledLoss}");
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has crippled movement! Reduced {roundInitiative} by {crippledLoss}");
                 roundInitiative -= crippledLoss;
             }
 
             // Check for melee impacts        
             if (this.meleeImpact > 0) {
                 int delay = (int)Math.Ceiling(this.meleeImpact * gutsEffectMulti);
-                SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} was meleed after activation! Impact of {this.meleeImpact} was reduced to {delay} by piloting. Reduced {roundInitiative} by {delay}");
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was meleed after activation! Impact of {this.meleeImpact} was reduced to {delay} by piloting. Reduced {roundInitiative} by {delay}");
                 roundInitiative -= delay;
             }
 
             // Check for knockdown / prone / shutdown
             if (actor.IsProne || actor.IsShutDown) {
                 int delay = (int)Math.Ceiling(SkillBasedInit.Settings.ProneOrShutdownMalus * pilotingEffectMulti);
-                SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} is prone or shutdown! Reduced {roundInitiative} by {delay}");
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is prone or shutdown! Reduced {roundInitiative} by {delay}");
                 roundInitiative -= delay;
             }
 
@@ -270,7 +269,7 @@ namespace SkillBasedInit {
             if (this.priorRoundInit != -1) {
                 delta = actor.Initiative - this.priorRoundInit;
                 roundInitiative += delta;
-                SkillBasedInit.Logger.Log($"Actor {actor.DisplayName} has init:{actor.Initiative} but priorInit:{this.priorRoundInit} - applying delta:{delta} to roundInit:{roundInitiative} reflect init changes during round.");
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has init:{actor.Initiative} but priorInit:{this.priorRoundInit} - applying delta:{delta} to roundInit:{roundInitiative} reflect init changes during round.");
                 /* 
                  * TODO: Should this be instead                 
                     string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
@@ -278,67 +277,75 @@ namespace SkillBasedInit {
                 */
             }
             
-            if (roundInitiative < 0) {
+            if (roundInitiative <= 0) {
                 roundInitiative = 1;
-                SkillBasedInit.LogDebug($"Round init {roundInitiative} less than 0.");
+                SkillBasedInit.Logger.Log($"  Round init {roundInitiative} less than 0, setting to 1.");
             } else if (roundInitiative > 30) {
                 roundInitiative = 30;
-                SkillBasedInit.LogDebug($"Round init {roundInitiative} greater than 30.");
+                SkillBasedInit.Logger.Log($"  Round init {roundInitiative} greater than 30, setting to 30.");
             }
 
             // Init is flipped... 1 acts in first phase, then 2, etc.
             actor.Initiative = 31 - roundInitiative;
-            SkillBasedInit.Logger.Log($"Actor:({actor.DisplayName}) ends up with roundInitiative:({roundInitiative}) from bounds {roundInitBounds[0]}-{roundInitBounds[1]}");
+            SkillBasedInit.Logger.Log($"== Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has roundInitiative:({roundInitiative}) from bounds {roundInitBounds[0]}-{roundInitBounds[1]}");
         }
 
-        public static float CalculateMeleeDelta(float targetTonnage, Weapon weapon) {
-            float delta = 0.0f;
+        public static int CalculateMeleeDelta(float targetTons, Weapon weapon) {
 
-            int targetTonnageMod = (int)Math.Floor(targetTonnage / 5.0);
-
-            float attackerTonnage = 0.0f;
-            if (weapon.parent.GetType() == typeof(Mech)) {
-                Mech parent = (Mech)weapon.parent;
-                attackerTonnage = parent.tonnage;
-            } else if (weapon.parent.GetType() == typeof(Vehicle)) {
-                Vehicle parent = (Vehicle)weapon.parent;
-                attackerTonnage = parent.tonnage;
-            }
-            int attackerTonnageMod = (int)Math.Ceiling(attackerTonnage / 5.0);
-            SkillBasedInit.LogDebug($"Raw attackerTonnageMod:{attackerTonnageMod} vs targetTonnageMod:{targetTonnageMod}");
-
-            // Check for juggernaut
+            // Check for the Juggernaught skill
+            bool attackerIsJugger = false;
             foreach (Ability ability in weapon.parent.GetPilot().Abilities) {
                 if (ability.Def.Id == "AbilityDefGu5") {
-                    attackerTonnageMod = (int)Math.Ceiling(attackerTonnageMod * SkillBasedInit.Settings.MeleeAttackerJuggerMulti);
-                    SkillBasedInit.LogDebug($"Pilot {weapon.parent.GetPilot()} has the Juggernaught skill, increasing their impact to {attackerTonnageMod}!");
+                    SkillBasedInit.LogDebug($"Actor:{weapon.parent.DisplayName}/Pilot:{weapon.parent.GetPilot()} has Juggernaught, multiplying their tonnage.");
+                    attackerIsJugger = true;
                 }
             }
 
-            delta = Math.Max(1, attackerTonnageMod - targetTonnageMod);
+            // Compute the attackers tonnage / 5
+            float attackTons = 0.0f;
+            if (weapon.parent.GetType() == typeof(Mech)) {
+                Mech parent = (Mech)weapon.parent;
+                attackTons = parent.tonnage;
+            } else if (weapon.parent.GetType() == typeof(Vehicle)) {
+                Vehicle parent = (Vehicle)weapon.parent;
+                attackTons = parent.tonnage;
+            }
+            float modifiedAttackTons = attackerIsJugger ?
+                attackTons * SkillBasedInit.Settings.MeleeAttackerJuggerMulti :
+                attackTons;
+            int attackMod = (int)Math.Ceiling(modifiedAttackTons / 5.0);
+            SkillBasedInit.LogDebug($"Melee attackerTonnage:{attackTons}/{modifiedAttackTons} becomes attackerMod:{attackMod}");
 
-            return delta;
+            // Compute target's tonnage / 5
+            int targetMod = (int)Math.Floor(targetTons / 5.0);
+            SkillBasedInit.LogDebug($"Melee attackerMod:{attackMod} vs targetMod:{targetMod}");
+
+            // Always return 1 or more
+            float delta = Math.Max(1, attackMod - targetMod);
+            int deltaMod = (int)Math.Ceiling(delta);
+
+            return deltaMod;
         }
 
-        public void ResolveMeleeImpact(AbstractActor actor, float delta) {
+        public void ResolveMeleeImpact(AbstractActor actor, int delta) {
             
             double modifiedDelta = Math.Max(1, Math.Floor(delta * this.gutsEffectMulti));
-            SkillBasedInit.LogDebug($"Melee impact of {delta} reduced to {modifiedDelta} thanks to gutsModifier: {this.gutsEffectMulti}");
+            int deltaMod = (int)Math.Ceiling(modifiedDelta);
+            SkillBasedInit.LogDebug($"Melee impact of {delta} reduced to {modifiedDelta}/{deltaMod} thanks to gutsModifier: {this.gutsEffectMulti}");
             
             if (actor.HasActivatedThisRound) {
-                SkillBasedInit.Logger.Log($"Melee impact will slow actor:{actor.DisplayName} by {modifiedDelta} init on next activation!");                
-                this.AddMeleeImpact(delta);
+                SkillBasedInit.Logger.Log($"Melee impact will slow actor:{actor.DisplayName} by {deltaMod} init on next activation!");
+                this.AddMeleeImpact(deltaMod);
             } else {
-                SkillBasedInit.Logger.Log($"Melee impact immediately slows actor:{actor.DisplayName} by {modifiedDelta} init!");
+                SkillBasedInit.Logger.Log($"Melee impact immediately slows actor:{actor.DisplayName} by {deltaMod} init!");
                 // TODO: Should this add to the PhaseModifier stat?
-                if (actor.Initiative + (int)Math.Ceiling(delta) > SkillBasedInit.MaxPhase) {
+                actor.Initiative = actor.Initiative + deltaMod;
+                if (actor.Initiative > SkillBasedInit.MaxPhase) {
                     actor.Initiative = SkillBasedInit.MaxPhase;
-                } else {
-                    actor.Initiative = actor.Initiative + (int)Math.Ceiling(delta);
                 }
+                actor.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(actor.GUID));
             }
-            actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CLANG!", FloatieMessage.MessageNature.Debuff));
-            actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"-{modifiedDelta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CLANG! -{modifiedDelta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
         }
     }
 
