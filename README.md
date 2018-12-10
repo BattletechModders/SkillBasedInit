@@ -42,7 +42,7 @@ Works in progress or planned effects include:
 * *Planned*: Knockdowns will note 'Going Down!' as their init bubble.
 * *Planned*: Units that are unsettled, panicked or similar will have a reduced initiative.
 * *Planned*: Show an initiative track at the top of the screen so that players know which models are going when. Perhaps use the unit icons and a number underneath them?
-* *Planned*: In the mechbay and lance drop screens, show the BaseInitiative modifier for mechs when there is no pilot selected. When only a pilot is selected, show their Tactics+Piloting rating. When both are selected, show the expected range.
+* *Planned*: In the MechBay and Lance Drop screens, show the BaseInitiative modifier for mechs when there is no pilot selected. When only a pilot is selected, show their Tactics+Piloting rating. When both are selected, show the expected range.
 
 
 ### Bugs and Incomplete functions
