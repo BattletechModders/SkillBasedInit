@@ -12,6 +12,7 @@ namespace SkillBasedInit {
         public static string Path { get; private set; }
 
         public static int MaxPhase = 30;
+        public static int MinPhase = 1;
 
         public static Settings Settings;
 
@@ -20,7 +21,6 @@ namespace SkillBasedInit {
         public static void Init(string modDirectory, string settingsJSON) {
             try {
                 SetupLogger(modDirectory);
-
                 SkillBasedInit.Logger.Log($"Reading settings from {settingsJSON}");
                 SkillBasedInit.Settings = JsonConvert.DeserializeObject<Settings>(settingsJSON);
             } catch (Exception e) {
