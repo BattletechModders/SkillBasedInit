@@ -15,6 +15,7 @@ To disable the mod, edit SkillBasedInitiative/mod.json and change enabled:true t
 ## Skills
 
 This mod emphasizes a MechWarrior's Tactics, Guts, and Piloting skills.
+
 * Tactics contributes directly to the initiative value, and is the most important skill to raise if you want your Mechwarriors to consistently achieve a high phase number.
 * Guts prevents initiative losses from injuries or melee attacks. A high guts rating is necessary to ensure you retain high phase numbers even after taking damage.
 * Piloting prevents initiative losses from knockdowns, shutdowns, and other effects. A high piloting rating is necessary to ensure you don't get dropped too far back in the phase order due to knockdowns.
@@ -84,6 +85,8 @@ Tonnage | Modifier | Initiative Range
 ### Impact of Tactics Skill
 A MechWarriors's Tactics rating makes a significant difference on when it acts in the initiative order. The tactics and piloting skills are combined and converted into an additional .1 to 1.0 added to the tonnage modifier above. The tactics skill has twice the impact of the piloting skill on this calculation, which follows the formula:
 
+![Tactics Impact Table](tactics_table.png "Tactics Impact on initiative")
+
 `Math.Floor((pilot.Tactics * 2.0 + pilot.Piloting) / 3.0) / 10.0;`
 
 Some examples illustrate the interplay between Tactics and Piloting:
@@ -96,6 +99,9 @@ Some examples illustrate the interplay between Tactics and Piloting:
 ### Impact of Piloting
 
 Many battlefield conditions reduce your initiative. Your piloting skill reduces the impact of these effects by 5% for each point of the skill. A mechwarrior with piloting 5 would reduce any effect by 25%, to a minimum of -1. This reduction is applied to knockdown, when your movement is crippled, or when the mech is shutdown or prone.
+
+![Piloting Impact Table](piloting_table.png "Piloting Impact on initiative")
+
 
 ### Impact of Guts
 
