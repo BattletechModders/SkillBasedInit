@@ -66,61 +66,61 @@ The sections below detail some of the calculations used by the mod. Please note 
 ### Tonnage Impact
 The tonnage of a unit determines a multiplier applied to the lower (3) and upper (5) bounds of the phase calculation. After multiplication, the lower bound is rounded down, while the upper bound is rounded up.
 
-Tonnage | Base Initiative
---------|----------
-05      | 
-10-15   |
-20-25   |
-30-35   |
-40-45   |
-50-55   |
-60-65   |
-70-75   |
-80-85   |
-90-95   |
-100     |
-100+    |
+Tonnage | 05 | 10-15 | 20-25 | 30-35 | 40-45 | 50-55 | 60-65 | 70-75 | 80-85 | 90-95 | 100 | 100+
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
+*Base Initiative* | 24 | 22 | 21 | 19 | 18 | 16 | 15 | 13 | 12 | 10 | 9 | 7
 
 ### Impact of Tactics Skill
-A MechWarriors's Tactics
+A MechWarriors's Tactics skill adds a flat modifier to the base initiative defined by the unit tonnage. This value is graduated, as defined in the table below.
 
-![Tactics Impact Table](tactic_table.png "Tactics Impact on initiative")
+Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+Modifier | 0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
 
-`Math.Floor((pilot.Tactics * 2.0 + pilot.Piloting) / 3.0) / 10.0;`
+The following diagram illustrates the combination of tonnage and tactics to show the various ranges in which units will operate. In the table below, the sum is given by the ⌄ symbol, next to the tactics value that would set the boundary. The ⌃4,5 block defines the **minimum** value for a pilot with Piloting skill 4 or 5. As we'll see shortly, this value can be used to evaluate how average skill units will interact across tactics and tonnage limits.
 
-Some examples illustrate the interplay between Tactics and Piloting:
-
-* A mechwarrior with Tactics 1 and Piloting 1 increase the tonnage modifier by `((2 + 1) / 3) / 10.0 = 0.1`. In a 50 ton mech, their phase bounds would be `x2.3 + 0.1 = x2.4`.
-* A mechwarrior with Tactics 6 and Piloting 3 increase the tonnage modifier by `((12 + 3) / 3) / 10.0 = 0.5`. In a 50 ton mech, their phase bounds would be `x2.3 + 0.5 = x2.8`.
-* A mechwarrior with Tactics 10 and Piloting 1 increase the tonnage modifier by `((20 + 2) / 3) / 10.0 = 0.7`. In a 50 ton mech, their phase bounds would be `x2.3 + 1.0 = x3.3`.
-* A mechwarrior with Tactics 1 and Piloting 10 increase the tonnage modifier by `((2 + 10) / 3) / 10.0 = 0.4`. In a 50 ton mech, their phase bounds would be `x2.3 + 0.4 = x2.7`.
+![Tactics Impact Table](tactics_table.png "Tactics Impact on initiative")
 
 ### Impact of Piloting
 
-Many battlefield conditions reduce your initiative. Your piloting skill reduces the impact of these effects by 5% for each point of the skill. A mechwarrior with piloting 5 would reduce any effect by 25%, to a minimum of -1. This reduction is applied to knockdown, when your movement is crippled, or when the mech is shutdown or prone.
+The Piloting skill impacts initiative in two ways. The first is by reducing a random element that is added each turn. Each turn, a unit's maximum initiative (tonnage initiative + tactics modifier + equipment modifiers) is reduced by a random amount, defined in the table below:
 
+Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+Random Modifier | 3-9 | 2-8 | 2-8 | 1-7 | 1-7 | 0-6 | 0-6 | 0-5 | 0-5 | 0-4 | 0-3 | 0-3 | 0-2
+
+The diagram below illustrates this as ranges based around the maximum initiative, represented as 0.
 ![Piloting Impact Table](piloting_table.png "Piloting Impact on initiative")
 
+In addition, some effects that reduce your initiative will be offset by a high piloting skill. Suffering a knockdown, being prone or shutdown results in initiative penalties. These penalties are reduced as per the table below:
+
+Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+Modifier | 0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
+
+If the modifier is greater than the penalty, a flat -1 penalty will be applied.
 
 ### Impact of Guts
 
-When a battlefield condition would stun or injure a mechwarrior, the size of the penalty is determined by the Mechwarrior's Guts skill rating. The following list defines the penalty range in terms of the skill level:
+Guts skill comes into play when the pilot suffers an injury, or the unit is successfully attacked in melee.
 
-Guts Rating | Initiative Range
-------------|---------------
-1 |  -6 to -9
-2, 3, 4 |  -5 to -8
-5, 6, |  -4 to -7
-7, 8 |  -4 to -7
-9 |  -2 to -5
-10 |  -1 to -4
+When a pilot is injured, they suffer a random penalty within a range bounded by their Guts skill. The ranges are defined below.
 
-Each injury adds -1 to the upper bound only. A mechwarrior with Guts 5 and 2 injuries would randomly suffer between -4 and -9 when they are injured, and on all subsequent turns.
+Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
+Injury Modifier | 6-9 | 5-8 | 5-8 | 4-7 | 4-7 | 3-6 | 3-6 | 2-5 | 2-5 | 1-4 | 1-3 | 1-3 | 1-2
 
-Mechwarriors lose initiative anytime they are injured.
+Each injury adds +1 to the upper bound only. A pilot with Guts 5 and 2 injuries would suffer between -4 and -9 when they are injured, both on the turn they are injured and on subsequent turns.
 
-Your guts skill reduces the impact of melee impacts by 5% for each point of the skill. A mechwarrior with guts 5 would reduce any effect by 25%, to a minimum of -1.
+When successfully damaged by a melee attack, the unit suffers an initiative penalty determined by the relative tonnage of the attacker and defender (see above). This penalty is reduced by the target's Guts skill rating, as defined by the table below.
+
+Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+Modifier | 0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
+
+If the modifier is greater than the penalty, a flat -1 penalty will be applied.
+
 
 ### Miscellaneous
 
-Turrets suffer a -4 penalty, while tanks suffer a -2. These will likely be removed in the future once it's been confirmed that init bonuses on chassis and components will flow through the system.
+Turrets suffer a -4 penalty, while tanks suffer a -2 to reflect their relative slowness in the background material. This may be removed in the future if chassis specific quirks are added to replicate this effect.
