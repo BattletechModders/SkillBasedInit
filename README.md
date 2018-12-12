@@ -68,7 +68,7 @@ The tonnage of a unit determines a multiplier applied to the lower (3) and upper
 
 Tonnage | 05 | 10-15 | 20-25 | 30-35 | 40-45 | 50-55 | 60-65 | 70-75 | 80-85 | 90-95 | 100 | 100+
 -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
-*Base Initiative* | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 | 9 | 6
+*Base Initiative* | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 9
 
 ### Impact of Tactics Skill
 A MechWarriors's Tactics skill adds a flat modifier to the base initiative defined by the unit tonnage. This value is graduated, as defined in the table below.
@@ -110,7 +110,7 @@ Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13
 -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
 Injury Modifier | 6-9 | 5-8 | 5-8 | 4-7 | 4-7 | 3-6 | 3-6 | 2-5 | 2-5 | 1-4 | 1-3 | 1-3 | 1-2
 
-Each injury adds +1 to the upper bound only. A pilot with Guts 5 and 2 injuries would suffer between -4 and -9 when they are injured, both on the turn they are injured and on subsequent turns.
+Each injury adds +1 to the upper bound only. A pilot with Guts 5 and 2 injuries would suffer between -4 and -9 when they are injured, both on the turn they are injured and on subsequent turns. However, on subsequent turns this penalty is halved, representing the pilot fighting through the pain.
 
 When successfully damaged by a melee attack, the unit suffers an initiative penalty determined by the relative tonnage of the attacker and defender (see above). This penalty is reduced by the target's Guts skill rating, as defined by the table below.
 

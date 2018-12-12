@@ -85,11 +85,25 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(CombatHUDPortrait), "IndicatePastPhase")]
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPortrait_IndicatePastPhase {
-        public static void Postfix(CombatHUDPortrait __instance) {
+        public static void Postfix(CombatHUDPortrait __instance, TextMeshProUGUI ___ioText) {
             //SkillBasedInit.LogDebug($"CombatHUDPortrait:IndicatePastPhase:post - init");
-            __instance.NumberFlagFill.color = Color.red;
-            __instance.NumberFlagOutline.color = Color.red;
-            __instance.NumberFlagText.color = Color.red;
+            //__instance.NumberFlagFill.color = Color.red;
+            //__instance.NumberFlagOutline.color = Color.red;
+            //__instance.NumberFlagText.color = Color.red;
+
+            //__instance.Frame.color = Color.red;
+            //__instance.PilotName.color = Color.red;
+            //__instance.PilotIcon.color = Color.red;
+
+            __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+            __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+            __instance.NumberFlagFill.color = Color.white;
+            __instance.NumberFlagText.color = Color.white;
+            __instance.NumberFlagOutline.color = Color.white;
+
+            ___ioText.color = Color.white;
+
+
             //__instance.Background.color = Color.red;
             //__instance.Portrait.color = Color.red;
         }
@@ -98,11 +112,33 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(CombatHUDPortrait), "IndicateCurrentPhase")]
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPortrait_IndicateCurrentPhase {
-        public static void Postfix(CombatHUDPortrait __instance) {
+        public static void Postfix(CombatHUDPortrait __instance, TextMeshProUGUI ___ioText) {
             //SkillBasedInit.LogDebug($"CombatHUDPortrait:IndicateCurrentPhase:post - init");
-            __instance.NumberFlagFill.color = Color.green;
-            __instance.NumberFlagOutline.color = Color.green;
-            __instance.NumberFlagText.color = Color.green;
+            //__instance.NumberFlagFill.color = Color.green;
+            //__instance.NumberFlagOutline.color = Color.green;
+            //__instance.NumberFlagText.color = Color.green;
+
+            //__instance.Frame.color = Color.green;
+            //__instance.PilotName.color = Color.green;
+            //__instance.PilotIcon.color = Color.green;
+
+            //__instance.Background.color = Color.green;
+            //__instance.NotActiveText.color = Color.blue;
+            //__instance.SelectedOutline.color = Color.red;
+
+            if (__instance.DisplayedActor.HasActivatedThisRound) {
+                __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+                __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+            } else {
+                __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
+                __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
+            }
+            __instance.NumberFlagFill.color = Color.white;
+            __instance.NumberFlagOutline.color = Color.white;
+            __instance.NumberFlagText.color = Color.white;
+
+            ___ioText.color = Color.white;
+
             //__instance.Background.color = Color.green;
             //__instance.Portrait.color = Color.green;
         }
@@ -112,16 +148,92 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(CombatHUDPortrait), "IndicateFuturePhase")]
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPortrait_IndicateFuturePhase {
-        public static void Postfix(CombatHUDPortrait __instance) {
+        public static void Postfix(CombatHUDPortrait __instance, TextMeshProUGUI ___ioText) {
             //SkillBasedInit.LogDebug($"CombatHUDPortrait:IndicateFuturePhase:post - init");
-            __instance.NumberFlagFill.color = Color.blue;
-            __instance.NumberFlagOutline.color = Color.blue;
-            __instance.NumberFlagText.color = Color.blue;
+            //__instance.NumberFlagFill.color = Color.blue;
+            //__instance.NumberFlagOutline.color = Color.blue;
+            //__instance.NumberFlagText.color = Color.blue;
+
+            //SkillBasedInit.Logger.Log($"CombatHUDPortrait:IndicateFuturePhase:post - looking at components");
+            //foreach (GameObject component in __instance.FilledHolder.GetComponents<GameObject>()) {
+            //    SkillBasedInit.Logger.Log($"CombatHUDPortrait:IndicateFuturePhase:post - Found component: {component.name}");
+            //}
+
+            __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
+            __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
+            __instance.NumberFlagFill.color = Color.white;
+            __instance.NumberFlagOutline.color = Color.white;
+            __instance.NumberFlagText.color = Color.white;
+
+            ___ioText.color = Color.white;
+
+            //__instance.PilotName.color = Color.blue;
+            //__instance.PilotIcon.color = Color.blue;
+
             //__instance.Background.color = Color.blue;
             //__instance.Portrait.color = Color.blue;
 
         }
     }
+
+    [HarmonyPatch(typeof(CombatHUDPortrait), "OnActorHovered")]
+    [HarmonyPatch(new Type[] { typeof(MessageCenterMessage) })]
+    public static class CombatHUDPortrait_OnActorHovered {
+        public static void Postfix(CombatHUDPortrait __instance) {
+            if (__instance.DisplayedActor.HasActivatedThisRound) {
+                __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+                __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+            } else {
+                __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
+                __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
+            }
+
+        }
+    }
+
+    [HarmonyPatch(typeof(CombatHUDPortrait), "OnActorUnHovered")]
+    [HarmonyPatch(new Type[] { typeof(MessageCenterMessage) })]
+    public static class CombatHUDPortrait_OnActorUnHovered {
+        public static void Postfix(CombatHUDPortrait __instance) {
+            if (__instance.DisplayedActor.HasActivatedThisRound) {
+                __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+                __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+            } else {
+                __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
+                __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
+            }
+        }
+    }
+
+
+    /*
+            public void OnActorHovered (MessageCenterMessage message)
+        {
+            if (displayedActor != null) {
+                ActorHoveredMessage actorHoveredMessage = message as ActorHoveredMessage;
+                if (actorHoveredMessage.affectedObjectGuid == displayedActor.GUID && !IsHovered) {
+                    IsHovered = true;
+                    Background.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ButtonBGHighlighted.color;
+                }
+            }
+        }
+            
+        public void OnActorUnHovered (MessageCenterMessage message)
+        {
+            if (displayedActor != null) {
+                ActorUnHoveredMessage actorUnHoveredMessage = message as ActorUnHoveredMessage;
+                if (actorUnHoveredMessage.affectedObjectGuid == displayedActor.GUID) {
+                    IsHovered = false;
+                    if (DisplayedActor.IsAvailableThisPhase) {
+                        Background.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ButtonBGEnabled.color;
+                    } else {
+                        Background.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ButtonBGDisabled.color;
+                    }
+                }
+                NotActiveText.color = Color.clear;
+            }
+        }
+     */
 
     /*
             public void OnActorHovered (MessageCenterMessage message) {
@@ -160,6 +272,7 @@ namespace SkillBasedInit {
      */
 
     // ========== CombatHUDPhaseDisplay ==========
+    // Manipulates the badge icon to the left of the mech's floating damage/status bars
 
     // TODO: Dead code? 
     // Manipulates the icon to the upper left of the mech panel
@@ -173,7 +286,6 @@ namespace SkillBasedInit {
     //    }
     //}
 
-    // Manipulates the badge icon to the left of the mech's floating damage/status bars
     [HarmonyPatch(typeof(CombatHUDPhaseDisplay), "RefreshInfo")]
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPhaseDisplay_RefreshInfo {
@@ -189,9 +301,29 @@ namespace SkillBasedInit {
     public static class CombatHUDPhaseDisplay_IndicatePastPhase {
         public static void Postfix(CombatHUDPhaseDisplay __instance) {
             //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicatePastPhase:post - init");
-            __instance.FlagFillImage.color = Color.grey;
-            __instance.FlagOutline.color = Color.grey;
+            __instance.FlagOutline.color = Color.white;
             __instance.NumText.color = Color.white;
+
+            Hostility hostility = __instance.Combat.HostilityMatrix.GetHostility(__instance.DisplayedActor.team, __instance.Combat.LocalPlayerTeam);
+            bool isPlayer = __instance.DisplayedActor.team == __instance.Combat.LocalPlayerTeam;
+
+            Color color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+            if (hostility == Hostility.ENEMY) {
+                color = SkillBasedInit.Settings.EnemyAlreadyActivated;
+            } else {
+                if (!isPlayer) {
+                    switch (hostility) {
+                        case Hostility.FRIENDLY:
+                            color = SkillBasedInit.Settings.AlliedAlreadyActivated;
+                            break;
+                        case Hostility.NEUTRAL:
+                            color = SkillBasedInit.Settings.NeutralAlreadyActivated;
+                            break;
+                    }
+                }
+            }
+            __instance.FlagFillImage.color = color;
+
             /*
             FlagFillImage.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhasePastFill.color;
             FlagOutline.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhasePastOutline.color;
@@ -205,32 +337,30 @@ namespace SkillBasedInit {
     public static class CombatHUDPhaseDisplay_IndicateCurrentPhase {
         public static void Postfix(CombatHUDPhaseDisplay __instance, bool isPlayer, Hostility hostility) {
             //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateCurrentPhase:post - init");
-            __instance.FlagFillImage.color = Color.green;
             __instance.FlagOutline.color = Color.white;
             __instance.NumText.color = Color.white;
 
+            Color color = SkillBasedInit.Settings.FriendlyUnactivated;
             if (hostility == Hostility.ENEMY) {
-                __instance.FlagFillImage.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.EnemyUI.color;
+                color = SkillBasedInit.Settings.EnemyUnactivated;
             } else {
-                //Color color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseCurrentFill.color;
-                Color color = Color.green;
                 if (!isPlayer) {
                     switch (hostility) {
-                    case Hostility.FRIENDLY:
-                        color *= LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.AlliedUI.color;
-                        break;
-                    case Hostility.NEUTRAL:
-                        color *= LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.NeutralUI.color;
-                        break;
+                        case Hostility.FRIENDLY:
+                            color = SkillBasedInit.Settings.AlliedUnactivated;
+                            break;
+                        case Hostility.NEUTRAL:
+                            color = SkillBasedInit.Settings.NeutralUnactivated;
+                            break;
                     }
                 }
-                __instance.FlagFillImage.color = color;
             }
+            __instance.FlagFillImage.color = color;
 
             /*
             FlagOutline.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseCurrentOutline.color;
             NumText.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseCurrentText.color;
-            */           
+            */
         }
     }
 
@@ -240,39 +370,28 @@ namespace SkillBasedInit {
         public static void Postfix(CombatHUDPhaseDisplay __instance) {
             //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateFuturePhase:post - init");
 
+            __instance.FlagOutline.color = Color.white;
+            __instance.NumText.color = Color.white;
+
             Hostility hostility = __instance.Combat.HostilityMatrix.GetHostility(__instance.DisplayedActor.team, __instance.Combat.LocalPlayerTeam);
-            bool isPlayer = __instance.DisplayedActor.team == __instance.Combat.LocalPlayerTeam;        
+            bool isPlayer = __instance.DisplayedActor.team == __instance.Combat.LocalPlayerTeam;
 
+            Color color = SkillBasedInit.Settings.FriendlyUnactivated;
             if (hostility == Hostility.ENEMY) {
-                __instance.FlagFillImage.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.EnemyUI.color;
-                //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateFuturePhase:post - enemy color is: {__instance.FlagFillImage.color.ToString()}");
+                color = SkillBasedInit.Settings.EnemyUnactivated;
             } else {
-                Color color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseCurrentFill.color;
-                //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateFuturePhase:post - color is: {color.ToString()}");
-                Color color2 = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.AlliedUI.color;
-                //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateFuturePhase:post - allied color is: {color2.ToString()}");
-                Color color3 = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.NeutralUI.color;
-                //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateFuturePhase:post - neutral color is: {color3.ToString()}");
-
-                color = Color.green;
-
                 if (!isPlayer) {
                     switch (hostility) {
                         case Hostility.FRIENDLY:
-                            color *= LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.AlliedUI.color;
-                            //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateFuturePhase:post - allied color is: {color.ToString()}");
+                            color = SkillBasedInit.Settings.AlliedUnactivated;
                             break;
                         case Hostility.NEUTRAL:
-                            color *= LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.NeutralUI.color;
-                            //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateFuturePhase:post - neutral color is: {color.ToString()}");
+                            color = SkillBasedInit.Settings.NeutralUnactivated;
                             break;
                     }
                 }
-                __instance.FlagFillImage.color = color;
             }
-            //__instance.FlagFillImage.color = Color.blue;
-            __instance.FlagOutline.color = Color.white;
-            __instance.NumText.color = Color.white;
+            __instance.FlagFillImage.color = color;
 
             /*
             FlagFillImage.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseFutureFill.color;

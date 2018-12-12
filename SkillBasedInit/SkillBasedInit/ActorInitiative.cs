@@ -86,18 +86,18 @@ namespace SkillBasedInit {
 
         private static readonly int SuperHeavyTonnage = 11;
         private static readonly Dictionary<int, int> InitBaseByTonnage = new Dictionary<int, int> {
-            {  0, 19 }, // 0-15
-            {  1, 18 }, // 10-15
-            {  2, 17 }, // 20-25
-            {  3, 16 }, // 30-35
-            {  4, 15 }, // 40-45
-            {  5, 14 }, // 50-55
-            {  6, 13 }, // 60-65
-            {  7, 12 }, // 70-75
-            {  8, 11 }, // 80-85
-            {  9, 10 }, // 90-95
-            { 10, 9 }, // 100
-            { SuperHeavyTonnage, 6 }, // 105+
+            {  0, 22 }, // 0-15
+            {  1, 21 }, // 10-15
+            {  2, 20 }, // 20-25
+            {  3, 19 }, // 30-35
+            {  4, 18 }, // 40-45
+            {  5, 17 }, // 50-55
+            {  6, 16 }, // 60-65
+            {  7, 15 }, // 70-75
+            {  8, 14 }, // 80-85
+            {  9, 13 }, // 90-95
+            { 10, 12 }, // 100
+            { SuperHeavyTonnage, 9 }, // 105+
         };
 
         public ActorInitiative(AbstractActor actor) {
@@ -286,10 +286,12 @@ namespace SkillBasedInit {
                 roundInitiative -= deferredInjuryMod;
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INJURED! -{deferredInjuryMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             } else if (actor.GetPilot().Injuries != 0) {
-                int penalty = this.CalculateInjuryPenalty(0, actor.GetPilot().Injuries);
+                // Only apply 1/2 of the modifier for 'old wounds'
+                int rawPenalty = this.CalculateInjuryPenalty(0, actor.GetPilot().Injuries);
+                int penalty = (int)Math.Ceiling(rawPenalty / 2.0);
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has existing injuries! Reduced {roundInitiative} by {penalty}");
                 roundInitiative -= penalty;
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INJURED! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"PAIN! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
             // Check for leg / side loss
