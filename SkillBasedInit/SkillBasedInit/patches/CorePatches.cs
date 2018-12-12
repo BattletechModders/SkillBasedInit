@@ -1,12 +1,7 @@
 ﻿using BattleTech;
-using BattleTech.Save.Test;
 using BattleTech.UI;
-using DG.Tweening;
 using Harmony;
 using System;
-using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
 
 namespace SkillBasedInit {
 
@@ -180,7 +175,7 @@ namespace SkillBasedInit {
                 int baseInit = ___statCollection.GetValue<int>("BaseInitiative");
                 int phaseMod = ___statCollection.GetValue<int>("PhaseModifier");
                 int modifiedInit = baseInit + phaseMod;
-                SkillBasedInit.LogDebug($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                SkillBasedInit.LogDebug($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has stats BaseInit:{baseInit} / PhaseMod:{phaseMod}");
 
                 if (modifiedInit < SkillBasedInit.MinPhase) {
                     SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) being set to {SkillBasedInit.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
@@ -190,7 +185,7 @@ namespace SkillBasedInit {
                     __result = SkillBasedInit.MaxPhase;
                 } else {
                     __result = modifiedInit;
-                    SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has BaseInit:{baseInit} + PhaseMod:{phaseMod} = modifiedInit:{modifiedInit}.");
+                    SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has stats BaseInit:{baseInit} + PhaseMod:{phaseMod} = modifiedInit:{modifiedInit}.");
                 }
             }
             __result = ___Combat.TurnDirector.NonInterleavedPhase;

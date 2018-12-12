@@ -27,26 +27,25 @@ namespace SkillBasedInit {
             int bonusDelta = __state - currentBonus;
             int damageTaken = dmg - bonusDelta;
             SkillBasedInit.LogDebug($"  Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) lost bonusHealth:{bonusDelta}, while results in damage:{damageTaken} from the attack.");
+
+            // If the attacker took any damage, apply it
             if (damageTaken > 0) {
                 AbstractActor parent = __instance.ParentActor;
-                ActorInitiative actorInit = ActorInitiativeHolder.ActorInitMap[parent.GUID];
-                int injuryMax = actorInit.injuryBounds[1] + damageTaken;
-                int injuryMin = actorInit.injuryBounds[0] + damageTaken;
-                int injuryMod = SkillBasedInit.Random.Next(injuryMin, injuryMax);
-                SkillBasedInit.LogDebug($"  Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) will suffer -{injuryMod} init due to bounds {injuryMin}-{injuryMax}.");
+                ActorInitiative target = ActorInitiativeHolder.GetOrCreate(parent);
+                int injuryPenalty = target.CalculateInjuryPenalty(damageTaken, __instance.Injuries);
 
                 if (!parent.HasActivatedThisRound) {
-                    // Apply penalty in current round
-                    parent.Initiative -= injuryMod;
+                    // Apply penalty in current round. Remember high init -> higher phase
+                    parent.Initiative += injuryPenalty;
                     if (parent.Initiative > SkillBasedInit.MaxPhase) {
                         parent.Initiative = SkillBasedInit.MaxPhase;
                     }
                     parent.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(parent.GUID));
-                    parent.Combat.MessageCenter.PublishMessage(new FloatieMessage(parent.GUID, parent.GUID, $"OUCH! -{injuryMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                    parent.Combat.MessageCenter.PublishMessage(new FloatieMessage(parent.GUID, parent.GUID, $"OUCH! -{injuryPenalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
                 } else {
                     // Injuries are cumulative
-                    actorInit.priorRoundInjuryMod += injuryMod;
-                    parent.Combat.MessageCenter.PublishMessage(new FloatieMessage(parent.GUID, parent.GUID, $"OUCH! -{injuryMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                    target.deferredInjuryMod += injuryPenalty;
+                    parent.Combat.MessageCenter.PublishMessage(new FloatieMessage(parent.GUID, parent.GUID, $"OUCH! -{injuryPenalty} INITIATIVE NEXT ROUND", FloatieMessage.MessageNature.Debuff));
                 }
 
             }

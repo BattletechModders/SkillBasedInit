@@ -11,54 +11,93 @@ namespace SkillBasedInit {
         readonly string pilotId;
         readonly string pilotName;
         public ActorType type = ActorType.Mech;
-        readonly public float tonnage;
-        readonly public int chassisBaseMod; // base initiative value from the chassis before any effects
-        readonly public int[] roundInitBounds;
-        readonly public double pilotingEffectMulti;
-        readonly public double gutsEffectMulti;
 
-        readonly public int[] injuryBounds;
+        readonly public float tonnage;
+        readonly public int staticMod; // static modifiers from chassis, pilot that won't change during combat
+        readonly public int roundInitBase; // Base initiative each round; chassisMod + tacticsMod + staticMod
+
+        readonly public int gutsEffectMod;
+        readonly public int pilotingEffectMod;
+        readonly public int tacticsEffectMod;
+
+        readonly public int meleeAttackMod;
+
+        readonly public int[] randomBounds = new int[2];
+        readonly public int[] injuryBounds = new int[2];
 
         // Track any changes in the previous round init
         public int priorRoundInit = -1;
-        // If an injury was suffered on a previous round, but not handled, take the full impact on the coming round.
-        public int priorRoundInjuryMod = 0;
 
-        public float meleeImpact = 0.0f;
+        // If an injury was suffered on a previous round, but not handled, take the full impact on the coming round.
+        public int deferredInjuryMod = 0;
+        public int deferredMeleeMod = 0;
+        public int deferredReserveMod = 0;
 
         // Const values 
         private const float TurretTonnage = 100.0f;
 
-        private static readonly Dictionary<int, int[]> GutsInjuryBounds = new Dictionary<int, int[]> {
+        private static readonly Dictionary<int, int[]> InjuryBoundsByGuts = new Dictionary<int, int[]> {
             {  1, new[] { 6, 9 } },
             {  2, new[] { 5, 8 } },
             {  3, new[] { 5, 8 } },
-            {  4, new[] { 5, 8 } },
+            {  4, new[] { 4, 7 } },
             {  5, new[] { 4, 7 } },
-            {  6, new[] { 4, 7 } },
+            {  6, new[] { 3, 6 } },
             {  7, new[] { 3, 6 } },
-            {  8, new[] { 3, 6 } },
+            {  8, new[] { 2, 5 } },
             {  9, new[] { 2, 5 } },
             { 10, new[] { 1, 4 } },
-            { 11, new[] { 0, 4 } },
+            { 11, new[] { 1, 3 } },
+            { 12, new[] { 1, 3 } },
+            { 13, new[] { 1, 2 } } 
+        };
+
+        private static readonly Dictionary<int, int[]> RandomBoundsByPiloting = new Dictionary<int, int[]> {
+            {  1, new[] { 3, 9 } },
+            {  2, new[] { 2, 8 } },
+            {  3, new[] { 2, 8 } },
+            {  4, new[] { 1, 7 } },
+            {  5, new[] { 1, 7 } },
+            {  6, new[] { 0, 6 } },
+            {  7, new[] { 0, 6 } },
+            {  8, new[] { 0, 5 } },
+            {  9, new[] { 0, 5 } },
+            { 10, new[] { 0, 4 } },
+            { 11, new[] { 0, 3 } },
             { 12, new[] { 0, 3 } },
-            { 13, new[] { 0, 2 } } 
+            { 13, new[] { 0, 2 } }
+        };
+
+        private static readonly Dictionary<int, int> ModifierBySkill = new Dictionary<int, int> {
+            { 1, 0 },
+            { 2, 1 },
+            { 3, 1 },
+            { 4, 2 },
+            { 5, 2 },
+            { 6, 3 },
+            { 7, 3 },
+            { 8, 4 },
+            { 9, 4 },
+            { 10, 5 },
+            { 11, 6 },
+            { 12, 7 },
+            { 13, 8 }
         };
 
         private static readonly int SuperHeavyTonnage = 11;
-        private static readonly Dictionary<int, double> InitMultiBaseByTonnage = new Dictionary<int, double> {
-            {  0, 4.0 }, // 0-15
-            {  1, 3.8 }, // 10-15
-            {  2, 3.4 }, // 20-25
-            {  3, 3.0 }, // 30-35
-            {  4, 2.5 }, // 40-45
-            {  5, 2.3 }, // 50-55
-            {  6, 1.8 }, // 60-65
-            {  7, 1.5 }, // 70-75
-            {  8, 1.1 }, // 80-85
-            {  9, 0.9 }, // 90-95
-            { 10, 0.7 }, // 100
-            { SuperHeavyTonnage, 0.2 }, // 105+
+        private static readonly Dictionary<int, int> InitBaseByTonnage = new Dictionary<int, int> {
+            {  0, 24 }, // 0-15
+            {  1, 22 }, // 10-15
+            {  2, 21 }, // 20-25
+            {  3, 19 }, // 30-35
+            {  4, 18 }, // 40-45
+            {  5, 16 }, // 50-55
+            {  6, 15 }, // 60-65
+            {  7, 13 }, // 70-75
+            {  8, 12 }, // 80-85
+            {  9, 10 }, // 90-95
+            { 10, 9 }, // 100
+            { SuperHeavyTonnage, 7 }, // 105+
         };
 
         public ActorInitiative(AbstractActor actor) {
@@ -76,7 +115,7 @@ namespace SkillBasedInit {
                 weightClass = ((Vehicle)actor).weightClass;
 
                 // TODO: Temporary malus for testing purposes
-                chassisBaseMod -= SkillBasedInit.Settings.VehicleROCModifier;
+                staticMod -= SkillBasedInit.Settings.VehicleROCModifier;
             } else {
                 this.type = ActorType.Turret;
                 this.tonnage = TurretTonnage;
@@ -97,31 +136,39 @@ namespace SkillBasedInit {
                 }
 
                 // TODO: Temporary malus for testing
-                chassisBaseMod -= SkillBasedInit.Settings.TurretROCModifier;
+                staticMod -= SkillBasedInit.Settings.TurretROCModifier;
             }
 
             // Determine if the mech has any special tags on it that grant bonus init
             // TODO: This must be compared against the 'base' value to see what the modifier is
             if (actor.StatCollection != null && actor.StatCollection.ContainsStatistic("BaseInitiative")) {
                 int statCollectionVal = actor.StatCollection.GetValue<int>("BaseInitiative");
-                int rawModifier = statCollectionVal;
+                int rawModifier = actor.StatCollection.GetValue<int>("BaseInitiative");
                 
                 // Normalize the value
-                if (weightClass == WeightClass.LIGHT) {
-                    rawModifier -= 2;
-                } else if (weightClass == WeightClass.MEDIUM) {
-                    rawModifier -= 3;
-                } else if (weightClass == WeightClass.HEAVY) {
-                    rawModifier -= 4;
-                } else if (weightClass == WeightClass.ASSAULT) {
-                    rawModifier -= 5;
+                switch (weightClass) {
+                    case WeightClass.LIGHT:
+                        rawModifier -= 2;
+                        break;
+                    case WeightClass.MEDIUM:
+                        rawModifier -= 3;
+                        break;
+                    case WeightClass.HEAVY:
+                        rawModifier -= 4;
+                        break;
+                    case WeightClass.ASSAULT:
+                        rawModifier -= 5;
+                        break;
+                    default:
+                        SkillBasedInit.LogDebug($"Actor:{actor.DisplayName}_{actor.GetPilot().Name} has unknown or undefined weight class:{weightClass}!");
+                        break;
                 }
 
                 // Because HBS init values were from 2-5, bonuses will be negative at this point and penalties positive. Invert these.
-                this.chassisBaseMod = rawModifier * -1;
-                SkillBasedInit.LogDebug($"Normalized BaseInit from {statCollectionVal} to {this.chassisBaseMod}");
+                this.staticMod = rawModifier * -1;
+                SkillBasedInit.LogDebug($"Normalized BaseInit from {statCollectionVal} to {this.staticMod}");
             } else {
-                this.chassisBaseMod = 0;
+                this.staticMod = 0;
             }
 
             // Determine engine size
@@ -136,9 +183,9 @@ namespace SkillBasedInit {
 
             // Check morale status
             if (actor.HasHighMorale) {
-                this.chassisBaseMod += SkillBasedInit.Settings.PilotSpiritsModifier;
+                this.staticMod += SkillBasedInit.Settings.PilotSpiritsModifier;
             } else if (actor.HasLowMorale) {
-                this.chassisBaseMod -= SkillBasedInit.Settings.PilotSpiritsModifier;
+                this.staticMod -= SkillBasedInit.Settings.PilotSpiritsModifier;
             }
 
             Pilot pilot = actor.GetPilot();
@@ -146,32 +193,51 @@ namespace SkillBasedInit {
             this.pilotName = pilot.Name;
 
             // Normalize skills so that values above 10 don't screw the system
-            int pilotingNormd = NormalizeSkill(pilot.Piloting);
-            int tacticsNormd = NormalizeSkill(pilot.Tactics);
             int gutsNormd = NormalizeSkill(pilot.Guts);
-            SkillBasedInit.LogDebug($"Skill profile is p:{pilot.Piloting}->{pilotingNormd} t:{pilot.Tactics}->{tacticsNormd} g:{pilot.Guts}->{gutsNormd}");
+            this.gutsEffectMod = ModifierBySkill[gutsNormd];
+            InjuryBoundsByGuts[gutsNormd].CopyTo(this.injuryBounds, 0);
 
-            // Set the round init modifier based upon the normalized tactics and piloting skill
-            double skillsInitModifier = Math.Ceiling((tacticsNormd * 2.0 + pilotingNormd) / 3.0) / 10.0;
-            this.roundInitBounds = RoundInitFromTonnage(this.tonnage, skillsInitModifier);
+            int pilotingNormd = NormalizeSkill(pilot.Piloting);
+            this.pilotingEffectMod = ModifierBySkill[pilotingNormd];
+            RandomBoundsByPiloting[pilotingNormd].CopyTo(this.randomBounds, 0);
 
-            this.pilotingEffectMulti = 1.0 - (pilotingNormd * SkillBasedInit.Settings.PilotingMultiplier);
-            this.gutsEffectMulti = 1.0 - (gutsNormd * SkillBasedInit.Settings.GutsMultiplier);
+            int tacticsNormd = NormalizeSkill(pilot.Tactics);
+            this.tacticsEffectMod = ModifierBySkill[tacticsNormd];
 
-            if (gutsNormd > 13 || gutsNormd < 1) {
-                SkillBasedInit.Logger.Log($"ERROR: Actor:{actor.DisplayName}_{pilot.Name} has an invalid guts rating!");
-                SkillBasedInit.Logger.Log($"ERROR: Actor:{actor.DisplayName}_{pilot.Name} has skills p:{pilot.Piloting}->{pilotingNormd} g:{pilot.Guts}->{gutsNormd} t:{pilot.Tactics}->{tacticsNormd}!");
-                SkillBasedInit.Logger.Log($"ERROR: Reverting pilot to guts 1!");
-                this.injuryBounds = GutsInjuryBounds[1];
+            SkillBasedInit.LogDebug($"Actor:{actor.DisplayName}_{pilot.Name} skill profile is " +
+            	$"p:{pilot.Piloting}->{pilotingNormd}={pilotingEffectMod} " +
+            	$"t:{pilot.Tactics}->{tacticsNormd}={tacticsEffectMod} " +
+            	$"g:{pilot.Guts}->{gutsNormd}={gutsEffectMod}");
+
+            // Determine the static init value from chassis + tacctics
+            int tonnageRange = (int)Math.Floor(tonnage / 10.0);
+            int chassisBase;
+            if (tonnageRange > 10) {
+                chassisBase = InitBaseByTonnage[SuperHeavyTonnage];
             } else {
-                this.injuryBounds = GutsInjuryBounds[gutsNormd];
+                chassisBase = InitBaseByTonnage[tonnageRange];
             }
 
+            // Determine my melee modifier
+            bool pilotIsJugger = false;
+            foreach (Ability ability in pilot.Abilities) {
+                if (ability.Def.Id == "AbilityDefGu5") {
+                    SkillBasedInit.LogDebug($"Actor:{actor.DisplayName}_{pilot.Name} has Juggernaught.");
+                    pilotIsJugger = true;
+                }
+            }
+            float meleeAttackTonnage = pilotIsJugger ? tonnage * SkillBasedInit.Settings.MeleeAttackerJuggerMulti : tonnage;
+            this.meleeAttackMod = (int)Math.Ceiling(meleeAttackTonnage / 5.0);
+            SkillBasedInit.LogDebug($"Actor:{actor.DisplayName}_{pilot.Name} has meleeAttackMod:{meleeAttackMod} from rawTonnage:{tonnage} / meleeTonnage:{meleeAttackTonnage} / isJugger:{pilotIsJugger}");
+
+            // Finally wrap together the static init we'll use each round
+            roundInitBase = chassisBase + tacticsEffectMod + staticMod;
+
             SkillBasedInit.Logger.Log($"Actor:{actor.DisplayName}_{pilot.Name} has " +
-                $"skillsMod:{skillsInitModifier} (from piloting:{pilotingNormd} tactics:{tacticsNormd}) " +
-                $"injuryBounds: {injuryBounds[0]}-{injuryBounds[1]}" +
-                $"roundInitBounds:{roundInitBounds[0]}-{roundInitBounds[1]} chassisBaseMod: {chassisBaseMod} " +
-                $"pilotingEffectMulti:{pilotingEffectMulti} gutsEffectMulti:{gutsEffectMulti}");
+                $"roundInitBase:{roundInitBase} = (chassisBase:{chassisBase} + tacticsMod:{tacticsEffectMod} + staticMod:{staticMod}) " +
+                $"randomBounds:({randomBounds[0]}-{randomBounds[1]}) " +
+                $"injuryBounds:({injuryBounds[0]}-{injuryBounds[1]}) " +
+                $"gutsMod:{gutsEffectMod} pilotingMod:{pilotingEffectMod} tacticsMod:{tacticsEffectMod}");
         }
 
         private int NormalizeSkill(int rawValue) {
@@ -193,58 +259,37 @@ namespace SkillBasedInit {
             return normalizedVal;
         }
 
-        private int[] RoundInitFromTonnage(float tonnage, double skillInitModifier) {
-            int tonnageRange = (int)Math.Floor(tonnage / 10.0);
-
-            double initBaseMulti = 0.0;
-            if (tonnageRange <= 10) {
-                initBaseMulti = InitMultiBaseByTonnage[tonnageRange];
-            } else if (tonnageRange > 10) {
-                initBaseMulti = InitMultiBaseByTonnage[SuperHeavyTonnage];
-            }
-
-            double initBoundMulti = initBaseMulti + skillInitModifier;
-            int roundMin = (int)Math.Floor(3 * initBoundMulti);
-            int roundMax = (int)Math.Ceiling(5 * initBoundMulti);
-            SkillBasedInit.LogDebug($"For skillMod:{skillInitModifier} + baseMod:{initBaseMulti} yielded bounds: {roundMin} - {roundMax}");
-            return new int[] { roundMin, roundMax };
-        }
-
-        public void AddMeleeImpact(float impactDelta) {
-            // TODO: Should only the highest apply? This could make the messaging confusing.
-            this.meleeImpact += impactDelta;
-        }
-
         public void CalculateRoundInit(AbstractActor actor) {
-            if (actor.IsDead) {
+            // If the actor is dead, skip them
+            if (actor.IsDead || actor.IsFlaggedForDeath) {
                 actor.Initiative = SkillBasedInit.MaxPhase;
-                SkillBasedInit.LogDebug("  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is dead, skipping init.");
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is dead, skipping init.");
                 return;
             }
 
             // Generate a random element            
-            int roundVariance = SkillBasedInit.Random.Next(this.roundInitBounds[0], this.roundInitBounds[1]);
-            int roundInitiative = this.chassisBaseMod + roundVariance;
+            int roundVariance = SkillBasedInit.Random.Next(this.randomBounds[0], this.randomBounds[1]);
+            int roundInitiative = this.roundInitBase - roundVariance;
+            SkillBasedInit.LogDebug($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has roundInit:{roundInitiative} = (roundInitbase:{roundInitBase} - roundVariance:{roundVariance})");
 
             // Check for inspired status
             if (actor.IsMoraleInspired || actor.IsFuryInspired) {
-                int inspiredBonus = SkillBasedInit.Random.Next(1, 3);
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is inspired, adding {inspiredBonus} to init.");
-                roundInitiative += inspiredBonus;
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INSPIRED! +{inspiredBonus} INITIATIVE", FloatieMessage.MessageNature.Buff));
+                int bonus = SkillBasedInit.Random.Next(1, 3);
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is inspired, adding {bonus} to init.");
+                roundInitiative += bonus;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INSPIRED! +{bonus} INITIATIVE", FloatieMessage.MessageNature.Buff));
             }
 
             // Check for injuries. If there injuries on the previous round, apply them in full force. Otherwise, reduce them.
-            if (priorRoundInjuryMod != 0) {
-                roundInitiative -= priorRoundInjuryMod;
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was injured on a previous round! Reducing {roundInitiative} by {priorRoundInjuryMod}");
-                priorRoundInjuryMod = 0;
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INJURED! -{roundInitiative} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            if (deferredInjuryMod != 0) {
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was injured on a previous round! Reducing {roundInitiative} by {deferredInjuryMod}");
+                roundInitiative -= deferredInjuryMod;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INJURED! -{deferredInjuryMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             } else if (actor.GetPilot().Injuries != 0) {
-                int injuryModifier = SkillBasedInit.Random.Next(this.injuryBounds[0], this.injuryBounds[1]);
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) previously suffered injuries! Reduced {roundInitiative} by {injuryModifier}");
-                roundInitiative -= injuryModifier;
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INJURED! -{injuryModifier} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                int penalty = this.CalculateInjuryPenalty(0, actor.GetPilot().Injuries);
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has existing injuries! Reduced {roundInitiative} by {penalty}");
+                roundInitiative -= penalty;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"INJURED! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
             // Check for leg / side loss
@@ -256,28 +301,47 @@ namespace SkillBasedInit {
                 var vehicle = (Vehicle)actor;
                 isMovementCrippled = vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right) ? true : false;
             }
+
             if (isMovementCrippled) {
-                int crippledLoss = (int)Math.Ceiling(SkillBasedInit.Settings.MovementCrippledMalus * pilotingEffectMulti);
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has crippled movement! Reduced {roundInitiative} by {crippledLoss}");
-                roundInitiative -= crippledLoss;
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CRIPPLED! -{crippledLoss} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                int rawMod = SkillBasedInit.Settings.MovementCrippledMalus - this.pilotingEffectMod;
+                SkillBasedInit.LogDebug($"  Crippled Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.MovementCrippledMalus} - {this.pilotingEffectMod})");
+
+                int penalty = Math.Min(-1, rawMod);
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has crippled movement! Reduced {roundInitiative} by {penalty}");
+                roundInitiative -= penalty;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CRIPPLED! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            }
+
+            // Check for knockdown / prone 
+            if (actor.IsProne) {
+                int rawMod = SkillBasedInit.Settings.ProneMalus - this.pilotingEffectMod;
+                SkillBasedInit.LogDebug($"  Prone Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ProneMalus} - {this.pilotingEffectMod})");
+
+                int penalty = Math.Min(-1, rawMod);
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is prone! Reduced {roundInitiative} by {penalty}");
+                roundInitiative -= penalty;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"PRONE! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            }
+
+            if (actor.IsShutDown) {
+                int rawMod = SkillBasedInit.Settings.ShutdownMalus - this.pilotingEffectMod;
+                SkillBasedInit.LogDebug($"  Shutdown Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ShutdownMalus} - {this.pilotingEffectMod})");
+
+                int penalty = Math.Min(-1, rawMod);
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is shutdown! Reduced {roundInitiative} by {penalty}");
+                roundInitiative -= penalty;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"SHUTDOWN! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+
             }
 
             // Check for melee impacts        
-            if (this.meleeImpact > 0) {
-                int delay = (int)Math.Ceiling(this.meleeImpact * gutsEffectMulti);
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was meleed after activation! Impact of {this.meleeImpact} was reduced to {delay} by piloting. Reduced {roundInitiative} by {delay}");
-                roundInitiative -= delay;
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"MELEED! -{delay} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            if (this.deferredMeleeMod > 0) {
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was meleed after activation! Reduced {roundInitiative} by {deferredMeleeMod}");
+                roundInitiative -= deferredMeleeMod;
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"MELEED! -{deferredMeleeMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
-            // Check for knockdown / prone / shutdown
-            if (actor.IsProne || actor.IsShutDown) {
-                int delay = (int)Math.Ceiling(SkillBasedInit.Settings.ProneOrShutdownMalus * pilotingEffectMulti);
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is prone or shutdown! Reduced {roundInitiative} by {delay}");
-                roundInitiative -= delay;
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"PRONE OR SHUTDOWN! -{delay} INITIATIVE", FloatieMessage.MessageNature.Debuff));
-            }
+            // TODO: Apply tactics reserve penalty
 
             // Check to see if the actor's initative changed in the prior round
             int delta = 0;
@@ -302,65 +366,41 @@ namespace SkillBasedInit {
 
             // Init is flipped... 1 acts in first phase, then 2, etc.
             actor.Initiative = 31 - roundInitiative;
-            SkillBasedInit.Logger.Log($"== Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has roundInitiative:({roundInitiative}) from bounds {roundInitBounds[0]}-{roundInitBounds[1]}");
+            SkillBasedInit.Logger.Log($"== Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has roundInitiative:({roundInitiative}) from bounds {randomBounds[0]}-{randomBounds[1]}");
         }
 
-        public static int CalculateMeleeDelta(float targetTons, Weapon weapon) {
-
-            // Check for the Juggernaught skill
-            bool attackerIsJugger = false;
-            foreach (Ability ability in weapon.parent.GetPilot().Abilities) {
-                if (ability.Def.Id == "AbilityDefGu5") {
-                    SkillBasedInit.LogDebug($"Actor:{weapon.parent.DisplayName}/Pilot:{weapon.parent.GetPilot()} has Juggernaught, multiplying their tonnage.");
-                    attackerIsJugger = true;
-                }
-            }
-
-            // Compute the attackers tonnage / 5
-            float attackTons = 0.0f;
-            if (weapon.parent.GetType() == typeof(Mech)) {
-                Mech parent = (Mech)weapon.parent;
-                attackTons = parent.tonnage;
-            } else if (weapon.parent.GetType() == typeof(Vehicle)) {
-                Vehicle parent = (Vehicle)weapon.parent;
-                attackTons = parent.tonnage;
-            }
-            float modifiedAttackTons = attackerIsJugger ?
-                attackTons * SkillBasedInit.Settings.MeleeAttackerJuggerMulti :
-                attackTons;
-            int attackMod = (int)Math.Ceiling(modifiedAttackTons / 5.0);
-            SkillBasedInit.LogDebug($"Melee attackerTonnage:{attackTons}/{modifiedAttackTons} becomes attackerMod:{attackMod}");
-
-            // Compute target's tonnage / 5
-            int targetMod = (int)Math.Floor(targetTons / 5.0);
-            SkillBasedInit.LogDebug($"Melee attackerMod:{attackMod} vs targetMod:{targetMod}");
-
+        public static int CalculateMeleeDelta(ActorInitiative attacker, ActorInitiative target) {
             // Always return 1 or more
-            float delta = Math.Max(1, attackMod - targetMod);
-            int deltaMod = (int)Math.Ceiling(delta);
-
-            return deltaMod;
+            int rawDelta = Math.Max(1, attacker.meleeAttackMod - target.meleeAttackMod);
+            SkillBasedInit.LogDebug($"Melee rawDelta:{rawDelta} = (attackerMod:{attacker.meleeAttackMod} - targetMod:{target.meleeAttackMod})");
+            int modifiedDelta = Math.Max(1, rawDelta - target.gutsEffectMod);
+            SkillBasedInit.LogDebug($"MeleeMod reduced to modifiedDelta:{modifiedDelta} = (rawDelta:{rawDelta} - gutsEffectMod:{target.gutsEffectMod})");
+            return modifiedDelta;
         }
 
-        public void ResolveMeleeImpact(AbstractActor actor, int delta) {
-            
-            double modifiedDelta = Math.Max(1, Math.Floor(delta * this.gutsEffectMulti));
-            int deltaMod = (int)Math.Ceiling(modifiedDelta);
-            SkillBasedInit.LogDebug($"Melee impact of {delta} reduced to {modifiedDelta}/{deltaMod} thanks to gutsModifier: {this.gutsEffectMulti}");
-            
-            if (actor.HasActivatedThisRound) {
-                SkillBasedInit.Logger.Log($"Melee impact will slow actor:{actor.DisplayName} by {deltaMod} init on next activation!");
-                this.AddMeleeImpact(deltaMod);
+        public void ResolveMeleeImpact(AbstractActor target, int impact) {
+        
+            if (target.HasActivatedThisRound) {
+                SkillBasedInit.Logger.Log($"Melee impact will slow Actor:({target.DisplayName}_{target.GetPilot().Name}) by {impact} init on next activation!");
+                this.deferredMeleeMod += impact;
             } else {
-                SkillBasedInit.Logger.Log($"Melee impact immediately slows actor:{actor.DisplayName} by {deltaMod} init!");
-                // TODO: Should this add to the PhaseModifier stat?
-                actor.Initiative = actor.Initiative + deltaMod;
-                if (actor.Initiative > SkillBasedInit.MaxPhase) {
-                    actor.Initiative = SkillBasedInit.MaxPhase;
+                SkillBasedInit.Logger.Log($"Melee impact immediately slows Actor:({target.DisplayName}_{target.GetPilot().Name}) by {impact} init!");
+                // Add to the target's initiative. Remember higher init -> higher phase
+                target.Initiative += impact;
+                if (target.Initiative > SkillBasedInit.MaxPhase) {
+                    target.Initiative = SkillBasedInit.MaxPhase;
                 }
-                actor.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(actor.GUID));
+                target.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(target.GUID));
             }
-            actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CLANG! -{modifiedDelta} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID, $"CLANG! -{impact} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+        }
+
+        public int CalculateInjuryPenalty(int damageTaken, int existingInjuries) {
+            int injuryMax = this.injuryBounds[1] + existingInjuries + damageTaken;
+            int injuryMin = this.injuryBounds[0] + existingInjuries;
+            int injuryPenalty = SkillBasedInit.Random.Next(injuryMin, injuryMax);
+            SkillBasedInit.LogDebug($"  InjuryPenalty:-{injuryPenalty} from (injuryMin:{this.injuryBounds[0]} + existingInjuries:{existingInjuries}) to (injuryMax:{this.injuryBounds[1]} + existingInjuries:{existingInjuries} + damageTaken:{damageTaken}).");
+            return injuryPenalty;
         }
     }
 
@@ -372,15 +412,14 @@ namespace SkillBasedInit {
         public static void OnRoundBegin(AbstractActor actor) {
             if (actor != null) {
                 // If the actor already exists, don't change them
-                if (!ActorInitMap.ContainsKey(actor.GUID)) {
-                    AddActor(actor);
-                }
-                var actorInit = ActorInitMap[actor.GUID];
+                ActorInitiative actorInit = GetOrCreate(actor);
 
                 // Recalculate the random part of their initiative for the round
                 actorInit.CalculateRoundInit(actor);
 
-                actorInit.meleeImpact = 0.0f;
+                actorInit.deferredMeleeMod = 0;
+                actorInit.deferredReserveMod = 0;
+                actorInit.deferredInjuryMod = 0;
             }
         }
 
@@ -388,9 +427,13 @@ namespace SkillBasedInit {
             ActorInitMap.Clear();
         }
 
-        private static void AddActor(AbstractActor actor) {
-            var actorInit = new ActorInitiative(actor);
-            ActorInitMap[actor.GUID] = actorInit;
+        // Units can spawn before they get onRoundBegin called, and so may not be present. This ensures they get added if they are missing.
+        public static ActorInitiative GetOrCreate(AbstractActor actor) {
+            if (!ActorInitMap.ContainsKey(actor.GUID)) {
+                var actorInit = new ActorInitiative(actor);
+                ActorInitMap[actor.GUID] = actorInit;
+            }
+            return ActorInitMap[actor.GUID];
         }
 
     }

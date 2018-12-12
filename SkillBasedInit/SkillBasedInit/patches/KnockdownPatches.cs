@@ -46,6 +46,8 @@ namespace SkillBasedInit {
 
                 if (__instance.HasActivatedThisRound || __instance.Initiative != SkillBasedInit.MaxPhase) {
                     SkillBasedInit.Logger.Log($"Knockdown will slow Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) by {knockDownMod} init on next activation!");
+                    __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"THUD! -{knockDownMod} INITIATIVE NEXT ROUND", FloatieMessage.MessageNature.Debuff));
+
                 } else {
                     SkillBasedInit.Logger.Log($"Knockdown immediately slows Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) by {knockDownMod} init!");
                     if (__instance.Combat.TurnDirector.IsInterleaved && __instance.Initiative != SkillBasedInit.MaxPhase) {
@@ -55,8 +57,8 @@ namespace SkillBasedInit {
                         } 
                         __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
                     }
+                    __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"THUD! -{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
                 }
-                __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"THUD! -{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
 
                 // TODO: Is this causing the lockup?
                 string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";

@@ -55,6 +55,9 @@
     <Reference Include="0Harmony">
       <HintPath>..\..\..\..\..\..\..\Volumes\SourceCode\BT_DLLs\0Harmony.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\..\..\..\..\Volumes\SourceCode\Steam\steamapps\common\BATTLETECH\BattleTech.app\Contents\Resources\Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActorInitiative.cs" />
