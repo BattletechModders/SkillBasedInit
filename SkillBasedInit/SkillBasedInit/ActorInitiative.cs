@@ -86,18 +86,18 @@ namespace SkillBasedInit {
 
         private static readonly int SuperHeavyTonnage = 11;
         private static readonly Dictionary<int, int> InitBaseByTonnage = new Dictionary<int, int> {
-            {  0, 24 }, // 0-15
-            {  1, 22 }, // 10-15
-            {  2, 21 }, // 20-25
-            {  3, 19 }, // 30-35
-            {  4, 18 }, // 40-45
-            {  5, 16 }, // 50-55
-            {  6, 15 }, // 60-65
-            {  7, 13 }, // 70-75
-            {  8, 12 }, // 80-85
+            {  0, 19 }, // 0-15
+            {  1, 18 }, // 10-15
+            {  2, 17 }, // 20-25
+            {  3, 16 }, // 30-35
+            {  4, 15 }, // 40-45
+            {  5, 14 }, // 50-55
+            {  6, 13 }, // 60-65
+            {  7, 12 }, // 70-75
+            {  8, 11 }, // 80-85
             {  9, 10 }, // 90-95
             { 10, 9 }, // 100
-            { SuperHeavyTonnage, 7 }, // 105+
+            { SuperHeavyTonnage, 6 }, // 105+
         };
 
         public ActorInitiative(AbstractActor actor) {
@@ -166,7 +166,7 @@ namespace SkillBasedInit {
 
                 // Because HBS init values were from 2-5, bonuses will be negative at this point and penalties positive. Invert these.
                 this.staticMod = rawModifier * -1;
-                SkillBasedInit.LogDebug($"Normalized BaseInit from {statCollectionVal} to {this.staticMod}");
+                SkillBasedInit.LogDebug($"Normalized BaseInit from {statCollectionVal} to rawModifier:{rawModifier} to {this.staticMod}");
             } else {
                 this.staticMod = 0;
             }
@@ -222,7 +222,7 @@ namespace SkillBasedInit {
             bool pilotIsJugger = false;
             foreach (Ability ability in pilot.Abilities) {
                 if (ability.Def.Id == "AbilityDefGu5") {
-                    SkillBasedInit.LogDebug($"Actor:{actor.DisplayName}_{pilot.Name} has Juggernaught.");
+                    //SkillBasedInit.LogDebug($"Actor:{actor.DisplayName}_{pilot.Name} has Juggernaught.");
                     pilotIsJugger = true;
                 }
             }
@@ -306,7 +306,7 @@ namespace SkillBasedInit {
                 int rawMod = SkillBasedInit.Settings.MovementCrippledMalus - this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Crippled Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.MovementCrippledMalus} - {this.pilotingEffectMod})");
 
-                int penalty = Math.Min(-1, rawMod);
+                int penalty = Math.Min(-1, -1 * rawMod);
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has crippled movement! Reduced {roundInitiative} by {penalty}");
                 roundInitiative -= penalty;
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CRIPPLED! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
@@ -317,7 +317,7 @@ namespace SkillBasedInit {
                 int rawMod = SkillBasedInit.Settings.ProneMalus - this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Prone Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ProneMalus} - {this.pilotingEffectMod})");
 
-                int penalty = Math.Min(-1, rawMod);
+                int penalty = Math.Min(-1, -1 * rawMod);
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is prone! Reduced {roundInitiative} by {penalty}");
                 roundInitiative -= penalty;
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"PRONE! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
@@ -327,7 +327,7 @@ namespace SkillBasedInit {
                 int rawMod = SkillBasedInit.Settings.ShutdownMalus - this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Shutdown Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ShutdownMalus} - {this.pilotingEffectMod})");
 
-                int penalty = Math.Min(-1, rawMod);
+                int penalty = Math.Min(-1, -1 * rawMod);
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is shutdown! Reduced {roundInitiative} by {penalty}");
                 roundInitiative -= penalty;
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"SHUTDOWN! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));

@@ -68,7 +68,7 @@ The tonnage of a unit determines a multiplier applied to the lower (3) and upper
 
 Tonnage | 05 | 10-15 | 20-25 | 30-35 | 40-45 | 50-55 | 60-65 | 70-75 | 80-85 | 90-95 | 100 | 100+
 -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
-*Base Initiative* | 24 | 22 | 21 | 19 | 18 | 16 | 15 | 13 | 12 | 10 | 9 | 7
+*Base Initiative* | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 11 | 10 | 9 | 6
 
 ### Impact of Tactics Skill
 A MechWarriors's Tactics skill adds a flat modifier to the base initiative defined by the unit tonnage. This value is graduated, as defined in the table below.
