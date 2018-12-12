@@ -1,7 +1,7 @@
 {
     "Name": "SkillBasedInit",
     "Enabled": true,
-    "Version": "0.3.0",
+    "Version": "0.3.1",
     "Description": "Changes the initiative system to be pilot-skill focused.",
     "Author": "IceRaptor",
     "Website": "https://github.com/IceRaptor/SkillBasedInit",

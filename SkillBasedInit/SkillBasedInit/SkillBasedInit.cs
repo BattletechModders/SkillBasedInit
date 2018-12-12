@@ -22,7 +22,7 @@ namespace SkillBasedInit {
             try {
                 SetupLogger(modDirectory);
                 SkillBasedInit.Settings = JsonConvert.DeserializeObject<Settings>(settingsJSON);
-                SkillBasedInit.LogDebug($"Settings were:({settingsJSON})");
+                SkillBasedInit.LogDebug($"Mod settings were:({settingsJSON})");
             } catch (Exception e) {
                 Logger.LogError(e);
                 Logger.Log("Error loading mod settings - using defaults.");
