@@ -25,6 +25,7 @@ Certain effects impact your phase number during the course of battle. These effe
 * **Spirit** - Pilots *High Spirits* tag gain a +2 initiative bonus. Pilots with the *Low Spirits* tag suffer a -2 initiative penalty.
 * **Melee Impact** - Units that are successfully attacked in melee suffer a small initiative penalty on the current round, or the subsequent round if they have already activated. This penalty is increased when the attacker weighs more than the target, and attackers with the *Juggernaught* skill increase this effect further. This penalty is applied *on every successful attack* so light units that are repeatedly attacked may find themselves acting at the very end of the following round! **Clang!** modifiers are from melee impacts.
 * **Reserve** Units that reserve drop between 2 to 7 phases. This drop is carried over to the next round as penalty, reflecting the hesitation of the unit. **Hesitation!** modifiers are this carry-over penalty.
+
 ## Usage
 
 This mod is only intended to be used with RogueTech. You may freely us it standalone, but this mod expects TurnDirector.IsInterleaved to always be true. This is achieved by the **AlwaysCombatTurns** mod, which this mod depends upon. It also requires the components from **CustomComponents** and **MechEngineer**, both of which are also dependencies.
@@ -33,6 +34,15 @@ If you are using this mod independently of RougeTech, you'll likely want to add 
 
 ### Disabling The Mod
 To disable the mod, edit `SkillBasedInitiative/mod.json` and change `enabled:true` to `enabled:false`. This will prevent the mod from loading, restoring the original HBS experience. However, it will also **break your RogueTech experience** due to the various pieces of equipment that add initiative modifiers. The net effect is that most units will act in phase 1, rendering initiative largely useless. You will need to do significant overhauls on all the equipment in the mod to remove any **BaseInitiative** changes.
+
+### Changing Colors
+The mod applies colors to the following combat UI elements:
+
+* Initiative Hexagon above the Mech Paper doll
+* Initiative Hexagon floating above the Mech
+* Pilot Name background bar
+
+These colors can be customized through the `mod.json`. 
 
 ## Planned
 
