@@ -7,7 +7,7 @@
     "Website": "https://github.com/IceRaptor/SkillBasedInit",
     "Contact": "",
     "DLL": "SkillBasedInit.dll",
-    "DependsOn" : [ "AlwaysCombatTurns" ],
+    "DependsOn" : [ "AlwaysCombatTurns", "CustomComponents", "MechEngineer" ],
     "Settings": {
         "Debug" : false,
         "ProneMalus" : 9,
@@ -21,6 +21,14 @@
         "TurretTonnageTagUnitLight" : 60.0,
         "TurretTonnageTagUnitMedium" : 80.0,
         "TurretTonnageTagUnitHeavy" : 100.0,
-        "TurretTonnageTagUnitNone" : 120.0
+        "TurretTonnageTagUnitNone" : 120.0,
+        "ColorFriendlyUnactivated"      : [ 0.231, 0.694, 0.262, 1.0 ],
+        "ColorFriendlyAlreadyActivated" : [ 0.043, 0.4, 0.137, 1.0 ],
+        "ColorAlliedUnactivated"        : [ 0.521, 0.858, 0.964, 1.0 ],
+        "ColorAlliedAlreadyActivated"   : [ 0.345, 0.545, 0.682, 1.0 ],
+        "ColorNeutralUnactivated"       : [ 0.850, 0.866, 0.862, 1.0 ],
+        "ColorNeutralAlreadyActivated"  : [ 0.466, 0.482, 0.494, 1.0 ],
+        "ColorEnemyUnactivated"         : [ 1.0, 0.031, 0.0, 1.0 ],
+        "ColorEnemyAlreadyActivated"    : [ 0.486, 0.039, 0.007, 1.0 ]
     }
 }
