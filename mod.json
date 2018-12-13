@@ -1,7 +1,7 @@
 {
     "Name": "SkillBasedInit",
     "Enabled": true,
-    "Version": "0.4.0",
+    "Version": "0.4.1",
     "Description": "Changes the initiative system to be pilot-skill focused.",
     "Author": "IceRaptor",
     "Website": "https://github.com/IceRaptor/SkillBasedInit",
@@ -10,18 +10,25 @@
     "DependsOn" : [ "AlwaysCombatTurns", "CustomComponents", "MechEngineer" ],
     "Settings": {
         "Debug" : false,
-        "ProneMalus" : 9,
-        "ShutdownMalus" : 6,
-        "MovementCrippledMalus" : 13,
-        "PilotSpiritsModifier" : 2,
-        "MeleeTonnageMalus" : 1,
-        "MeleeAttackerJuggerMulti" : 1.5,
-        "VehicleROCModifier" : 2,
-        "TurretROCModifier" : 4,
+        "ProneModifier" : -9,
+        "ShutdownModifier" : -6,
+        "CrippledMovementModifier" : -13,
+        "VehicleROCModifier" : -2,
+        "TurretROCModifier" : -4,
         "TurretTonnageTagUnitLight" : 60.0,
         "TurretTonnageTagUnitMedium" : 80.0,
         "TurretTonnageTagUnitHeavy" : 100.0,
         "TurretTonnageTagUnitNone" : 120.0,
+        "PilotTagModifiers" : { 
+            "pilot_morale_high" : 2, 
+            "pilot_morale_low" : -2
+        },
+        "JuggernaughtBonus" : 0.5,
+        "PilotTagMeleeMultipliers" : {
+            "pilot_drunk" : [ 0.0, 0.5 ],
+            "pilot_gladiator" : [ 0.25, 0.25 ],
+            "pilot_assassin" : [ 0.5, 0.0 ]
+        },
         "ColorFriendlyUnactivated"      : [ 0.231, 0.694, 0.262, 1.0 ],
         "ColorFriendlyAlreadyActivated" : [ 0.043, 0.4, 0.137, 1.0 ],
         "ColorAlliedUnactivated"        : [ 0.521, 0.858, 0.964, 1.0 ],

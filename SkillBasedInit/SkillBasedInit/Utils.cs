@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace SkillBasedInit {
@@ -8,34 +9,44 @@ namespace SkillBasedInit {
         public bool Debug = false;
 
         // The init malus when a unit starts the round prone (from a knockdown)
-        public int ProneMalus = 9;
+        public int ProneModifier = -9;
 
         // The init malus when a unit starts the round shutdown
-        public int ShutdownMalus = 6;
+        public int ShutdownModifier = -6;
 
         // The init malus when a unit has lost a leg (mechs) or side (vehicles)
-        public int MovementCrippledMalus = 13;
-
-        // The modifier applied for High Spirits or Low Spirits tag
-        public int PilotSpiritsModifier = 2;
+        public int CrippledMovementModifier = -13;
 
         // The init malus per point of difference in tonnage
         public float MeleeTonnageMalus = 1;
 
-        // The init malus multiplier used if the pilot has the Juggernaught skill
-        public float MeleeAttackerJuggerMulti = 1.5f;
 
         // Modifier applied to make vehicles slower
-        public int VehicleROCModifier = 2;
+        public int VehicleROCModifier = -2;
 
         // Modifier applied to make turrets slower
-        public int TurretROCModifier = 4;
+        public int TurretROCModifier = -4;
 
         // Turrets don't have tonnage; supply a tonnage based upon unit tags
         public float TurretTonnageTagUnitLight = 60.0f;
         public float TurretTonnageTagUnitMedium = 80.0f;
         public float TurretTonnageTagUnitHeavy = 100.0f;
         public float TurretTonnageTagUnitNone = 120.0f;
+
+        // Definition of any tags that should result in a flat initiative modifier
+        public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
+            { "pilot_morale_high", 2 },
+            { "pilot_morale_low", -2 }
+        };
+
+        // The init malus multiplier used if the pilot has the Juggernaught skill
+        public float JuggernaughtBonus = 0.5f;
+
+        public Dictionary<string, float[]> PilotTagMeleeMultipliers = new Dictionary<string, float[]> {
+            { "pilot_drunk", new float[] { 0.0f, 0.5f } },
+            { "pilot_gladiator", new float[] { 0.25f, 0.25f } },
+            { "pilot_assassin", new float[] { 0.5f, 0.0f } }
+        };
 
         public void InitializeColors() {
             FriendlyUnactivated = new Color(ColorFriendlyUnactivated[0], ColorFriendlyUnactivated[1], ColorFriendlyUnactivated[2], ColorFriendlyUnactivated[3]);

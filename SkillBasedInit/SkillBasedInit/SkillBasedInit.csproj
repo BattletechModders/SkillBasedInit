@@ -78,6 +78,8 @@
     <Compile Include="patches\LoadoutPatches.cs" />
     <Compile Include="patches\SerializationPatches.cs" />
     <Compile Include="patches\KnockdownPatches.cs" />
+    <Compile Include="Helper\UnitHelper.cs" />
+    <Compile Include="Helper\PilotHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -85,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="patches\" />
+    <Folder Include="Helper\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
