@@ -38,13 +38,18 @@ namespace SkillBasedInit {
     public static class AbstractActor_DeferUnit {
         public static void Postfix(AbstractActor __instance) {
             //SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
-            var deferJump = SkillBasedInit.Random.Next(2, 7);
-            SkillBasedInit.LogDebug($"AbstractActor:DeferUnit - Reducing Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) actorInit:{__instance.Initiative} by :{deferJump} to {__instance.Initiative + deferJump}");
-
-            __instance.Initiative += deferJump;
+            int reservePenalty = SkillBasedInit.Random.Next(2, 7);
+            SkillBasedInit.LogDebug($"  Deferring Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) initiative:{__instance.Initiative} by :{reservePenalty} to {__instance.Initiative + reservePenalty}");
+            __instance.Initiative += reservePenalty;
             if (__instance.Initiative > SkillBasedInit.MaxPhase) {
                 __instance.Initiative = SkillBasedInit.MaxPhase;
             }
+
+            // Save some part of the reserve surplus as a penalty for the next round
+            ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
+            int deferredPenalty = Math.Min(1, reservePenalty - actorInit.tacticsEffectMod);
+            actorInit.deferredReserveMod += deferredPenalty;
+            SkillBasedInit.LogDebug($"  Added deferredPenalty:{deferredPenalty} to Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) for total:{actorInit.deferredReserveMod}");
         }
     }
 

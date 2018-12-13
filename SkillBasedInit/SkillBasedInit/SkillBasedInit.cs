@@ -28,6 +28,7 @@ namespace SkillBasedInit {
                 Logger.Log("Error loading mod settings - using defaults.");
                 Settings = new Settings();
             }
+            Settings.InitializeColors();
 
             var harmony = HarmonyInstance.Create("us.frostraptor.SkillBasedInit");
             harmony.PatchAll(Assembly.GetExecutingAssembly());

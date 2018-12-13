@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SkillBasedInit {
 
@@ -86,26 +87,21 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPortrait_IndicatePastPhase {
         public static void Postfix(CombatHUDPortrait __instance, TextMeshProUGUI ___ioText) {
-            //SkillBasedInit.LogDebug($"CombatHUDPortrait:IndicatePastPhase:post - init");
-            //__instance.NumberFlagFill.color = Color.red;
-            //__instance.NumberFlagOutline.color = Color.red;
-            //__instance.NumberFlagText.color = Color.red;
-
-            //__instance.Frame.color = Color.red;
-            //__instance.PilotName.color = Color.red;
-            //__instance.PilotIcon.color = Color.red;
-
-            __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-            __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
             __instance.NumberFlagFill.color = Color.white;
             __instance.NumberFlagText.color = Color.white;
             __instance.NumberFlagOutline.color = Color.white;
-
             ___ioText.color = Color.white;
 
-
-            //__instance.Background.color = Color.red;
-            //__instance.Portrait.color = Color.red;
+            Transform frameT = __instance.FilledHolder.transform.Find("mw_Frame");
+            if (frameT != null) {
+                GameObject frame = frameT.gameObject;
+                Transform nameRectT = frameT.transform.Find("mw_NameRect");
+                if (nameRectT != null) {
+                    GameObject nameRect = nameRectT.gameObject;
+                    Image nameImg = nameRect.GetComponent<Image>();
+                    nameImg.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+                }
+            }
         }
     }
 
@@ -113,34 +109,27 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPortrait_IndicateCurrentPhase {
         public static void Postfix(CombatHUDPortrait __instance, TextMeshProUGUI ___ioText) {
-            //SkillBasedInit.LogDebug($"CombatHUDPortrait:IndicateCurrentPhase:post - init");
-            //__instance.NumberFlagFill.color = Color.green;
-            //__instance.NumberFlagOutline.color = Color.green;
-            //__instance.NumberFlagText.color = Color.green;
-
-            //__instance.Frame.color = Color.green;
-            //__instance.PilotName.color = Color.green;
-            //__instance.PilotIcon.color = Color.green;
-
-            //__instance.Background.color = Color.green;
-            //__instance.NotActiveText.color = Color.blue;
-            //__instance.SelectedOutline.color = Color.red;
-
-            if (__instance.DisplayedActor.HasActivatedThisRound) {
-                __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-                __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-            } else {
-                __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
-                __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
-            }
             __instance.NumberFlagFill.color = Color.white;
             __instance.NumberFlagOutline.color = Color.white;
             __instance.NumberFlagText.color = Color.white;
-
             ___ioText.color = Color.white;
 
-            //__instance.Background.color = Color.green;
-            //__instance.Portrait.color = Color.green;
+            Transform frameT = __instance.FilledHolder.transform.Find("mw_Frame");
+            if (frameT != null) {
+                GameObject frame = frameT.gameObject;
+                Transform nameRectT = frameT.transform.Find("mw_NameRect");
+                if (nameRectT != null) {
+                    GameObject nameRect = nameRectT.gameObject;
+                    Image nameImg = nameRect.GetComponent<Image>();
+
+                    if (__instance.DisplayedActor.HasActivatedThisRound) {
+                        nameImg.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+                    } else {
+                        nameImg.color = SkillBasedInit.Settings.FriendlyUnactivated;
+                    }
+
+                }
+            }
         }
     }
 
@@ -149,61 +138,53 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPortrait_IndicateFuturePhase {
         public static void Postfix(CombatHUDPortrait __instance, TextMeshProUGUI ___ioText) {
-            //SkillBasedInit.LogDebug($"CombatHUDPortrait:IndicateFuturePhase:post - init");
-            //__instance.NumberFlagFill.color = Color.blue;
-            //__instance.NumberFlagOutline.color = Color.blue;
-            //__instance.NumberFlagText.color = Color.blue;
-
-            //SkillBasedInit.Logger.Log($"CombatHUDPortrait:IndicateFuturePhase:post - looking at components");
-            //foreach (GameObject component in __instance.FilledHolder.GetComponents<GameObject>()) {
-            //    SkillBasedInit.Logger.Log($"CombatHUDPortrait:IndicateFuturePhase:post - Found component: {component.name}");
-            //}
-
-            __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
-            __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
             __instance.NumberFlagFill.color = Color.white;
             __instance.NumberFlagOutline.color = Color.white;
             __instance.NumberFlagText.color = Color.white;
-
             ___ioText.color = Color.white;
 
-            //__instance.PilotName.color = Color.blue;
-            //__instance.PilotIcon.color = Color.blue;
+            Transform frameT = __instance.FilledHolder.transform.Find("mw_Frame");
+            if (frameT != null) {
+                GameObject frame = frameT.gameObject;
+                Transform nameRectT = frameT.transform.Find("mw_NameRect");
+                if (nameRectT != null) {
+                    GameObject nameRect = nameRectT.gameObject;
+                    Image imgByCmp = nameRect.GetComponent<Image>();
+                    imgByCmp.color = SkillBasedInit.Settings.FriendlyUnactivated;
 
-            //__instance.Background.color = Color.blue;
-            //__instance.Portrait.color = Color.blue;
-
+                } 
+            } 
         }
     }
 
-    [HarmonyPatch(typeof(CombatHUDPortrait), "OnActorHovered")]
-    [HarmonyPatch(new Type[] { typeof(MessageCenterMessage) })]
-    public static class CombatHUDPortrait_OnActorHovered {
-        public static void Postfix(CombatHUDPortrait __instance) {
-            if (__instance.DisplayedActor.HasActivatedThisRound) {
-                __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-                __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-            } else {
-                __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
-                __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
-            }
+    //[HarmonyPatch(typeof(CombatHUDPortrait), "OnActorHovered")]
+    //[HarmonyPatch(new Type[] { typeof(MessageCenterMessage) })]
+    //public static class CombatHUDPortrait_OnActorHovered {
+    //    public static void Postfix(CombatHUDPortrait __instance) {
+    //        if (__instance.DisplayedActor.HasActivatedThisRound) {
+    //            __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+    //            __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+    //        } else {
+    //            __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
+    //            __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
+    //        }
 
-        }
-    }
+    //    }
+    //}
 
-    [HarmonyPatch(typeof(CombatHUDPortrait), "OnActorUnHovered")]
-    [HarmonyPatch(new Type[] { typeof(MessageCenterMessage) })]
-    public static class CombatHUDPortrait_OnActorUnHovered {
-        public static void Postfix(CombatHUDPortrait __instance) {
-            if (__instance.DisplayedActor.HasActivatedThisRound) {
-                __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-                __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-            } else {
-                __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
-                __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
-            }
-        }
-    }
+    //[HarmonyPatch(typeof(CombatHUDPortrait), "OnActorUnHovered")]
+    //[HarmonyPatch(new Type[] { typeof(MessageCenterMessage) })]
+    //public static class CombatHUDPortrait_OnActorUnHovered {
+    //    public static void Postfix(CombatHUDPortrait __instance) {
+    //        if (__instance.DisplayedActor.HasActivatedThisRound) {
+    //            __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+    //            __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+    //        } else {
+    //            __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
+    //            __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
+    //        }
+    //    }
+    //}
 
 
     /*

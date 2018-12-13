@@ -49,48 +49,6 @@ namespace SkillBasedInit {
                 }
 
             }
-        }
-        /*
-         *          
-         * if (ParentActor != null && ParentActor.StatCollection.GetValue<bool> ("IgnorePilotInjuries")) {
-                Combat.MessageCenter.PublishMessage (new FloatieMessage (sourceID, ParentActor.GUID, Strings.T ("INJURY IGNORED"), FloatieMessage.MessageNature.PilotInjury));
-            } else {
-                int bonusHealth = BonusHealth;
-                if (bonusHealth > 0) {
-                    int num = Mathf.Min (dmg, bonusHealth);
-                    statCollection.ModifyStat (sourceID, stackItemUID, "BonusHealth", StatCollection.StatOperation.Int_Subtract, num, -1, true);
-                    dmg -= num;
-                }
-                if (dmg > 0) {
-                    if (!IsIncapacitated) {
-                        SaveInjuryInfo (damageType, ParentActor, sourceWeapon, sourceActor);
-                    }
-                    StatCollection.ModifyStat (sourceID, stackItemUID, "Injuries", StatCollection.StatOperation.Int_Add, dmg, -1, true);
-                    if (Combat != null) {
-                        Combat.MessageCenter.PublishMessage (new PilotDamagedMessage (ParentActor.GUID, StatCollection.GetValue<int> ("Injuries")));
-                    }
-                    if (injuryLogger.IsLogEnabled) {
-                        injuryLogger.Log ($"////// POWPOW (>_<*): {Description.Name} Injured! ///// Cause: {damageType.ToString ()} ///// Injuries: {Injuries}");
-                    }
-                }
-                ApplyInjuryAbilities (sourceID, stackItemUID);
-            }
-
-public void ApplyInjuryAbilities (string sourceID, int stackItemUID)
-{
-    if (OnInjuredAbilities != null) {
-        for (int i = 0; i < OnInjuredAbilities.Count; i++) {
-            for (int j = 0; j < OnInjuredAbilities [i].Def.EffectData.Count; j++) {
-                Combat.EffectManager.CreateEffect (OnInjuredAbilities [i].Def.EffectData [j], OnInjuredAbilities [i].Def.Id, stackItemUID, ParentActor, ParentActor, default(WeaponHitInfo), 0, false);
-            }
-            Combat.MessageCenter.PublishMessage (new FloatieMessage (sourceID, ParentActor.GUID, OnInjuredAbilities [i].Def.Description.Name, FloatieMessage.MessageNature.Buff));
-            if (injuryLogger.IsLogEnabled) {
-                injuryLogger.Log ($"////// ZAP (>n<!): {Description.Name} Gains {OnInjuredAbilities [i].Def.Description.Name}!");
-            }
-        }
-    }
-}
-         * 
-         */
+        }       
     }
 }
