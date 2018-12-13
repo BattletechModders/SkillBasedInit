@@ -5,13 +5,6 @@ The skill level of each Pilot becomes very important in this mod. Novice MechWar
 
 Instead of four weight classes (light / medium / heavy / assault), this mod divides units into 10-ton groups. 20-25 ton mechs are slightly faster than 30-35 ton mechs. 40-45 ton mechs are faster than 50-55 ton mechs, while 60-65 ton mechs are faster than 70-75 ton mechs. 80-85 tons mechs are faster than 90-95, which are faster than 100. This offers a small bonus to pilots of lighter units.
 
-## Usage
-
-This mod is only intended to be used with RogueTech. You may freely us it standalone, but this mod expects TurnDirector.IsInterleaved to always be true. There is another mod to force this interaction;
-In addition you will likely want initiative boosting equipment of some kind.
-
-To disable the mod, edit SkillBasedInitiative/mod.json and change enabled:true to enabled:false. This will prevent the mod from loading, but will significantly break your RogueTech experience. You will need to do significant overhauls on any equipment that grants a BaseInitiative modifier to complete the removal of this mod.
-
 ## Skills
 
 This mod emphasizes a MechWarrior's Tactics, Guts, and Piloting skills.
@@ -31,44 +24,50 @@ Certain effects impact your phase number during the course of battle. These effe
 * **Inspired** - Pilots that are inspired by high Morale (or Fury) randomly gain between +1 and +3 when a new round begins. **Inspired!** modifiers are from morale or fury.
 * **Spirit** - Pilots *High Spirits* tag gain a +2 initiative bonus. Pilots with the *Low Spirits* tag suffer a -2 initiative penalty.
 * **Melee Impact** - Units that are successfully attacked in melee suffer a small initiative penalty on the current round, or the subsequent round if they have already activated. This penalty is increased when the attacker weighs more than the target, and attackers with the *Juggernaught* skill increase this effect further. This penalty is applied *on every successful attack* so light units that are repeatedly attacked may find themselves acting at the very end of the following round! **Clang!** modifiers are from melee impacts.
-* **Reserve** Units that reserve lose a random amount of initiative, between 2 and 7 phases.
+* **Reserve** Units that reserve drop between 2 to 7 phases. This drop is carried over to the next round as penalty, reflecting the hesitation of the unit. **Hesitation!** modifiers are this carry-over penalty.
+## Usage
+
+This mod is only intended to be used with RogueTech. You may freely us it standalone, but this mod expects TurnDirector.IsInterleaved to always be true. This is achieved by the **AlwaysCombatTurns** mod, which this mod depends upon. It also requires the components from **CustomComponents** and **MechEngineer**, both of which are also dependencies.
+
+If you are using this mod independently of RougeTech, you'll likely want to add initiative boosting equipment or skills of some kind.
+
+### Disabling The Mod
+To disable the mod, edit `SkillBasedInitiative/mod.json` and change `enabled:true` to `enabled:false`. This will prevent the mod from loading, restoring the original HBS experience. However, it will also **break your RogueTech experience** due to the various pieces of equipment that add initiative modifiers. The net effect is that most units will act in phase 1, rendering initiative largely useless. You will need to do significant overhauls on all the equipment in the mod to remove any **BaseInitiative** changes.
 
 ## Planned
 
 Works in progress or planned effects include:
 
-* *Planned*: Units will gain a small boost to their total initiative rating based upon their engine core. Rating / Tonnage / 10 = % boost.
-* *Planned*: Units that reserve will gain a small init penalty in the coming round. The more reserves that occur, the greater the penalty will be in the following round. A high tactics skill will mitigate this effect.
-* *Planned*: Knockdowns will note 'Going Down!' as their init bubble.
-* *Planned*: Units that are unsettled, panicked or similar will have a reduced initiative.
-* *Planned*: Show an initiative track at the top of the screen so that players know which models are going when. Perhaps use the unit icons and a number underneath them?
-* *Planned*: In the MechBay and Lance Drop screens, show the BaseInitiative modifier for mechs when there is no pilot selected. When only a pilot is selected, show their Tactics+Piloting rating. When both are selected, show the expected range.
+- [] Expose mech initiative modifiers through Lance Drop screen
+- [] Expose mech initiative modifiers through Skirmish Drop screen
+- [] Expose mech initiative modifiers through MechLab screen
+- [] Expose mech initiative modifiers through Initiative Badge in combination
+- [] Expose pilot initiative modifiers through Lance Drop screen
+- [] Expose pilot initiative modifiers through Skirmish Drop screen
+- [] Expose pilot initiative modifiers through MechLab screen
+- [] Expose pilot initiative modifiers through Initiative Badge in combination
+- [] Introduce pilot quirk specific behaviors (drunk, reckless, etc)
+- [] Introduce pilot quirk specific modifiers
+- [x] Units will gain a small boost to their total initiative rating based upon their engine core. Rating / Tonnage / 10 = % boost.
+- [x] Units that reserve will gain a small init penalty in the coming round. The more reserves that occur, the greater the penalty will be in the following round. A high tactics skill will mitigate this effect.
+- [] Knockdowns will note 'Going Down!' as their init bubble.
+- [] Units that are unsettled, panicked or similar will have a reduced initiative.
+- [] Show an initiative track at the top of the screen so that players know which models are going when. Perhaps use the unit icons and a number underneath them?
 
-
-### Bugs and Incomplete functions
+### Bugs and Issues
 
 These items are known bugs or issues that should be resolved before declaring a 1.0 version.
 
 * **CONFIRMED BUG**: When loading a save that is within a battle, the phase bars are displayed.
-* **CONFIRMED BUG**: When reserves spawn, they don't necessarily get OnRoundBeing invoked. This causes NPEs in the lookup of ActorInit. Protect the ActorInit fetch.
 * Determine if there are other stats that should be evaluated. In particular "PhaseModifier" : "PhaseModifierSelf" may be appropriate to check on each round.
 * Extract logging from HBS.Logging to prevent duplication of logs
-* Init can wrap below 0 when it's dynamically applied. This can prevent a unit from activating at all.
-* Percentages have too many significant digits (looks ugly in logs)
-* Bonus health from cockpits isn't handled; injury penalties should ignore up to (bonus health) hits before applying the penalty
 * Knockdown doesn't seem to immediately apply in some cases - see https://www.twitch.tv/videos/345435095 @ 1:31
 * Crippled on vehicles is a very narrow margin. Once their structure is removed, they are destroyed - so this rarely happens. This would be better served with a critical hit effect, like broken tracks?
+* *CONSIDER*: Should knockdown penalty apply on the turn you go down? You're already taking an injury penalty there.
 
 ## Technical Details
 
 The sections below detail some of the calculations used by the mod. Please note that these can vary as the code changes, and may be out of date. You are better off checking the code for these details instead of relying upon this documentation.
-
-### Tonnage Impact
-The tonnage of a unit determines a multiplier applied to the lower (3) and upper (5) bounds of the phase calculation. After multiplication, the lower bound is rounded down, while the upper bound is rounded up.
-
-Tonnage | 05 | 10-15 | 20-25 | 30-35 | 40-45 | 50-55 | 60-65 | 70-75 | 80-85 | 90-95 | 100 | 100+
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
-*Base Initiative* | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 9
 
 ### Impact of Tactics Skill
 A MechWarriors's Tactics skill adds a flat modifier to the base initiative defined by the unit tonnage. This value is graduated, as defined in the table below.
@@ -80,6 +79,18 @@ Modifier | 0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
 The following diagram illustrates the combination of tonnage and tactics to show the various ranges in which units will operate. In the table below, the sum is given by the ⌄ symbol, next to the tactics value that would set the boundary. The ⌃4,5 block defines the **minimum** value for a pilot with Piloting skill 4 or 5. As we'll see shortly, this value can be used to evaluate how average skill units will interact across tactics and tonnage limits.
 
 ![Tactics Impact Table](tactics_table.png "Tactics Impact on initiative")
+
+#### Reserve Penalty
+In addition, tactics reduces the impact of the reserve carry over penalty. Each time a unit reserves, the number of phases dropped is added to a penalty applied on the following round. Each time the phase drop is applied, it is reduced by the tactics skill modifier defined above. The phase drop modifier will never be reduced below -1 however.
+
+Example: A unit reserves 3 times during a round, dropping 5 phases, 3 phases, and 7 phases. The reserve penalty applied on the following round would be:
+
+Tactics | Modifier | Calculation | Penalty
+-- | -- | -- | --
+3 | +1 | (-5 + 1 = -4) + (-3 + 1 = -2) + (-7 + 1 = -6) | -12
+5 | +2 | (-5 + 2 = -3) + (-3 + 2 = -1) + (-7 + 2 = -5) | -9
+7 | +3 | (-5 + 3 = -2) + (-3 + 3 = -1) + (-7 + 3 = -4) | -7
+9 | +4 | (-5 + 4 = -1) + (-3 + 4 = -1) + (-7 + 4 = -3) | -5
 
 ### Impact of Piloting
 
@@ -120,7 +131,79 @@ Modifier | 0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
 
 If the modifier is greater than the penalty, a flat -1 penalty will be applied.
 
+### Tonnage Impact
+The tonnage of a unit determines a multiplier applied to the lower (3) and upper (5) bounds of the phase calculation. After multiplication, the lower bound is rounded down, while the upper bound is rounded up.
+
+Tonnage | 05 | 10-15 | 20-25 | 30-35 | 40-45 | 50-55 | 60-65 | 70-75 | 80-85 | 90-95 | 100 | 100+
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
+*Base Initiative* | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 9
+
+### Engine Impact
+This mod breaks units down into 10-ton ranges, such as 20-25 tons, 30-35 tons, etc. Within each range, there is a sweet-spot for engine ratings where a unit is considered to have a typical engine for its class. Units with engine ratings less than this midpoint suffer an initiative penalty from -3 to -1, while units with engine ratings above this midpoint gain a bonus between +1 to +3.
+
+For a given midpoint, the modifier bounds are defined below.
+
+Modifier | -3 | -2 | -1 | +0 | +1 | +2 | +3
+-- | -- | -- | -- | -- | -- | -- | --
+Midpoint Multiplier | 0.3 | 0.6 | 0.8 | 1.0 | 1.2 | 1.4 | 1.7
+Example | 2	| 4 | 6	| 8	| 10 | 12	| 14
+
+Each unit's engine rating is divided by its tonnage to define an **engine ratio**. Ratios above the midpoint are are rounded up to the nearest integer, while ratios below the midpoint are rounded down. These are then compared against the bounds to determine the modifier that will be applied.
+
+The breakpoints by tonnage and rating are defined below:
+
+Tons / Mod | -3 | -2 | -1 | +0 | +1 | +2 | +3
+-- | -- | -- | -- | -- | -- | -- | --
+5 | 15| 30 | 40 | 55 | 70 | 80 | 95
+10 | 30 | 60 | 80 | 100 | 120 | 140 | 170
+15 | 30 | 75 | 105 | 135 | 165 | 195 | 240
+20 | 40 | 80 | 120 | 160 | 200 | 240 | 280
+25 | 50 | 100 | 150 | 200 | 250 | 300 | 350
+30 | 60 | 120 | 150 | 210 | 270 | 300 | 360
+35 | 70 | 140 | 175 | 245 | 315 | 350 | 420
+40 | 40 | 120 | 160 | 240 | 320 | 360 | NA
+45 | 45 | 135 | 180 | 270 | 360 | 405 | NA
+50 | 50 | 150 | 200 | 250 | 300 | 350 | NA
+55 | 55 | 165 | 220 | 275 | 330 | 385 | NA
+60 | 60 | 120 | 180 | 240 | 300 | 360 | NA
+65 | 65 | 130 | 195 | 260 | 325 | 390 | NA
+70 | 70 | 140 | 210 | 280 | 350 | 420 | NA
+75 | 75 | 150 | 225 | 300 | 375 | 450 | NA
+80 | NA | 80 | 160 | 240 | 320 | 400 | NA
+85 | NA | 85 | 170 | 255 | 340 | 425 | NA
+90 | NA | 90 | 180 | 270 | 360 | NA | NA
+95 | NA | 95 | 190 | 285 | 380 | NA | NA
+100 | NA | 100 | 200 | 300 | 400 | NA | NA
+150 | NA | 150 | 150 | 300 | NA | NA | NA
+200 | NA | 200 | 200 | 400 | NA | NA | NA
+
+This feature on the [MechEngineer](https://github.com/BattletechModders/MechEngineer/) mod.
+
+Units with the `unit_powerarmor` tag have neither a bonus or penalty.
 
 ### Miscellaneous
 
 Turrets suffer a -4 penalty, while tanks suffer a -2 to reflect their relative slowness in the background material. This may be removed in the future if chassis specific quirks are added to replicate this effect.
+
+## Changelog
+
+### 0.4.0
+- Adds carry-over penalty for reserve (HESITATION!)
+- Adds engine vs. tonnage modifier of -3 to +3
+- Removes the green highlight for the profile; now highlights only the name title bar
+- Highlight/icon colors exposed through `mod.json`
+
+### 0.3.1
+- Eliminates messages from dead actors
+- Fixes issue where knockdown, prone, shutdown penalties were applied as bonuses
+
+### 0.3.0
+- Possible fix for issue with reinforcements that spawn during a round
+- Simplified modifiers, documented as per github.com
+- Implemented injury penalties as they occur.
+- Bonus health from cockpits works to eliminate injuries
+- Reduced existing injury penalties by 1/2.
+- Fixes to melee impacts. Guts reduces impacts of melee.
+- Refine prone and shutdown modifiers. Prone now incurs a -9, shutdown -6. Both are modified by piloting.
+- New approach that allows piloting skill to reduce randomness
+- Added some colorization to make it easier to distinguish units that have/haven't activated
