@@ -146,6 +146,11 @@ namespace SkillBasedInit {
                 int[] randomnessBounds = PilotHelper.GetRandomnessBounds(selectedPilot);
                 details.Add($"<space=5em>Piloting: -{randomnessBounds[0]} to -{randomnessBounds[1]}");
 
+                // --- LANCE ---
+
+
+                // --- Badge ---
+
                 ___initiativeText.SetText($"{initValue}");
                 ___initiativeText.color = Color.black;
                 ___initiativeColor.SetUIColor(UIColor.White);
