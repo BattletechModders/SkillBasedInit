@@ -1,11 +1,7 @@
 ﻿using BattleTech;
-using CustomComponents;
-using HBS.Collections;
-using MechEngineer;
 using SkillBasedInit.Helper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SkillBasedInit {
 
@@ -39,11 +35,8 @@ namespace SkillBasedInit {
             Klutz: Reduced stability from piloting.
         */
 
-        readonly public int[] randomBounds = new int[2];
+        readonly public int[] randomnessBounds = new int[2];
         readonly public int[] injuryBounds = new int[2];
-
-        // Track any changes in the previous round init
-        public int priorRoundInit = -1;
 
         // If an injury was suffered on a previous round, but not handled, take the full impact on the coming round.
         public int deferredInjuryMod = 0;
@@ -53,24 +46,22 @@ namespace SkillBasedInit {
         public ActorInitiative(AbstractActor actor) {
             //SkillBasedInit.Logger.Log($"Initializing ActorInitiative for {actor.DisplayName} with GUID {actor.GUID}.");
 
-            // --- UNIT IMPACTS ---
+            if (actor.GetType() == typeof(Mech)) {
+                this.type = ActorType.Mech;
+            } else if (actor.GetType() == typeof(Vehicle)) {
+                this.type = ActorType.Vehicle;
+            } else {
+                this.type = ActorType.Turret;
+            }
 
+            // --- UNIT IMPACTS ---
             // Static initiative from tonnage
             float tonnage = UnitHelper.GetUnitTonnage(actor);
             int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
             roundInitBase += tonnageMod;
 
             // Any special modifiers by type
-            int typeMod = 0;
-            if (actor.GetType() == typeof(Mech)) {
-                this.type = ActorType.Mech;
-            } else if (actor.GetType() == typeof(Vehicle)) {
-                this.type = ActorType.Vehicle;
-                typeMod = SkillBasedInit.Settings.VehicleROCModifier;
-            } else {
-                this.type = ActorType.Turret;
-                typeMod = SkillBasedInit.Settings.TurretROCModifier;
-            }
+            int typeMod = UnitHelper.GetTypeModifier(actor);
             roundInitBase += typeMod;
 
             // Any modifiers that come from the chassis/mech/vehicle defs
@@ -90,12 +81,13 @@ namespace SkillBasedInit {
             this.injuryBounds = PilotHelper.GetInjuryBounds(pilot);
 
             this.pilotingEffectMod = PilotHelper.GetPilotingModifier(pilot);
-            this.randomBounds = PilotHelper.GetRandomnessBounds(pilot);
+            this.randomnessBounds = PilotHelper.GetRandomnessBounds(pilot);
 
             this.tacticsEffectMod = PilotHelper.GetTacticsModifier(pilot);
+            roundInitBase += tacticsEffectMod;
 
-            int pilotMod = PilotHelper.GetTagsModifier(pilot);
-            roundInitBase += pilotMod;
+            int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
+            roundInitBase += pilotTagsMod;
 
             // --- COMBO IMPACTS --
             // Determine the melee modifier
@@ -105,14 +97,20 @@ namespace SkillBasedInit {
             this.meleeDefenseMod = meleeMods[1];
             SkillBasedInit.LogDebug($"Actor:{actor.DisplayName}_{pilot.Name} has meleeAttackMod:{meleeAttackMod} meleeDefenseMod:{meleeDefenseMod}");
 
+            // Log the full view for testing
+            roundInitBase += typeMod;
+            roundInitBase += componentsMod;
+            roundInitBase += engineMod;
+            roundInitBase += tacticsEffectMod;
+            roundInitBase += pilotTagsMod;
+
             SkillBasedInit.Logger.Log($"Actor:{actor.DisplayName}_{pilot.Name} has " +
-                $"roundInitBase:{roundInitBase} = (chassisBase:{chassisBase} + tacticsMod:{tacticsEffectMod} + staticMod:{staticMod}) " +
-                $"randomBounds:({randomBounds[0]}-{randomBounds[1]}) " +
+                $"roundInitBase:{roundInitBase} = (tonnage:{tonnageMod} + components:{componentsMod} + engine:{engineMod}" +
+                $"tactics:{tacticsEffectMod} + pilotTags:{pilotTagsMod}) " +
+                $"randomness:({randomnessBounds[0]}-{randomnessBounds[1]}) " +
                 $"injuryBounds:({injuryBounds[0]}-{injuryBounds[1]}) " +
                 $"gutsMod:{gutsEffectMod} pilotingMod:{pilotingEffectMod} tacticsMod:{tacticsEffectMod}");
         }
-
-
 
         public void CalculateRoundInit(AbstractActor actor) {
             // If the actor is dead, skip them
@@ -123,7 +121,7 @@ namespace SkillBasedInit {
             }
 
             // Generate a random element            
-            int roundVariance = SkillBasedInit.Random.Next(this.randomBounds[0], this.randomBounds[1]);
+            int roundVariance = SkillBasedInit.Random.Next(this.randomnessBounds[0], this.randomnessBounds[1]);
             int roundInitiative = this.roundInitBase - roundVariance;
             SkillBasedInit.LogDebug($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has roundInit:{roundInitiative} = (roundInitbase:{roundInitBase} - roundVariance:{roundVariance})");
 
@@ -155,15 +153,16 @@ namespace SkillBasedInit {
                 var mech = (Mech)actor;
                 isMovementCrippled = mech.IsLocationDestroyed(ChassisLocations.LeftLeg) || mech.IsLocationDestroyed(ChassisLocations.RightLeg) ? true : false;
             } else if (this.type == ActorType.Vehicle) {
+                // TODO: This is pretty unlikely; vehicles rarely get crippled before they are destroyed. Find another solution?
                 var vehicle = (Vehicle)actor;
                 isMovementCrippled = vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right) ? true : false;
             }
 
             if (isMovementCrippled) {
-                int rawMod = SkillBasedInit.Settings.CrippledMovementModifier - this.pilotingEffectMod;
+                int rawMod = SkillBasedInit.Settings.CrippledMovementModifier + this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Crippled Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.CrippledMovementModifier} - {this.pilotingEffectMod})");
 
-                int penalty = Math.Min(-1, -1 * rawMod);
+                int penalty = Math.Min(-1, rawMod);
                 roundInitiative += penalty;
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has crippled movement! Subtracted {penalty} = roundInit:{roundInitiative}");
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CRIPPLED! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
@@ -171,20 +170,20 @@ namespace SkillBasedInit {
 
             // Check for knockdown / prone 
             if (actor.IsProne) {
-                int rawMod = SkillBasedInit.Settings.ProneModifier - this.pilotingEffectMod;
+                int rawMod = SkillBasedInit.Settings.ProneModifier + this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Prone Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ProneModifier} - {this.pilotingEffectMod})");
 
-                int penalty = Math.Min(-1, -1 * rawMod);
+                int penalty = Math.Min(-1, rawMod);
                 roundInitiative += penalty;
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is prone! Subtracted {penalty} = roundInit:{roundInitiative}");
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"PRONE! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
             if (actor.IsShutDown) {
-                int rawMod = SkillBasedInit.Settings.ShutdownModifier - this.pilotingEffectMod;
+                int rawMod = SkillBasedInit.Settings.ShutdownModifier + this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Shutdown Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ShutdownModifier} - {this.pilotingEffectMod})");
 
-                int penalty = Math.Min(-1, -1 * rawMod);
+                int penalty = Math.Min(-1, rawMod);
                 roundInitiative += penalty;
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is shutdown! Subtracted {penalty} = roundInit:{roundInitiative}");
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"SHUTDOWN! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
@@ -202,39 +201,26 @@ namespace SkillBasedInit {
             if (this.deferredReserveMod > 0) {
                 roundInitiative -= deferredReserveMod;
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) deferred last round! Subtracted {this.deferredReserveMod} = roundInit:{roundInitiative}");
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"HESITATION! -{deferredReserveMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
-            }
-
-            // Check to see if the actor's initative changed in the prior round
-            int delta = 0;
-            if (this.priorRoundInit != -1) {
-                delta = actor.Initiative - this.priorRoundInit;
-                roundInitiative += delta;
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has init:{actor.Initiative} but priorInit:{this.priorRoundInit} - applying delta:{delta} to roundInit:{roundInitiative} reflect init changes during round.");
-                /* 
-                 * TODO: Should this be instead                 
-                    string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
-                    __instance.StatCollection.ModifyStat<int>(sourceID, stackItemUID, statName, StatCollection.StatOperation.Int_Add, 1, -1, true);
-                */
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"HESITATED! -{deferredReserveMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
             
             if (roundInitiative <= 0) {
-                roundInitiative = 1;
-                SkillBasedInit.Logger.Log($"  Round init {roundInitiative} less than 0, setting to 1.");
+                roundInitiative = SkillBasedInit.MinPhase;
+                SkillBasedInit.LogDebug($"  Round init {roundInitiative} less than 0, setting to 1.");
             } else if (roundInitiative > 30) {
-                roundInitiative = 30;
-                SkillBasedInit.Logger.Log($"  Round init {roundInitiative} greater than 30, setting to 30.");
+                roundInitiative = SkillBasedInit.MaxPhase;
+                SkillBasedInit.LogDebug($"  Round init {roundInitiative} greater than 30, setting to 30.");
             }
 
             // Init is flipped... 1 acts in first phase, then 2, etc.
-            actor.Initiative = 31 - roundInitiative;
-            SkillBasedInit.Logger.Log($"== Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has roundInitiative:({roundInitiative}) from initBase:{roundInitBase} - variance:{roundVariance} plus modifiers.");
+            actor.Initiative = (SkillBasedInit.MaxPhase + 1) - roundInitiative;
+            SkillBasedInit.Logger.Log($"== Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has init:({roundInitiative}) from base:{roundInitBase} - variance:{roundVariance} plus modifiers.");
         }
 
         public static int CalculateMeleeDelta(ActorInitiative attacker, ActorInitiative target) {
             // Always return 1 or more
-            int rawDelta = Math.Max(1, attacker.meleeAttackMod - target.meleeAttackMod);
-            SkillBasedInit.LogDebug($"Melee rawDelta:{rawDelta} = (attackerMod:{attacker.meleeAttackMod} - targetMod:{target.meleeAttackMod})");
+            int rawDelta = Math.Max(1, attacker.meleeAttackMod - target.meleeDefenseMod);
+            SkillBasedInit.LogDebug($"Melee rawDelta:{rawDelta} = (attackerMod:{attacker.meleeAttackMod} - targetMod:{target.meleeDefenseMod})");
             int modifiedDelta = Math.Max(1, rawDelta - target.gutsEffectMod);
             SkillBasedInit.LogDebug($"MeleeMod reduced to modifiedDelta:{modifiedDelta} = (rawDelta:{rawDelta} - gutsEffectMod:{target.gutsEffectMod})");
             return modifiedDelta;
@@ -256,7 +242,6 @@ namespace SkillBasedInit {
                 target.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(target.GUID));
                 target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID, $"CLANG! -{impact} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
-
         }
 
         public int CalculateInjuryPenalty(int damageTaken, int existingInjuries) {

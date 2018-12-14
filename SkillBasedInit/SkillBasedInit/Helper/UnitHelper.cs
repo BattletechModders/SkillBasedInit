@@ -43,12 +43,6 @@ namespace SkillBasedInit.Helper {
             { SuperHeavyTonnage, 2 }, // 105+        
         };
 
-        public UnitHelper() {
-            // Normalized BaseInitiative stats - should this be broken down by component in the tooltip?
-            // Base init from tonnage
-            // Engine mod
-        }
-
         public static float GetUnitTonnage(AbstractActor actor) {
             float tonnage = DefaultTonnage;
 
@@ -97,6 +91,7 @@ namespace SkillBasedInit.Helper {
          *  then invert the value. Because HBS defines bonuses as negative modifiers,
          *  invert this value to have it make sense elsewhere in the code.        
          */
+         // TODO: Should this use the MechDef call below? 
         public static int GetNormalizedComponentModifier(AbstractActor actor) {
             int unitInit = 0;
 
@@ -104,6 +99,7 @@ namespace SkillBasedInit.Helper {
             if (actor.GetType() == typeof(Mech)) {
                 weightClass = ((Mech)actor).weightClass;
             } else if (actor.GetType() == typeof(Vehicle)) {
+                var vehicle = (Vehicle)actor;
                 weightClass = ((Vehicle)actor).weightClass;
             } else { // turret
                 TagSet actorTags = actor.GetTags();
@@ -178,9 +174,31 @@ namespace SkillBasedInit.Helper {
 
                 // Because HBS init values were from 2-5, bonuses will be negative at this point and penalties positive. Invert these.
                 unitInit = baseMod * -1;
-                SkillBasedInit.LogDebug($"Normalized BaseInit from {actor.StatCollection.GetValue<int>("BaseInitiative")} to unitInit:{unitInit}");
+                SkillBasedInit.LogDebug($"Normalized BaseInit for Actor:{actor.DisplayName}_{actor.GetPilot().Name} from {actor.StatCollection.GetValue<int>("BaseInitiative")} to unitInit:{unitInit}");
             }
 
+            return unitInit;
+        }
+
+        // Calculate the initiative modifiers from all components based upon a MechDef
+        public static int GetNormalizedComponentModifier(MechDef mechDef) {
+            int baseMod = 0;
+            if (mechDef.Inventory != null) {
+                MechComponentRef[] inventory = mechDef.Inventory;
+                foreach (MechComponentRef mechComponentRef in inventory) {
+                    if (mechComponentRef.Def != null && mechComponentRef.Def.statusEffects != null) {
+                        EffectData[] statusEffects = mechComponentRef.Def.statusEffects;
+                        foreach (EffectData effect in statusEffects) {
+                            if (MechStatisticsRules.GetInitiativeModifierFromEffectData(effect, true, null) == 0) {
+                                baseMod += MechStatisticsRules.GetInitiativeModifierFromEffectData(effect, false, null);
+                            }
+                        }
+                    }
+                }
+            }
+            // Because HBS init values are 2-5, bonuses are negative values. Invert these.
+            int unitInit = baseMod * -1;
+            SkillBasedInit.LogDebug($"Normalized BaseInit for mechDef:{mechDef.Name} from {baseMod} to unitInit:{unitInit}");
             return unitInit;
         }
 
@@ -189,56 +207,89 @@ namespace SkillBasedInit.Helper {
             if (actor.GetTags().Contains("unit_powerarmor")) {
                 SkillBasedInit.LogDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} is PowerArmor, skipping engine bonus.");
             } else {
-                var mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
+                MechComponent mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
                 if (mainEngineComponent != null) {
-                    var engine = mainEngineComponent?.componentDef?.GetComponent<EngineCoreDef>();
-                    SkillBasedInit.LogDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has engine: {engine?.ToString()} with rating: {engine?.Rating}");
-
+                    EngineCoreDef engine = mainEngineComponent?.componentDef?.GetComponent<EngineCoreDef>();
                     float tonnage = GetUnitTonnage(actor);
-                    float engineRatio = engine.Rating / tonnage;
-
-                    int tonnageRange = GetTonnageRange(tonnage);
-                    int ratioMidpoint = EngineMidpointByTonnage[tonnageRange];
-                    SkillBasedInit.LogDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has engineRatio:{engineRatio} against midpoint:{ratioMidpoint}");
-                    if (engineRatio > ratioMidpoint) {
-                        int oneSigma = (int)Math.Ceiling(ratioMidpoint * 1.2);
-                        int twoSigma = (int)Math.Ceiling(ratioMidpoint * 1.4);
-                        int threeSigma = (int)Math.Ceiling(ratioMidpoint * 1.7);
-                        if (engineRatio < oneSigma) {
-                            engineMod = 0;
-                        } else if (engineRatio < twoSigma) {
-                            engineMod = 1;
-                        } else if (engineRatio < threeSigma) {
-                            engineMod = 2;
-                        } else {
-                            engineMod = 3;
-                        }
-                        SkillBasedInit.LogDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has an oversized engine, gets engineMod:{engineMod}");
-                    } else if (engineRatio < ratioMidpoint) {
-                        int oneSigma = (int)Math.Floor(ratioMidpoint * 0.8);
-                        int twoSigma = (int)Math.Floor(ratioMidpoint * 0.6);
-                        int threeSigma = (int)Math.Floor(ratioMidpoint * 0.3);
-                        if (engineRatio > oneSigma) {
-                            engineMod = 0;
-                        } else if (engineRatio > twoSigma) {
-                            engineMod = -1;
-                        } else if (engineRatio > threeSigma) {
-                            engineMod = -2;
-                        } else {
-                            engineMod = -3;
-                        }
-                        SkillBasedInit.LogDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has an undersized engine, gets engineMod:{engineMod}");
-                    } else {
-                        SkillBasedInit.LogDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has balanced engine, +0 modifier.");
-                        engineMod = 0;
-                    }
-
+                    engineMod = CalculateEngineModifier(tonnage, engine.Rating);
+                    SkillBasedInit.LogDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} with engine rating: {engine?.Rating} has engineMod:{engineMod}");
                 } else {
                     SkillBasedInit.Logger.Log($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has no engine - is this expected?");
                 }
             }
 
             return engineMod;
+        }
+
+        public static int GetEngineModifier(MechDef mechDef) {
+            int engineMod = 0;
+
+            // var mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
+            MechComponentRef engineRef = mechDef.Inventory.FirstOrDefault(mcr => mcr?.GetComponent<EngineCoreDef>() != null);
+            SkillBasedInit.Logger.Log($"MechDef:{mechDef.Name} has engineComponent:{engineRef}?");
+            if (engineRef != null) {
+                EngineCoreDef engine = engineRef.Def.GetComponent<EngineCoreDef>();
+                float tonnage = mechDef.Chassis.Tonnage;
+                engineMod = CalculateEngineModifier(tonnage, engine.Rating);
+            }
+
+            return engineMod;
+        }
+
+        private static int CalculateEngineModifier(float tonnage, int rating) {
+            int engineMod = 0;
+
+            float engineRatio = rating / tonnage;
+
+            int tonnageRange = GetTonnageRange(tonnage);
+            int ratioMidpoint = EngineMidpointByTonnage[tonnageRange];
+            SkillBasedInit.LogDebug($"Comparing engineRatio:{engineRatio} from rating:{rating} / tonnage:{tonnage} vs midpoint:{ratioMidpoint}");
+            if (engineRatio > ratioMidpoint) {
+                int oneSigma = (int)Math.Ceiling(ratioMidpoint * 1.2);
+                int twoSigma = (int)Math.Ceiling(ratioMidpoint * 1.4);
+                int threeSigma = (int)Math.Ceiling(ratioMidpoint * 1.7);
+                if (engineRatio < oneSigma) {
+                    engineMod = 0;
+                } else if (engineRatio < twoSigma) {
+                    engineMod = 1;
+                } else if (engineRatio < threeSigma) {
+                    engineMod = 2;
+                } else {
+                    engineMod = 3;
+                }
+                SkillBasedInit.LogDebug($"Oversized engine, returning bonus engineMod:{engineMod}");
+            } else if (engineRatio < ratioMidpoint) {
+                int oneSigma = (int)Math.Floor(ratioMidpoint * 0.8);
+                int twoSigma = (int)Math.Floor(ratioMidpoint * 0.6);
+                int threeSigma = (int)Math.Floor(ratioMidpoint * 0.3);
+                if (engineRatio > oneSigma) {
+                    engineMod = 0;
+                } else if (engineRatio > twoSigma) {
+                    engineMod = -1;
+                } else if (engineRatio > threeSigma) {
+                    engineMod = -2;
+                } else {
+                    engineMod = -3;
+                }
+                SkillBasedInit.LogDebug($"Undersized engine, returning penalty engineMod:{engineMod}");
+            } else {
+                SkillBasedInit.LogDebug("Balanced engine, returning engineMod:0");
+                engineMod = 0;
+            }
+
+            return engineMod;
+        }
+
+        public static int GetTypeModifier(AbstractActor actor) {
+            int typeMod;
+            if (actor.GetType() == typeof(Mech)) {
+                typeMod = 0;
+            } else if (actor.GetType() == typeof(Vehicle)) {
+                typeMod = SkillBasedInit.Settings.VehicleROCModifier;
+            } else {
+                typeMod = SkillBasedInit.Settings.TurretROCModifier;
+            }
+            return typeMod;
         }
     }
 }
