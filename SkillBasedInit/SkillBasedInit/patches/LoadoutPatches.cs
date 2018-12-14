@@ -16,7 +16,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { })]
     public static class MechBayMechInfoWidget_SetInitiative {
         public static void Postfix(MechBayMechInfoWidget __instance, MechDef ___selectedMech,
-            GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText) {
+            GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText, HBSTooltip ___initiativeTooltip) {
 
             if (___initiativeObj == null || ___initiativeText == null) {
                 return; 
@@ -27,65 +27,58 @@ namespace SkillBasedInit {
                 ___initiativeObj.SetActive(true);
                 ___initiativeText.SetText("{0}", new object[] { "-" });
             } else {
+                List<string> details = new List<string>();
+
                 // Static initiative from tonnage
                 float tonnage = ___selectedMech.Chassis.Tonnage;
                 int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
+                details.Add($"<space=5em>Base: {tonnageMod}");
 
                 // Any modifiers that come from the chassis/mech/vehicle defs
                 int componentsMod = UnitHelper.GetNormalizedComponentModifier(___selectedMech);
+                if (componentsMod > 0) {
+                    details.Add($"<space=5em><color=#00FF00>Components: {componentsMod:+0}</color>");
+                } else if (componentsMod < 0) {
+                    details.Add($"<space=5em><color=#FF0000>Components: {componentsMod:0}</color>");
+                } else {
+                    details.Add($"<space=5em>Components: {componentsMod:+0}");
+                }
 
                 // Modifier from the engine
                 int engineMod = UnitHelper.GetEngineModifier(___selectedMech);
+                if (engineMod > 0) {
+                    details.Add($"<space=5em><color=#00FF00>Engine: {engineMod:+0}</color>");
+                } else if (engineMod < 0) {
+                    details.Add($"<space=5em><color=#FF0000>Engine: {engineMod:0}</color>");
+                } else {
+                    details.Add($"<space=5em>Engine: {engineMod:+0}");
+                }
 
+                // --- Badge ---
                 ___initiativeObj.SetActive(true);
                 ___initiativeText.SetText($"{tonnageMod + componentsMod + engineMod}");
+
+                // --- Tooltip ---
+                int maxInit = (SkillBasedInit.MaxPhase + 1) - (tonnageMod + componentsMod);
+                details.Add("---\n");
+                details.Add($"Expected Phase: {maxInit} ");
+
+                string tooltipTitle = $"{___selectedMech.Name}";
+                string tooltipText = String.Join("\n", details.ToArray());
+                BaseDescriptionDef initiativeData = new BaseDescriptionDef("MB_MIW_MECH_TT", tooltipTitle, tooltipText, null);
+                ___initiativeTooltip.enabled = true;
+                ___initiativeTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(initiativeData));
             }
         }
     }
-
-    /*
-            public void SetInitiative ()
-        {
-            if (!((UnityEngine.Object)initiativeObj == (UnityEngine.Object)null) && !((UnityEngine.Object)initiativeText == (UnityEngine.Object)null)) {
-                if (selectedMech == null) {
-                    initiativeObj.SetActive (false);
-                } else {
-                    initiativeObj.SetActive (true);
-                    int num = 0;
-                    switch (selectedMech.Chassis.weightClass) {
-                    case WeightClass.LIGHT:
-                        num = 4;
-                        break;
-                    case WeightClass.MEDIUM:
-                        num = 3;
-                        break;
-                    case WeightClass.HEAVY:
-                        num = 2;
-                        break;
-                    case WeightClass.ASSAULT:
-                        num = 1;
-                        break;
-                    }
-                    initiativeText.SetText ("{0}", num);
-                    if ((UnityEngine.Object)initiativeTooltip != (UnityEngine.Object)null) {
-                        BaseDescriptionDef initiativeData = GetInitiativeData (selectedMech.Chassis.weightClass);
-                        if (initiativeData != null) {
-                            initiativeTooltip.enabled = true;
-                            initiativeTooltip.SetDefaultStateData (TooltipUtilities.GetStateDataFromObject (initiativeData));
-                        }
-                    }
-                }
-            }
-        }
-     */
 
     // Sets the initiative value in the lance loading screen. Because we want it to be understandable to players, 
     //  invert the values so they reflect the phase IDs, not the actual value
     [HarmonyPatch(typeof(LanceLoadoutSlot), "RefreshInitiativeData")]
     [HarmonyPatch(new Type[] { })]
     public static class LanceLoadoutSlot_RefreshInitiativeData {
-        public static void Postfix(LanceLoadoutSlot __instance, ref GameObject ___initiativeObj, ref TextMeshProUGUI ___initiativeText,
-            ref UIColorRefTracker ___initiativeColor, HBSTooltip ___initiativeTooltip) {
+        public static void Postfix(LanceLoadoutSlot __instance, GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText,
+            UIColorRefTracker ___initiativeColor, HBSTooltip ___initiativeTooltip, LanceConfiguratorPanel ___LC) {
 
             if (___initiativeObj == null || ___initiativeText == null || ___initiativeColor == null || ___initiativeTooltip == null) {
                 return;
@@ -115,29 +108,29 @@ namespace SkillBasedInit {
                 int componentsMod = UnitHelper.GetNormalizedComponentModifier(selectedMechDef);
                 initValue += componentsMod;
                 if (componentsMod > 0) {
-                    details.Add($"<space=5em>Components: {componentsMod}");
+                    details.Add($"<space=5em><color=#00FF00>Components: {componentsMod:+0}</color>");
                 } else if (componentsMod < 0) {
-                    details.Add($"<space=5em>Components: {componentsMod}");
+                    details.Add($"<space=5em><color=#FF0000>Components: {componentsMod:0}</color>");
                 } else {
-                    details.Add($"<space=5em>Components: {componentsMod}");
+                    details.Add($"<space=5em>Components: {componentsMod:+0}");
                 }
 
                 // Modifier from the engine
                 int engineMod = UnitHelper.GetEngineModifier(selectedMechDef);
                 initValue += engineMod;
                 if (engineMod > 0) {
-                    details.Add($"<space=5em><color=#00FF00>Engine: {engineMod}</color>");
+                    details.Add($"<space=5em><color=#00FF00>Engine: {engineMod:+0}</color>");
                 } else if (engineMod < 0) {
-                    details.Add($"<space=5em><color=#FF0000>Engine: {engineMod}</color>");
+                    details.Add($"<space=5em><color=#FF0000>Engine: {engineMod:0}</color>");
                 } else {
-                    details.Add($"<space=5em>Engine: {engineMod}");
+                    details.Add($"<space=5em>Engine: {engineMod:+0}");
                 }
 
                 // --- PILOT ---
                 Pilot selectedPilot = __instance.SelectedPilot.Pilot;
 
                 int tacticsMod = PilotHelper.GetTacticsModifier(selectedPilot);
-                details.Add($"<space=5em>Tactics: {tacticsMod}");
+                details.Add($"<space=5em>Tactics: {tacticsMod:+0}");
                 initValue += tacticsMod;
 
                 int pilotTagsMod = PilotHelper.GetTagsModifier(selectedPilot);
@@ -147,10 +140,16 @@ namespace SkillBasedInit {
                 details.Add($"<space=5em>Piloting: -{randomnessBounds[0]} to -{randomnessBounds[1]}");
 
                 // --- LANCE ---
-
+                if (___LC != null) {
+                    initValue += ___LC.lanceInitiativeModifier;
+                    if (___LC.lanceInitiativeModifier > 0) {
+                        details.Add($"<space=5em><color=#00FF00>Lance: {___LC.lanceInitiativeModifier:+0}</color>");
+                    } else if (___LC.lanceInitiativeModifier < 0) {
+                        details.Add($"<space=5em><color=#FF0000>Lance: {___LC.lanceInitiativeModifier:0}</color>");
+                    } 
+                }
 
                 // --- Badge ---
-
                 ___initiativeText.SetText($"{initValue}");
                 ___initiativeText.color = Color.black;
                 ___initiativeColor.SetUIColor(UIColor.White);
@@ -163,86 +162,11 @@ namespace SkillBasedInit {
 
                 string tooltipTitle = $"{selectedMechDef.Name}: {selectedPilot.Name}";
                 string tooltipText = String.Join("\n", details.ToArray());
-                BaseDescriptionDef initiativeData = new BaseDescriptionDef("TEST_ID", tooltipTitle, tooltipText, null);
+                BaseDescriptionDef initiativeData = new BaseDescriptionDef("LLS_MECH_TT", tooltipTitle, tooltipText, null);
                 ___initiativeTooltip.enabled = true;
                 ___initiativeTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(initiativeData));
             }
         }
-
-        /* TODO:
-                        int num3 = 0;
-                        if ((Object)LC != (Object)null) {
-                            num3 = LC.lanceInitiativeModifier;
-                        }
-
-                        -- Shows init from equipment that adds to lance mates
-         */
-
-        /*
-            if (!((Object)initiativeObj == (Object)null) && !((Object)initiativeText == (Object)null) && !((Object)initiativeColor == (Object)null)) {
-                    if ((Object)SelectedMech == (Object)null || SelectedMech.MechDef == null || SelectedMech.MechDef.Chassis == null) {
-                        initiativeObj.SetActive (false);
-                    } else if ((Object)SelectedPilot == (Object)null || SelectedPilot.Pilot == null || SelectedPilot.Pilot.pilotDef == null) {
-                        initiativeObj.SetActive (false);
-                    } else {
-                        initiativeObj.SetActive (true);
-                        int num = 0;
-                        int num2 = 0;
-                        switch (SelectedMech.MechDef.Chassis.weightClass) {
-                        case WeightClass.LIGHT:
-                            num = 4;
-                            break;
-                        case WeightClass.MEDIUM:
-                            num = 3;
-                            break;
-                        case WeightClass.HEAVY:
-                            num = 2;
-                            break;
-                        case WeightClass.ASSAULT:
-                            num = 1;
-                            break;
-                        }
-                        if (SelectedPilot.Pilot.pilotDef.AbilityDefs != null) {
-                            foreach (AbilityDef abilityDef in SelectedPilot.Pilot.pilotDef.AbilityDefs) {
-                                foreach (EffectData effectDatum in abilityDef.EffectData) {
-                                    if (MechStatisticsRules.GetInitiativeModifierFromEffectData (effectDatum, true, null) == 0) {
-                                        num2 += MechStatisticsRules.GetInitiativeModifierFromEffectData (effectDatum, false, null);
-                                    }
-                                }
-                            }
-                        }
-                        if (selectedMech.MechDef.Inventory != null) {
-                            MechComponentRef[] inventory = SelectedMech.MechDef.Inventory;
-                            foreach (MechComponentRef mechComponentRef in inventory) {
-                                if (mechComponentRef.Def != null && mechComponentRef.Def.statusEffects != null) {
-                                    EffectData[] statusEffects = mechComponentRef.Def.statusEffects;
-                                    foreach (EffectData effect in statusEffects) {
-                                        if (MechStatisticsRules.GetInitiativeModifierFromEffectData (effect, true, null) == 0) {
-                                            num2 += MechStatisticsRules.GetInitiativeModifierFromEffectData (effect, false, null);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        int num3 = 0;
-                        if ((Object)LC != (Object)null) {
-                            num3 = LC.lanceInitiativeModifier;
-                        }
-                        num2 += num3;
-                        int num4 = Mathf.Clamp (num + num2, 1, 5);
-                        initiativeText.SetText ($"{num4}");
-                        if ((Object)initiativeTooltip != (Object)null) {
-                            BaseDescriptionDef initiativeData = GetInitiativeData (SelectedMech.MechDef.Chassis.weightClass);
-                            if (initiativeData != null) {
-                                initiativeTooltip.enabled = true;
-                                initiativeTooltip.SetDefaultStateData (TooltipUtilities.GetStateDataFromObject (initiativeData));
-                            }
-                        }
-                        initiativeColor.SetUIColor ((num2 <= 0) ? ((num2 >= 0) ? UIColor.White : UIColor.Red) : UIColor.Gold);
-                    }
-                }
-
-         */
 
     }
 }

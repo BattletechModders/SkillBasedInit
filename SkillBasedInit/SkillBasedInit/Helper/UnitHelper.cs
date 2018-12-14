@@ -226,7 +226,7 @@ namespace SkillBasedInit.Helper {
 
             // var mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
             MechComponentRef engineRef = mechDef.Inventory.FirstOrDefault(mcr => mcr?.GetComponent<EngineCoreDef>() != null);
-            SkillBasedInit.Logger.Log($"MechDef:{mechDef.Name} has engineComponent:{engineRef}?");
+            SkillBasedInit.LogDebug($"MechDef:{mechDef.Name} has engineComponent:{engineRef}?");
             if (engineRef != null) {
                 EngineCoreDef engine = engineRef.Def.GetComponent<EngineCoreDef>();
                 float tonnage = mechDef.Chassis.Tonnage;
