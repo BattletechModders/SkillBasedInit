@@ -4,9 +4,7 @@ using System;
 
 namespace SkillBasedInit {
 
-    // TODO: If an attack damages multiple locations, this gets applied multiple times! Fix this!
     // TODO: Should embraced/guarded reduce this as well?
-
     [HarmonyPatch(typeof(Mech), "TakeWeaponDamage")]
     [HarmonyPatch(new Type[] { typeof(WeaponHitInfo), typeof(int), typeof(Weapon), typeof(float), typeof(int), typeof(DamageType) })]
     //public override void TakeWeaponDamage (WeaponHitInfo hitInfo, int hitLocation, Weapon weapon, float damageAmount, int hitIndex, DamageType damageType)
