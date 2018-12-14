@@ -20,7 +20,6 @@ namespace SkillBasedInit {
         // The init malus per point of difference in tonnage
         public float MeleeTonnageMalus = 1;
 
-
         // Modifier applied to make vehicles slower
         public int VehicleROCModifier = -2;
 
