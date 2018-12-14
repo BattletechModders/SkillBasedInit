@@ -109,7 +109,7 @@ namespace SkillBasedInit {
                     ___initiativeText.fontSize = 12;
                     ___initiativeText.enableWordWrapping = false;
                     ___initiativeText.color = Color.white;
-                    ___initiativeText.SetText($"{pilotMod[0]}-{pilotMod[1]}");
+                    ___initiativeText.SetText($"{pilotMod[0]}");
                     ___initiativeColor.SetUIColor(UIColor.Red);
                 }
             }
