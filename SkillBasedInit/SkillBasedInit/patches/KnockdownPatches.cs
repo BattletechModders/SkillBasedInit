@@ -44,25 +44,23 @@ namespace SkillBasedInit {
                 int knockDownMod = SkillBasedInit.Random.Next(actorInit.injuryBounds[0], actorInit.injuryBounds[1]);
                 SkillBasedInit.Logger.Log($"AbstractActor:ForceUnitOnePhaseDown modifying Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) initiative by {knockDownMod} due to knockdown!");
 
-                if (__instance.HasActivatedThisRound || __instance.Initiative != SkillBasedInit.MaxPhase) {
+                if (__instance.HasActivatedThisRound || __instance.Initiative >= SkillBasedInit.MaxPhase) {
                     SkillBasedInit.Logger.Log($"Knockdown will slow Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) by {knockDownMod} init on next activation!");
-                    __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"THUD! -{knockDownMod} INITIATIVE NEXT ROUND", FloatieMessage.MessageNature.Debuff));
+                    __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"GOING DOWN! -{knockDownMod} INITIATIVE NEXT ROUND", FloatieMessage.MessageNature.Debuff));
 
                 } else {
                     SkillBasedInit.Logger.Log($"Knockdown immediately slows Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) by {knockDownMod} init!");
-                    if (__instance.Combat.TurnDirector.IsInterleaved && __instance.Initiative != SkillBasedInit.MaxPhase) {
-                        __instance.Initiative = __instance.Initiative + knockDownMod;
-                        if (__instance.Initiative > SkillBasedInit.MaxPhase) {
-                            __instance.Initiative = SkillBasedInit.MaxPhase;
-                        } 
-                        __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
-                    }
-                    __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"THUD! -{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                    __instance.Initiative = __instance.Initiative + knockDownMod;
+                    if (__instance.Initiative > SkillBasedInit.MaxPhase) {
+                        __instance.Initiative = SkillBasedInit.MaxPhase;
+                    } 
+                    __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
+                    __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"GOING DOWN! -{knockDownMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
                 }
 
-                // TODO: Is this causing the lockup?
-                string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
-                __instance.StatCollection.ModifyStat<int>(sourceID, stackItemUID, statName, StatCollection.StatOperation.Int_Add, knockDownMod, -1, true);
+                // TODO: Is this causing the lockup? 
+                //string statName = (!addedBySelf) ? "PhaseModifier" : "PhaseModifierSelf";
+                //__instance.StatCollection.ModifyStat<int>(sourceID, stackItemUID, statName, StatCollection.StatOperation.Int_Add, knockDownMod, -1, true);
 
             }            
             return shouldReturn;
