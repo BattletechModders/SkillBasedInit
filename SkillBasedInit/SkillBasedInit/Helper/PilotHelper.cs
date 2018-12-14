@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using BattleTech;
-using HBS.Collections;
 
 namespace SkillBasedInit.Helper {
     public class PilotHelper {
@@ -67,6 +66,39 @@ namespace SkillBasedInit.Helper {
             }
 
             return mod;
+        }
+
+        // Generates tooltip details for tags that provide modifiers
+        public static List<string> GetTagsModifierDetails(Pilot pilot) {
+            List<string> details = new List<string>();
+
+            foreach (string tag in pilot.pilotDef.PilotTags) {
+                if (SkillBasedInit.Settings.PilotTagModifiers.ContainsKey(tag)) {
+                    int tagMod = SkillBasedInit.Settings.PilotTagModifiers[tag];
+                    if (tagMod > 0) {
+                        details.Add($"<space=5em><color=#00FF00>{tag}: {tagMod}</color>");
+                    } else if (tagMod < 0) {
+                        details.Add($"<space=5em><color=#FF0000>{tag}: {tagMod}</color>");
+                    }
+                }
+            }
+
+            return details;
+        }
+
+        // Generates tooltip details for tags that have a non-modifier effect.
+        //  This would be for things like juggernaught ability, drunk, etc
+        public static List<string> GetPilotSpecialsDetails(Pilot pilot) {
+            List<string> details = new List<string>();
+
+            foreach (string tag in pilot.pilotDef.PilotTags) {
+                if (SkillBasedInit.Settings.PilotTagModifiers.ContainsKey(tag)) {
+                    int tagMod = SkillBasedInit.Settings.PilotTagModifiers[tag];
+
+                }
+            }
+
+            return details;
         }
 
         public static int GetGutsModifier(Pilot pilot) {

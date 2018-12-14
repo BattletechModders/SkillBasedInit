@@ -47,6 +47,12 @@ namespace SkillBasedInit {
             { "pilot_assassin", new float[] { 0.5f, 0.0f } }
         };
 
+        public Dictionary<string, string> PilotSpecialTagsDetails = new Dictionary<string, string> {
+            { "pilot_drunk", "Drunk: +50% melee penalty resist" },
+            { "pilot_gladiator", "Gladiator: +25% melee penalty, +25% melee penalty resist" },
+            { "pilot_assassin", "Assassin: +50% melee penalty" }
+        };
+
         public void InitializeColors() {
             FriendlyUnactivated = new Color(ColorFriendlyUnactivated[0], ColorFriendlyUnactivated[1], ColorFriendlyUnactivated[2], ColorFriendlyUnactivated[3]);
             FriendlyAlreadyActivated = new Color(ColorFriendlyAlreadyActivated[0], ColorFriendlyAlreadyActivated[1], ColorFriendlyAlreadyActivated[2], ColorFriendlyAlreadyActivated[3]);

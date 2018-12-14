@@ -29,6 +29,11 @@
             "pilot_gladiator" : [ 0.25, 0.25 ],
             "pilot_assassin" : [ 0.5, 0.0 ]
         },
+        "PilotSpecialTagsDetails" : {
+            "pilot_drunk" : "Drunk: +50% melee penalty resist",
+            "pilot_gladiator" : "Gladiator: +25% melee penalty, +25% melee penalty resist",
+            "pilot_assassin" : "Assassin: +50% melee penalty"
+        },
         "ColorFriendlyUnactivated"      : [ 0.231, 0.694, 0.262, 1.0 ],
         "ColorFriendlyAlreadyActivated" : [ 0.043, 0.4, 0.137, 1.0 ],
         "ColorAlliedUnactivated"        : [ 0.521, 0.858, 0.964, 1.0 ],

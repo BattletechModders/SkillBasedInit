@@ -180,9 +180,10 @@ namespace SkillBasedInit.Helper {
             return unitInit;
         }
 
-        // Calculate the initiative modifiers from all components based upon a MechDef
+        // Calculate the initiative modifiers from all components based upon a MechDef. For whatever reason they 
+        //  reverse the modifier right out of the gate, such that these values are positives automatically
         public static int GetNormalizedComponentModifier(MechDef mechDef) {
-            int baseMod = 0;
+            int unitInit = 0;
             if (mechDef.Inventory != null) {
                 MechComponentRef[] inventory = mechDef.Inventory;
                 foreach (MechComponentRef mechComponentRef in inventory) {
@@ -190,15 +191,14 @@ namespace SkillBasedInit.Helper {
                         EffectData[] statusEffects = mechComponentRef.Def.statusEffects;
                         foreach (EffectData effect in statusEffects) {
                             if (MechStatisticsRules.GetInitiativeModifierFromEffectData(effect, true, null) == 0) {
-                                baseMod += MechStatisticsRules.GetInitiativeModifierFromEffectData(effect, false, null);
+                                unitInit += MechStatisticsRules.GetInitiativeModifierFromEffectData(effect, false, null);
                             }
                         }
                     }
                 }
             }
-            // Because HBS init values are 2-5, bonuses are negative values. Invert these.
-            int unitInit = baseMod * -1;
-            SkillBasedInit.LogDebug($"Normalized BaseInit for mechDef:{mechDef.Name} from {baseMod} to unitInit:{unitInit}");
+
+            SkillBasedInit.LogDebug($"Normalized BaseInit for mechDef:{mechDef.Name} is unitInit:{unitInit}");
             return unitInit;
         }
 
