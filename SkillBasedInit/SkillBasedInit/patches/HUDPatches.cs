@@ -2,7 +2,6 @@
 using BattleTech.UI;
 using DG.Tweening;
 using Harmony;
-using HBS;
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -157,116 +156,6 @@ namespace SkillBasedInit {
         }
     }
 
-    //[HarmonyPatch(typeof(CombatHUDPortrait), "OnActorHovered")]
-    //[HarmonyPatch(new Type[] { typeof(MessageCenterMessage) })]
-    //public static class CombatHUDPortrait_OnActorHovered {
-    //    public static void Postfix(CombatHUDPortrait __instance) {
-    //        if (__instance.DisplayedActor.HasActivatedThisRound) {
-    //            __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-    //            __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-    //        } else {
-    //            __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
-    //            __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
-    //        }
-
-    //    }
-    //}
-
-    //[HarmonyPatch(typeof(CombatHUDPortrait), "OnActorUnHovered")]
-    //[HarmonyPatch(new Type[] { typeof(MessageCenterMessage) })]
-    //public static class CombatHUDPortrait_OnActorUnHovered {
-    //    public static void Postfix(CombatHUDPortrait __instance) {
-    //        if (__instance.DisplayedActor.HasActivatedThisRound) {
-    //            __instance.Frame.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-    //            __instance.Background.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
-    //        } else {
-    //            __instance.Frame.color = SkillBasedInit.Settings.FriendlyUnactivated;
-    //            __instance.Background.color = SkillBasedInit.Settings.FriendlyUnactivated;
-    //        }
-    //    }
-    //}
-
-
-    /*
-            public void OnActorHovered (MessageCenterMessage message)
-        {
-            if (displayedActor != null) {
-                ActorHoveredMessage actorHoveredMessage = message as ActorHoveredMessage;
-                if (actorHoveredMessage.affectedObjectGuid == displayedActor.GUID && !IsHovered) {
-                    IsHovered = true;
-                    Background.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ButtonBGHighlighted.color;
-                }
-            }
-        }
-            
-        public void OnActorUnHovered (MessageCenterMessage message)
-        {
-            if (displayedActor != null) {
-                ActorUnHoveredMessage actorUnHoveredMessage = message as ActorUnHoveredMessage;
-                if (actorUnHoveredMessage.affectedObjectGuid == displayedActor.GUID) {
-                    IsHovered = false;
-                    if (DisplayedActor.IsAvailableThisPhase) {
-                        Background.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ButtonBGEnabled.color;
-                    } else {
-                        Background.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ButtonBGDisabled.color;
-                    }
-                }
-                NotActiveText.color = Color.clear;
-            }
-        }
-     */
-
-    /*
-            public void OnActorHovered (MessageCenterMessage message) {
-            if (displayedActor != null) {
-                ActorHoveredMessage actorHoveredMessage = message as ActorHoveredMessage;
-                if (actorHoveredMessage.affectedObjectGuid == displayedActor.GUID && !IsHovered) {
-                    IsHovered = true;
-                    Background.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ButtonBGHighlighted.color;
-                }
-            }
-        }
-
-        public void OnPointerExit (PointerEventData eventData)
-        {
-            if (displayedActor != null) {
-                Combat.MessageCenter.PublishMessage (new ActorUnHoveredMessage (displayedActor.GUID));
-            }
-            MWStatusWindow.MouseHover = false;
-        }
-
-        public void OnActorUnHovered (MessageCenterMessage message)
-        {
-            if (displayedActor != null) {
-                ActorUnHoveredMessage actorUnHoveredMessage = message as ActorUnHoveredMessage;
-                if (actorUnHoveredMessage.affectedObjectGuid == displayedActor.GUID) {
-                    IsHovered = false;
-                    if (DisplayedActor.IsAvailableThisPhase) {
-                        Background.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ButtonBGEnabled.color;
-                    } else {
-                        Background.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ButtonBGDisabled.color;
-                    }
-                }
-                NotActiveText.color = Color.clear;
-            }
-        }
-     */
-
-    // ========== CombatHUDPhaseDisplay ==========
-    // Manipulates the badge icon to the left of the mech's floating damage/status bars
-
-    // TODO: Dead code? 
-    // Manipulates the icon to the upper left of the mech panel
-    //[HarmonyPatch(typeof(CombatHUDPhaseDisplay), "Init")]
-    //[HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD) })]
-    //public static class CombatHUDPhaseDisplay_Init {
-    //    public static void Postfix(CombatHUDPhaseDisplay __instance, ref TextMeshProUGUI ___NumText) {
-    //        //SkillBasedInit.Logger.Log($"CombatHUDPhaseDisplay:Init:post - Init");
-    //        ___NumText.enableWordWrapping = false;
-    //        ___NumText.fontSize = 18;
-    //    }
-    //}
-
     [HarmonyPatch(typeof(CombatHUDPhaseDisplay), "RefreshInfo")]
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPhaseDisplay_RefreshInfo {
@@ -305,11 +194,6 @@ namespace SkillBasedInit {
             }
             __instance.FlagFillImage.color = color;
 
-            /*
-            FlagFillImage.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhasePastFill.color;
-            FlagOutline.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhasePastOutline.color;
-            NumText.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhasePastText.color;
-            */
         }
     }
 
@@ -338,10 +222,6 @@ namespace SkillBasedInit {
             }
             __instance.FlagFillImage.color = color;
 
-            /*
-            FlagOutline.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseCurrentOutline.color;
-            NumText.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseCurrentText.color;
-            */
         }
     }
 
@@ -373,12 +253,6 @@ namespace SkillBasedInit {
                 }
             }
             __instance.FlagFillImage.color = color;
-
-            /*
-            FlagFillImage.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseFutureFill.color;
-            FlagOutline.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseFutureOutline.color;
-            NumText.color = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.PhaseFutureText.color;
-            */
         }
     }
 
