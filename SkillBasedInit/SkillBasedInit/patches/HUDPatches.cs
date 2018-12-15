@@ -18,7 +18,7 @@ namespace SkillBasedInit {
         public static HBSTooltip CombatInitTooltip;
 
         public static void Postfix(CombatHUDMechTray __instance, MessageCenter messageCenter, CombatHUD HUD) {
-            SkillBasedInit.Logger.Log($"CombatHUDMechTray:Init - entered");
+            //SkillBasedInit.Logger.Log($"CombatHUDMechTray:Init - entered");
 
             CombatInitTooltip = __instance.gameObject.AddComponent(typeof(HBSTooltip)) as HBSTooltip;
             CombatInitTooltip.enabled = true;
@@ -37,7 +37,7 @@ namespace SkillBasedInit {
     public static class CombatHUDMechTray_DisplayedActor_Setter {
 
         public static void Postfix(CombatHUDMechTray __instance) {
-            SkillBasedInit.Logger.Log($"CombatHUDMechTray:DisplayedActor:post - entered");
+            //SkillBasedInit.Logger.Log($"CombatHUDMechTray:DisplayedActor:post - entered");
 
             if (__instance != null && __instance.DisplayedActor != null) {
                 AbstractActor actor = __instance.DisplayedActor;
