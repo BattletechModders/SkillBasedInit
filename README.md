@@ -42,7 +42,7 @@ The mod applies colors to the following combat UI elements:
 * Initiative Hexagon floating above the Mech
 * Pilot Name background bar
 
-These colors can be customized through the `mod.json`. 
+These colors can be customized through the `mod.json`.
 
 ## Planned
 
@@ -73,7 +73,7 @@ These items are known bugs or issues that should be resolved before declaring a 
 * Extract logging from HBS.Logging to prevent duplication of logs
 * Knockdown doesn't seem to immediately apply in some cases - see https://www.twitch.tv/videos/345435095 @ 1:31
 * Crippled on vehicles is a very narrow margin. Once their structure is removed, they are destroyed - so this rarely happens. This would be better served with a critical hit effect, like broken tracks?
-* *CONSIDER*: Should knockdown penalty apply on the turn you go down? You're already taking an injury penalty there.
+* *CONSIDER*: Should knockdown penalty apply on the turn you go down? You're already taking an injury penalty there. YES, because you can have bonusHealth that will avoid the injury penalty.
 
 ## Technical Details
 

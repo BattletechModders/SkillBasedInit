@@ -101,9 +101,11 @@ namespace SkillBasedInit {
             if (__instance.CustomHeraldryDef != null) {
                 __instance.CustomHeraldryDef.RequestResources(loadedState.DataManager, true);
             }
-            if (!(__instance.Initiative < 0 && __instance.Initiative > (SkillBasedInit.MaxPhase + 1))) {
+
+            // OriginalLogic: Initiative > 0 && Initiative < 6;
+            if (!(__instance.Initiative > 0 && __instance.Initiative <= SkillBasedInit.MaxPhase)) {
                 SkillBasedInit.Logger.Log(string.Format("Loading an AbstractActor of type {0} with an invalid initiative of {1}, Reverting to BaseInitiative", __instance.ClassName, __instance.Initiative));
-                __instance.Initiative = __instance.BaseInitiative;
+                __instance.Initiative = 1;
             }
 
             return false;
