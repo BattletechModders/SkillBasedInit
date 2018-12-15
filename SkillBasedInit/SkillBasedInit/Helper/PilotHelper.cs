@@ -76,9 +76,9 @@ namespace SkillBasedInit.Helper {
                 if (SkillBasedInit.Settings.PilotTagModifiers.ContainsKey(tag)) {
                     int tagMod = SkillBasedInit.Settings.PilotTagModifiers[tag];
                     if (tagMod > 0) {
-                        details.Add($"<space=5em><color=#00FF00>{tag}: {tagMod}</color>");
+                        details.Add($"<space=2em><color=#00FF00>{tag}: {tagMod}</color>");
                     } else if (tagMod < 0) {
-                        details.Add($"<space=5em><color=#FF0000>{tag}: {tagMod}</color>");
+                        details.Add($"<space=2em><color=#FF0000>{tag}: {tagMod}</color>");
                     }
                 }
             }
@@ -92,9 +92,9 @@ namespace SkillBasedInit.Helper {
             List<string> details = new List<string>();
 
             foreach (string tag in pilot.pilotDef.PilotTags) {
-                if (SkillBasedInit.Settings.PilotTagModifiers.ContainsKey(tag)) {
-                    int tagMod = SkillBasedInit.Settings.PilotTagModifiers[tag];
-
+                if (SkillBasedInit.Settings.PilotSpecialTagsDetails.ContainsKey(tag)) {
+                    string tagEffect = SkillBasedInit.Settings.PilotSpecialTagsDetails[tag];
+                    details.Add($"<space=2em>{tag}: <i>{tagEffect}</i>");
                 }
             }
 
