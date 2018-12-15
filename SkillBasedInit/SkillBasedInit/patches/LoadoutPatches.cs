@@ -32,7 +32,7 @@ namespace SkillBasedInit {
                 // Static initiative from tonnage
                 float tonnage = ___selectedMech.Chassis.Tonnage;
                 int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
-                details.Add($"<u>Base: {tonnageMod}</u>");
+                details.Add($"Tonnage Base: {tonnageMod}");
 
                 // Any modifiers that come from the chassis/mech/vehicle defs
                 int componentsMod = UnitHelper.GetNormalizedComponentModifier(___selectedMech);
@@ -56,7 +56,6 @@ namespace SkillBasedInit {
 
                 // --- Tooltip ---
                 int maxInit = Math.Max(tonnageMod + componentsMod + engineMod, SkillBasedInit.MinPhase);
-                details.Add("---\n");
                 details.Add($"Expected Phase: <b>{maxInit}</b> ");
 
                 string tooltipTitle = $"{___selectedMech.Name}";
@@ -96,7 +95,7 @@ namespace SkillBasedInit {
                 float tonnage = __instance.SelectedMech.MechDef.Chassis.Tonnage;
                 int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
                 initValue += tonnageMod;
-                details.Add($"<u>Base: {tonnageMod}</u>");
+                details.Add($"Tonnage Base: {tonnageMod}");
 
                 // Any special modifiers by type - NA, Mech is the only type
 
@@ -148,9 +147,8 @@ namespace SkillBasedInit {
                 // --- Tooltip ---
                 int maxInit = Math.Max(initValue - randomnessBounds[0], SkillBasedInit.MinPhase);
                 int minInit = Math.Max(initValue - randomnessBounds[1], SkillBasedInit.MinPhase);
-                details.Add("---\n");
                 details.Add($"Total:{initValue}");
-                details.Add($"<space=em><color=#FF0000>-{randomnessBounds[0]} to -{randomnessBounds[1]} randomness</color> (piloting)</space>");                
+                details.Add($"<space=2em><color=#FF0000>-{randomnessBounds[0]} to -{randomnessBounds[1]} randomness</color> (piloting)</space>");                
                 details.Add($"<b>Expected Phase<b>: {maxInit} to {minInit}");
 
                 string tooltipTitle = $"{selectedMechDef.Name}: {selectedPilot.Name}";

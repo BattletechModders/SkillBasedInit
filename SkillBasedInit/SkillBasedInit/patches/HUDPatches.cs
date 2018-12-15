@@ -44,7 +44,7 @@ namespace SkillBasedInit {
 
                 ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(actor);
                 List<string> details = new List<string> {
-                    $"<u>Static Initiative: {actorInit.roundInitBase}</u>",
+                    $"Static Initiative: {actorInit.roundInitBase}",
                     $"<space=2em><color=#FF0000>-{actorInit.randomnessBounds[0]} to -{actorInit.randomnessBounds[1]} randomness</color> (piloting)"
                 };
 
@@ -110,7 +110,7 @@ namespace SkillBasedInit {
 
                 int maxInit = Math.Max(expectedInitMax - expectedInitRandMin, SkillBasedInit.MinPhase);
                 int minInit = Math.Max(expectedInitMax - expectedInitRandMax, SkillBasedInit.MinPhase);
-                details.Add($"\n<b>Expected Phase<b>: {maxInit} to {minInit}");
+                details.Add($"\nExpected Phase: <b>{maxInit} to {minInit}</b>");
 
                 string tooltipTitle = $"{actor.DisplayName}: {actor.GetPilot().Name}";
                 string tooltipText = String.Join("\n", details.ToArray());
