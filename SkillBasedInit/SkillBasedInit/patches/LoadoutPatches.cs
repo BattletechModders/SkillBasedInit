@@ -126,6 +126,7 @@ namespace SkillBasedInit {
 
                 int pilotTagsMod = PilotHelper.GetTagsModifier(selectedPilot);
                 details.Concat(PilotHelper.GetTagsModifierDetails(selectedPilot));
+                initValue += pilotTagsMod;
 
                 int[] randomnessBounds = PilotHelper.GetRandomnessBounds(selectedPilot);
                 
@@ -148,7 +149,7 @@ namespace SkillBasedInit {
                 int maxInit = Math.Max(initValue - randomnessBounds[0], SkillBasedInit.MinPhase);
                 int minInit = Math.Max(initValue - randomnessBounds[1], SkillBasedInit.MinPhase);
                 details.Add($"Total:{initValue}");
-                details.Add($"<space=2em><color=#FF0000>-{randomnessBounds[0]} to -{randomnessBounds[1]} randomness</color> (piloting)</space>");                
+                details.Add($"<space=2em><color=#FF0000>-{randomnessBounds[0]} to -{randomnessBounds[1]} randomness</color> (piloting)");                
                 details.Add($"<b>Expected Phase<b>: {maxInit} to {minInit}");
 
                 string tooltipTitle = $"{selectedMechDef.Name}: {selectedPilot.Name}";
