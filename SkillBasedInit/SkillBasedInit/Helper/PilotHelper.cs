@@ -76,7 +76,7 @@ namespace SkillBasedInit.Helper {
                 if (SkillBasedInit.Settings.PilotTagModifiers.ContainsKey(tag)) {
                     int tagMod = SkillBasedInit.Settings.PilotTagModifiers[tag];
                     if (tagMod > 0) {
-                        details.Add($"<space=2em><color=#00FF00>{tag}: {tagMod}</color>");
+                        details.Add($"<space=2em><color=#00FF00>{tag}: {tagMod:+0}</color>");
                     } else if (tagMod < 0) {
                         details.Add($"<space=2em><color=#FF0000>{tag}: {tagMod}</color>");
                     }

@@ -125,7 +125,7 @@ namespace SkillBasedInit {
                 initValue += tacticsMod;
 
                 int pilotTagsMod = PilotHelper.GetTagsModifier(selectedPilot);
-                details.Concat(PilotHelper.GetTagsModifierDetails(selectedPilot));
+                details.AddRange(PilotHelper.GetTagsModifierDetails(selectedPilot));
                 initValue += pilotTagsMod;
 
                 int[] randomnessBounds = PilotHelper.GetRandomnessBounds(selectedPilot);
