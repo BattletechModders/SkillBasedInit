@@ -58,19 +58,15 @@ namespace SkillBasedInit {
             // Static initiative from tonnage
             float tonnage = UnitHelper.GetUnitTonnage(actor);
             int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
-            roundInitBase += tonnageMod;
 
             // Any special modifiers by type
             int typeMod = UnitHelper.GetTypeModifier(actor);
-            roundInitBase += typeMod;
 
             // Any modifiers that come from the chassis/mech/vehicle defs
             int componentsMod = UnitHelper.GetNormalizedComponentModifier(actor);
-            roundInitBase += componentsMod;
 
             // Modifier from the engine
             int engineMod = UnitHelper.GetEngineModifier(actor);
-            roundInitBase += engineMod;
 
             // --- PILOT IMPACTS ---
             Pilot pilot = actor.GetPilot();
@@ -84,20 +80,18 @@ namespace SkillBasedInit {
             this.randomnessBounds = PilotHelper.GetRandomnessBounds(pilot);
 
             this.tacticsEffectMod = PilotHelper.GetTacticsModifier(pilot);
-            roundInitBase += tacticsEffectMod;
 
             int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
-            roundInitBase += pilotTagsMod;
 
             // --- COMBO IMPACTS --
             // Determine the melee modifier
             int[] meleeMods = PilotHelper.GetMeleeModifiers(pilot, tonnage);
-
             this.meleeAttackMod = meleeMods[0];
             this.meleeDefenseMod = meleeMods[1];
             SkillBasedInit.LogDebug($"Actor:{actor.DisplayName}_{pilot.Name} has meleeAttackMod:{meleeAttackMod} meleeDefenseMod:{meleeDefenseMod}");
 
             // Log the full view for testing
+            roundInitBase = tonnageMod;
             roundInitBase += typeMod;
             roundInitBase += componentsMod;
             roundInitBase += engineMod;
@@ -105,7 +99,7 @@ namespace SkillBasedInit {
             roundInitBase += pilotTagsMod;
 
             SkillBasedInit.Logger.Log($"Actor:{actor.DisplayName}_{pilot.Name} has " +
-                $"roundInitBase:{roundInitBase} = (tonnage:{tonnageMod} + components:{componentsMod} + engine:{engineMod}" +
+                $"roundInitBase:{roundInitBase} = (tonnage:{tonnageMod} + typeMod:{typeMod} + components:{componentsMod} + engine:{engineMod} " +
                 $"tactics:{tacticsEffectMod} + pilotTags:{pilotTagsMod}) " +
                 $"randomness:({randomnessBounds[0]}-{randomnessBounds[1]}) " +
                 $"injuryBounds:({injuryBounds[0]}-{injuryBounds[1]}) " +
