@@ -72,17 +72,16 @@ namespace SkillBasedInit.Helper {
             int tonnageMod = 0;
 
             int tonnageRange = GetTonnageRange(tonnage);
-            if (tonnageRange > 10) {
-                tonnageMod = InitBaseByTonnage[SuperHeavyTonnage];
-            } else {
-                tonnageMod = InitBaseByTonnage[tonnageRange];
-            }
-
-            return tonnageMod;
+            return InitBaseByTonnage[tonnageRange];
         }
 
         private static int GetTonnageRange(float tonnage) {
-            return (int)Math.Floor(tonnage / 10.0);
+            int tonnageRange = (int)Math.Floor(tonnage / 10.0);
+            if (tonnageRange > 10) {
+                tonnageRange = SuperHeavyTonnage;
+            }
+            SkillBasedInit.LogDebug($"for raw tonnage {tonnage} returning tonnageRange:{tonnageRange}");
+            return tonnageRange;
         }
 
         /*
@@ -240,7 +239,6 @@ namespace SkillBasedInit.Helper {
             int engineMod = 0;
 
             float engineRatio = rating / tonnage;
-
             int tonnageRange = GetTonnageRange(tonnage);
             int ratioMidpoint = EngineMidpointByTonnage[tonnageRange];
             SkillBasedInit.LogDebug($"Comparing engineRatio:{engineRatio} from rating:{rating} / tonnage:{tonnage} vs midpoint:{ratioMidpoint}");
@@ -251,11 +249,11 @@ namespace SkillBasedInit.Helper {
                 if (engineRatio < oneSigma) {
                     engineMod = 0;
                 } else if (engineRatio < twoSigma) {
-                    engineMod = 1;
-                } else if (engineRatio < threeSigma) {
                     engineMod = 2;
+                } else if (engineRatio < threeSigma) {
+                    engineMod = 4;
                 } else {
-                    engineMod = 3;
+                    engineMod = 6;
                 }
                 SkillBasedInit.LogDebug($"Oversized engine, returning bonus engineMod:{engineMod}");
             } else if (engineRatio < ratioMidpoint) {
@@ -265,11 +263,11 @@ namespace SkillBasedInit.Helper {
                 if (engineRatio > oneSigma) {
                     engineMod = 0;
                 } else if (engineRatio > twoSigma) {
-                    engineMod = -1;
-                } else if (engineRatio > threeSigma) {
                     engineMod = -2;
+                } else if (engineRatio > threeSigma) {
+                    engineMod = -4;
                 } else {
-                    engineMod = -3;
+                    engineMod = -6;
                 }
                 SkillBasedInit.LogDebug($"Undersized engine, returning penalty engineMod:{engineMod}");
             } else {

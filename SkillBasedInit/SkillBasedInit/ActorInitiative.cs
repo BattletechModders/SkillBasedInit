@@ -165,10 +165,10 @@ namespace SkillBasedInit {
                 int penalty = Math.Min(-1, rawMod);
                 roundInitiative += penalty;
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has crippled movement! Subtracted {penalty} = roundInit:{roundInitiative}");
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CRIPPLED! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CRIPPLED! {penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
-            // Check for knockdown / prone 
+            // Check for prone 
             if (actor.IsProne) {
                 int rawMod = SkillBasedInit.Settings.ProneModifier + this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Prone Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ProneModifier} - {this.pilotingEffectMod})");
@@ -176,9 +176,10 @@ namespace SkillBasedInit {
                 int penalty = Math.Min(-1, rawMod);
                 roundInitiative += penalty;
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is prone! Subtracted {penalty} = roundInit:{roundInitiative}");
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"PRONE! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"PRONE! {penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
+            // Check for shutdown
             if (actor.IsShutDown) {
                 int rawMod = SkillBasedInit.Settings.ShutdownModifier + this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Shutdown Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ShutdownModifier} - {this.pilotingEffectMod})");
@@ -186,8 +187,7 @@ namespace SkillBasedInit {
                 int penalty = Math.Min(-1, rawMod);
                 roundInitiative += penalty;
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is shutdown! Subtracted {penalty} = roundInit:{roundInitiative}");
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"SHUTDOWN! -{penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
-
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"SHUTDOWN! {penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
             // Check for melee impacts        

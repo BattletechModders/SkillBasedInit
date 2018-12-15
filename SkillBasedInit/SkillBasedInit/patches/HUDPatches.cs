@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using BattleTech.UI;
+using BattleTech.UI.Tooltips;
 using DG.Tweening;
 using Harmony;
 using System;
@@ -10,15 +11,124 @@ using UnityEngine.UI;
 
 namespace SkillBasedInit {
 
+    [HarmonyPatch(typeof(CombatHUDMechTray), "Init")]
+    [HarmonyPatch(new Type[] { typeof(MessageCenter), typeof(CombatHUD) })]
+    public static class CombatHUDMechTray_Init {
+
+        public static HBSTooltip CombatInitTooltip;
+
+        public static void Postfix(CombatHUDMechTray __instance, MessageCenter messageCenter, CombatHUD HUD) {
+            SkillBasedInit.Logger.Log($"CombatHUDMechTray:Init - entered");
+
+            CombatInitTooltip = __instance.gameObject.AddComponent(typeof(HBSTooltip)) as HBSTooltip;
+            CombatInitTooltip.enabled = true;
+            CombatInitTooltip.AllowRightClickExpansion = false;
+            CombatInitTooltip.Show = true;
+            CombatInitTooltip.gameObject.SetActive(true);
+
+            BaseDescriptionDef initiativeData = new BaseDescriptionDef("CHUDMT_INIT", "TEST", $"{__instance}", null);
+            CombatInitTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(initiativeData));
+        }
+
+    }
+
+    [HarmonyPatch(typeof(CombatHUDMechTray))]
+    [HarmonyPatch("DisplayedActor", MethodType.Setter)]
+    public static class CombatHUDMechTray_DisplayedActor_Setter {
+
+        public static void Postfix(CombatHUDMechTray __instance) {
+            SkillBasedInit.Logger.Log($"CombatHUDMechTray:DisplayedActor:post - entered");
+
+            if (__instance != null && __instance.DisplayedActor != null) {
+                AbstractActor actor = __instance.DisplayedActor;
+
+                ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(actor);
+                List<string> details = new List<string> {
+                    $"<u>Static Initiative: {actorInit.roundInitBase}</u>",
+                    $"<space=2em><color=#FF0000>-{actorInit.randomnessBounds[0]} to -{actorInit.randomnessBounds[1]} randomness</color> (piloting)"
+                };
+
+                int expectedInitMax = actorInit.roundInitBase;
+                int expectedInitRandMin = actorInit.randomnessBounds[0];
+                int expectedInitRandMax = actorInit.randomnessBounds[1];
+
+                // Check for inspired status                
+                if (actor.IsMoraleInspired || actor.IsFuryInspired) {
+                    details.Add($"<space=2em><color=#00FF00>+1 to +3 Inspired</color>");
+                    expectedInitRandMin += 1;
+                    expectedInitRandMin += 3;
+                }
+
+                // Check for injuries. If there injuries on the previous round, apply them in full force. Otherwise, reduce them.
+                if (actorInit.deferredInjuryMod != 0) {
+                    details.Add($"<space=2em><color=#FF0000>-{actorInit.deferredInjuryMod} Deferred Injury</color>");
+                    expectedInitMax -= actorInit.deferredInjuryMod;
+                } else if (actor.GetPilot().Injuries != 0) {
+                    // TODO: fold this in
+                    int rawPenalty = actorInit.CalculateInjuryPenalty(0, actor.GetPilot().Injuries);
+                    int penalty = (int)Math.Ceiling(rawPenalty / 2.0);
+                    details.Add($"<space=2em><color=#FF0000>-{penalty} Previous Injuries</color>");
+                    expectedInitMax -= penalty;
+                }
+
+                // Check for leg / side loss
+                Mech mech = (Mech)actor;
+                if (mech.IsLocationDestroyed(ChassisLocations.LeftLeg) || mech.IsLocationDestroyed(ChassisLocations.RightLeg)) {
+                    int rawMod = SkillBasedInit.Settings.CrippledMovementModifier + actorInit.pilotingEffectMod;
+                    int penalty = Math.Min(-1, rawMod);
+                    details.Add($"<space=2em><color=#FF0000>{penalty} Crippled Movement</color>");
+                    expectedInitMax += penalty;
+                }
+               
+                // Check for prone 
+                if (actor.IsProne) {
+                    int rawMod = SkillBasedInit.Settings.ProneModifier + actorInit.pilotingEffectMod;               
+                    int penalty = Math.Min(-1, rawMod);
+                    details.Add($"<space=2em><color=#FF0000>{penalty} Prone</color>");
+                    expectedInitMax += penalty;
+                }
+
+                // Check for shutdown
+                if (actor.IsShutDown) {
+                    int rawMod = SkillBasedInit.Settings.ShutdownModifier + actorInit.pilotingEffectMod;
+                    int penalty = Math.Min(-1, rawMod);
+                    details.Add($"<space=2em><color=#FF0000>{penalty} Shutdown</color>");
+                    expectedInitMax += penalty;
+                }
+
+                // Check for melee impacts        
+                if (actorInit.deferredMeleeMod > 0) {
+                    expectedInitMax -= actorInit.deferredMeleeMod;
+                    details.Add($"<space=2em><color=#FF0000>-{actorInit.deferredMeleeMod} Shutdown</color>");
+                }
+
+                // Check for an overly cautious player
+                if (actorInit.deferredReserveMod > 0) {
+                    expectedInitMax -= actorInit.deferredReserveMod;
+                    details.Add($"<space=2em><color=#FF0000>-{actorInit.deferredReserveMod} Hesitation</color>");
+                }
+
+                int maxInit = Math.Max(expectedInitMax - expectedInitRandMin, SkillBasedInit.MinPhase);
+                int minInit = Math.Max(expectedInitMax - expectedInitRandMax, SkillBasedInit.MinPhase);
+                details.Add($"\n<b>Expected Phase<b>: {maxInit} to {minInit}");
+
+                string tooltipTitle = $"{actor.DisplayName}: {actor.GetPilot().Name}";
+                string tooltipText = String.Join("\n", details.ToArray());
+
+                BaseDescriptionDef initiativeData = new BaseDescriptionDef("CHUDMT_INIT", tooltipTitle, tooltipText, null);
+                CombatHUDMechTray_Init.CombatInitTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(initiativeData));
+            }
+        }
+    }
+
+
     // ========== CombatHUDPhaseTrack ==========
     [HarmonyPatch(typeof(CombatHUDPhaseTrack), "Init")]
     [HarmonyPatch(new Type[] { typeof(CombatGameState), typeof(CombatHUD) })]
     public static class CombatHUDPhaseTrack_Init {
 
-        public static void Postfix(CombatHUDPhaseTrack __instance, 
-            CombatGameState combat, CombatHUD HUD, 
-            List<CombatHUDPhaseIcons> ___PhaseIcons, 
-            CombatHUDReserveButton ___reserveButton) {
+        public static void Postfix(CombatHUDPhaseTrack __instance, CombatGameState combat, CombatHUD HUD, 
+            List<CombatHUDPhaseIcons> ___PhaseIcons, CombatHUDReserveButton ___reserveButton) {
             //SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack:Init - entered");
 
             __instance.OnCombatGameDestroyed();
@@ -69,7 +179,7 @@ namespace SkillBasedInit {
         }
     }
 
-    // ========== CombatHUDPortrait ==========
+    // === CombatHUDPortrait === : The mechwarrior picture in the bottom tray
 
     // Corrects the init overlay displayed on the Mechwarrior
     [HarmonyPatch(typeof(CombatHUDPortrait), "Init")]
@@ -132,7 +242,6 @@ namespace SkillBasedInit {
         }
     }
 
-
     [HarmonyPatch(typeof(CombatHUDPortrait), "IndicateFuturePhase")]
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPortrait_IndicateFuturePhase {
@@ -156,6 +265,7 @@ namespace SkillBasedInit {
         }
     }
 
+    // === CombatHUDPhaseDisplay === : The floating badget next to a mech
     [HarmonyPatch(typeof(CombatHUDPhaseDisplay), "RefreshInfo")]
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPhaseDisplay_RefreshInfo {
@@ -221,7 +331,6 @@ namespace SkillBasedInit {
                 }
             }
             __instance.FlagFillImage.color = color;
-
         }
     }
 
