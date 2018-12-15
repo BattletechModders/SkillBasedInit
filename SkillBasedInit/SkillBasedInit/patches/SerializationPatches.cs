@@ -21,7 +21,7 @@ namespace SkillBasedInit {
             ref DeathMethod ___serializableDeathMethod, DeathMethod ____deathMethod,
             Team ____team, List<Weapon> ___weapons
             ) {
-            SkillBasedInit.Logger.Log($"AbstractActor:Dehydrate - preventing native call to allow serialization of initiative");
+            //SkillBasedInit.Logger.Log($"AbstractActor:Dehydrate - preventing native call to allow serialization of initiative");
 
             ___underscoreIsShutDown = ____isShutDown;
             ___underscoreLanceID = ____lanceId;
@@ -63,7 +63,7 @@ namespace SkillBasedInit {
             ref DeathMethod ____deathMethod, DeathMethod ___serializableDeathMethod,             
             List<Weapon> ___weapons
             ) {
-            SkillBasedInit.Logger.Log($"AbstractActor:Hydrate - preventing native call to allow deserialization of initiative");
+            //SkillBasedInit.Logger.Log($"AbstractActor:Hydrate - preventing native call to allow deserialization of initiative");
 
             Traverse.Create(__instance).Property("Combat").SetValue(loadedState);           
 

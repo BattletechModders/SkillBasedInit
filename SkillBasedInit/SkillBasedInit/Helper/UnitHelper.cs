@@ -69,8 +69,6 @@ namespace SkillBasedInit.Helper {
 
         // Any modifier from the unit's tonnage
         public static int GetTonnageModifier(float tonnage) {
-            int tonnageMod = 0;
-
             int tonnageRange = GetTonnageRange(tonnage);
             return InitBaseByTonnage[tonnageRange];
         }
