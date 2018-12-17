@@ -5,6 +5,8 @@ The skill level of each Pilot becomes very important in this mod. Novice MechWar
 
 Instead of four weight classes (light / medium / heavy / assault), this mod divides units into 10-ton groups. 20-25 ton mechs are slightly faster than 30-35 ton mechs. 40-45 ton mechs are faster than 50-55 ton mechs, while 60-65 ton mechs are faster than 70-75 ton mechs. 80-85 tons mechs are faster than 90-95, which are faster than 100. This offers a small bonus to pilots of lighter units.
 
+Almost all values are available through tooltips in the mech bay, lance drop and combat UI screens. Hover over the initiative badges (the hexagons) and many details of the system will be defined.
+
 ## Skills
 
 This mod emphasizes a MechWarrior's Tactics, Guts, and Piloting skills.
