@@ -13,6 +13,10 @@ This mod emphasizes a MechWarrior's Tactics, Guts, and Piloting skills.
 * Guts prevents initiative losses from injuries or melee attacks. A high guts rating is necessary to ensure you retain high phase numbers even after taking damage.
 * Piloting prevents initiative losses from knockdowns, shutdowns, and other effects. A high piloting rating is necessary to ensure you don't get dropped too far back in the phase order due to knockdowns.
 
+## Pilot Tags
+
+Certain pilot tags provide bonuses or penalties to reflect the different quirks each pilot has. 
+
 ## Effects
 
 Certain effects impact your phase number during the course of battle. These effects include:
@@ -25,6 +29,7 @@ Certain effects impact your phase number during the course of battle. These effe
 * **Spirit** - Pilots *High Spirits* tag gain a +2 initiative bonus. Pilots with the *Low Spirits* tag suffer a -2 initiative penalty.
 * **Melee Impact** - Units that are successfully attacked in melee suffer a small initiative penalty on the current round, or the subsequent round if they have already activated. This penalty is increased when the attacker weighs more than the target, and attackers with the *Juggernaught* skill increase this effect further. This penalty is applied *on every successful attack* so light units that are repeatedly attacked may find themselves acting at the very end of the following round! **Clang!** modifiers are from melee impacts.
 * **Reserve** Units that reserve drop between 2 to 7 phases. This drop is carried over to the next round as penalty, reflecting the hesitation of the unit. **Hesitation!** modifiers are this carry-over penalty.
+
 
 ## Usage
 
@@ -141,6 +146,34 @@ Modifier | 0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
 
 If the modifier is greater than the penalty, a flat -1 penalty will be applied.
 
+### Pilot Tags
+
+Pilot tags impact the game in three major ways:
+    1) some provide a direct bonus or penalty to initiative
+    2) some provide a bonus or penalty to the tonnage calculation for melee purposes
+    3) a rare few provide subtle, unique benefits 
+
+#### Direct Modifiers
+
+In the `mod.json` file the property `PilotTagModifiers` defines a dictionary keyed by `pilot tag` with a value equal to the direct initiative modifier applied to that tag. These values must be integers, those positive and negative values are allowed. Currently the only tags with modifiers are:
+
+* **pilot_morale_high** : +2
+* **pilot_morale_low**: -2
+
+#### Melee Modifiers
+
+In the `mod.json` file the property `PilotTagMeleeMultipliers` defines a dictionary keyed by `pilot tag` with a value of an array with two values. The first value defines a bonus or penalty to the melee tonnage multiplier as a percentage. The second value defines the bonus or penalty used when defending. These values are floats, and are added to a base of 1.0. For an array value of `[ 0.25, 0.50 ]` the model would multiply it's tonnage by 1.25 when determining the melee attack modifier, and 0.50 when defending against a melee attack. A 50 ton mech would count as 62.5 tons (rounded down), for attacking, and 75 tons for defending. Currently the tags with these modifiers are:
+
+* **pilot_drunk** : 0.0, 0.5
+* **pilot_gladiator** : 0.25, 0.25
+* **pilot_assassin** : 0.5, 0.0
+
+#### Special bonuses
+
+Some tags will provide unique bonuses that aren't easily modifable. The tweaks are:
+
+* **pilot_reckless** (PLANNED) - the unit cannot reserve
+
 ### Tonnage Impact
 The tonnage of a unit determines a multiplier applied to the lower (3) and upper (5) bounds of the phase calculation. After multiplication, the lower bound is rounded down, while the upper bound is rounded up.
 
@@ -153,7 +186,7 @@ This mod breaks units down into 10-ton ranges, such as 20-25 tons, 30-35 tons, e
 
 For a given midpoint, the modifier bounds are defined below.
 
-Modifier | -3 | -2 | -1 | +0 | +1 | +2 | +3
+Modifier | -6 | -4 | -2 | +0 | +2 | +4 | +6
 -- | -- | -- | -- | -- | -- | -- | --
 Midpoint Multiplier | 0.3 | 0.6 | 0.8 | 1.0 | 1.2 | 1.4 | 1.7
 Example | 2	| 4 | 6	| 8	| 10 | 12	| 14
@@ -162,7 +195,7 @@ Each unit's engine rating is divided by its tonnage to define an **engine ratio*
 
 The breakpoints by tonnage and rating are defined below:
 
-Tons / Mod | -3 | -2 | -1 | +0 | +1 | +2 | +3
+Tons / Mod | -6 | -4 | -2 | +0 | +2 | +4 | +6
 -- | -- | -- | -- | -- | -- | -- | --
 5 | 15| 30 | 40 | 55 | 70 | 80 | 95
 10 | 30 | 60 | 80 | 100 | 120 | 140 | 170
@@ -189,13 +222,24 @@ Tons / Mod | -3 | -2 | -1 | +0 | +1 | +2 | +3
 
 This feature on the [MechEngineer](https://github.com/BattletechModders/MechEngineer/) mod.
 
-Units with the `unit_powerarmor` tag have neither a bonus or penalty.
+Units with the `unit_powerarmor` tag have neither a bonus nor penalty.
 
 ### Miscellaneous
 
 Turrets suffer a -4 penalty, while tanks suffer a -2 to reflect their relative slowness in the background material. This may be removed in the future if chassis specific quirks are added to replicate this effect.
 
 ## Changelog
+
+### 0.5.1
+- Fixes issue where static bonuses/penalties were applied twice
+- Fixes display issue where tooltips wouldn't show pilot tag bonuses/penalties
+
+### 0.5.0
+- Adds tooltips for MechLab, Lance Drop, and Combat screens. Hover over the Initiative badge (hexagon) to see the modifiers being applied.
+- Tweaked engine modifiers to be 2/4/6 (instead of 1/2/3)
+- Fixed issue with combat saves - can not save during combat and reload.
+- Added pilot tags as initiative modifiers. Pilot tags can now result in straight +/- modifers to init. Controlled through mod.json
+- Added pilot tag melee multipliers. Pilot tags can now add or subtract to the melee multiplier. Values are added/subtracted from 1.0. The final multiplier is used to determine the effective tonnage of the unit for melee attacks. The first value increase the tonnage as the attacker, the second as the defender.
 
 ### 0.4.0
 - Adds carry-over penalty for reserve (HESITATION!)
