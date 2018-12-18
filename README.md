@@ -17,7 +17,7 @@ This mod emphasizes a MechWarrior's Tactics, Guts, and Piloting skills.
 
 ## Pilot Tags
 
-Certain pilot tags provide bonuses or penalties to reflect the different quirks each pilot has. 
+Certain pilot tags provide bonuses or penalties to reflect the different quirks each pilot has.
 
 ## Effects
 
@@ -55,21 +55,13 @@ These colors can be customized through the `mod.json`.
 
 Works in progress or planned effects include:
 
-- [] Expose mech initiative modifiers through Lance Drop screen
-- [] Expose mech initiative modifiers through Skirmish Drop screen
-- [] Expose mech initiative modifiers through MechLab screen
-- [] Expose mech initiative modifiers through Initiative Badge in combination
-- [] Expose pilot initiative modifiers through Lance Drop screen
-- [] Expose pilot initiative modifiers through Skirmish Drop screen
-- [] Expose pilot initiative modifiers through MechLab screen
-- [] Expose pilot initiative modifiers through Initiative Badge in combination
-- [] Introduce pilot quirk specific behaviors (drunk, reckless, etc)
-- [] Introduce pilot quirk specific modifiers
-- [x] Units will gain a small boost to their total initiative rating based upon their engine core. Rating / Tonnage / 10 = % boost.
-- [x] Units that reserve will gain a small init penalty in the coming round. The more reserves that occur, the greater the penalty will be in the following round. A high tactics skill will mitigate this effect.
-- [] Knockdowns will note 'Going Down!' as their init bubble.
 - [] Units that are unsettled, panicked or similar will have a reduced initiative.
 - [] Show an initiative track at the top of the screen so that players know which models are going when. Perhaps use the unit icons and a number underneath them?
+- [] Tactician (P5 ability) and Ace pilot (P5 ability) will provide a boost to modifiers of about 50%.
+- [] Reserve penalty will no longer be a minimum of -1; a high enough tactics will reduce it to 0
+- [] Modify Reserve button to change to 'Reserve to Phase 1' when ALT key is held down. Model pays for all the phases it holds though.
+- [] Vigiliance provides an initiative boost of Math.Ceil((guts + tactics)/2)
+- [] Called Shot provides an init. penalty of Math.Ceil((gunnery + tactics)/2). The modifier is based upon the amount of stab damage in the attack, perhaps?
 
 ### Bugs and Issues
 
@@ -153,7 +145,7 @@ If the modifier is greater than the penalty, a flat -1 penalty will be applied.
 Pilot tags impact the game in three major ways:
     1) some provide a direct bonus or penalty to initiative
     2) some provide a bonus or penalty to the tonnage calculation for melee purposes
-    3) a rare few provide subtle, unique benefits 
+    3) a rare few provide subtle, unique benefits
 
 #### Direct Modifiers
 
