@@ -38,9 +38,6 @@ namespace SkillBasedInit {
             { "pilot_morale_low", -2 }
         };
 
-        // The init malus multiplier used if the pilot has the Juggernaught skill
-        public float JuggernaughtBonus = 0.5f;
-
         public Dictionary<string, float[]> PilotTagMeleeMultipliers = new Dictionary<string, float[]> {
             { "pilot_drunk", new float[] { 0.0f, 0.5f } },
             { "pilot_gladiator", new float[] { 0.25f, 0.25f } },

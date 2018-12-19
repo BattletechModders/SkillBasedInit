@@ -42,6 +42,7 @@ namespace SkillBasedInit {
         public int deferredInjuryMod = 0;
         public int deferredMeleeMod = 0;
         public int deferredReserveMod = 0;
+        public int deferredCalledShotMod = 0;
 
         public ActorInitiative(AbstractActor actor) {
             //SkillBasedInit.Logger.Log($"Initializing ActorInitiative for {actor.DisplayName} with GUID {actor.GUID}.");
@@ -167,7 +168,7 @@ namespace SkillBasedInit {
                 int rawMod = SkillBasedInit.Settings.ProneModifier + this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Prone Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ProneModifier} - {this.pilotingEffectMod})");
 
-                int penalty = Math.Min(-1, rawMod);
+                int penalty = Math.Min(0, rawMod);
                 roundInitiative += penalty;
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is prone! Subtracted {penalty} = roundInit:{roundInitiative}");
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"PRONE! {penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
@@ -178,10 +179,17 @@ namespace SkillBasedInit {
                 int rawMod = SkillBasedInit.Settings.ShutdownModifier + this.pilotingEffectMod;
                 SkillBasedInit.LogDebug($"  Shutdown Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Settings.ShutdownModifier} - {this.pilotingEffectMod})");
 
-                int penalty = Math.Min(-1, rawMod);
+                int penalty = Math.Min(0, rawMod);
                 roundInitiative += penalty;
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is shutdown! Subtracted {penalty} = roundInit:{roundInitiative}");
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"SHUTDOWN! {penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            }
+
+            // Check for deferred called shot
+            if (this.deferredCalledShotMod > 0) {
+                roundInitiative -= deferredCalledShotMod;
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was targetd by called shot after activation! Subtracted {this.deferredCalledShotMod} = roundInit:{roundInitiative}");
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CALLED SHOT! -{deferredMeleeMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
             // Check for melee impacts        
@@ -263,6 +271,7 @@ namespace SkillBasedInit {
                 actorInit.deferredInjuryMod = 0;
                 actorInit.deferredMeleeMod = 0;
                 actorInit.deferredReserveMod = 0;
+                actorInit.deferredCalledShotMod = 0;
             }
         }
 

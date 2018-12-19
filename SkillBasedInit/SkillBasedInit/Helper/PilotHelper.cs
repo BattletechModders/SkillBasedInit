@@ -53,6 +53,23 @@ namespace SkillBasedInit.Helper {
             { 13, 8 }
         };
 
+        // From skill 5 onward, you get a roughly 50% bonus
+        private static readonly Dictionary<int, int> BoostedModifierBySkill = new Dictionary<int, int> {
+            { 1, 0 },
+            { 2, 1 },
+            { 3, 1 },
+            { 4, 2 },
+            { 5, 3 }, 
+            { 6, 5 },
+            { 7, 5 },
+            { 8, 6 },
+            { 9, 6 },
+            { 10, 8 },
+            { 11, 9 },
+            { 12, 11 },
+            { 13, 12 }
+        };
+
         // Process any tags that provide flat bonuses
         public static int GetTagsModifier(Pilot pilot) {
             int mod = 0;
@@ -105,7 +122,14 @@ namespace SkillBasedInit.Helper {
             int mod = 0;
 
             int normalizedVal = NormalizeSkill(pilot.Guts);
+
             mod = ModifierBySkill[normalizedVal];
+            foreach (Ability ability in pilot.Abilities) {
+                if (ability.Def.Id == "AbilityDefGu5") {
+                    SkillBasedInit.Logger.Log($"Pilot {pilot.Name} has AbilityDefGu5, boosting their guts modifier.");
+                    mod = BoostedModifierBySkill[normalizedVal];
+                }
+            }
 
             return mod;
         }
@@ -115,6 +139,12 @@ namespace SkillBasedInit.Helper {
 
             int normalizedVal = NormalizeSkill(pilot.Piloting);
             mod = ModifierBySkill[normalizedVal];
+            foreach (Ability ability in pilot.Abilities) {
+                if (ability.Def.Id == "AbilityDefP5") {
+                    SkillBasedInit.Logger.Log($"Pilot {pilot.Name} has AbilityDefP5, boosting their piloting modifier.");
+                    mod = BoostedModifierBySkill[normalizedVal];
+                }
+            }
 
             return mod;
         }
@@ -124,6 +154,12 @@ namespace SkillBasedInit.Helper {
 
             int normalizedVal = NormalizeSkill(pilot.Tactics);
             mod = ModifierBySkill[normalizedVal];
+            foreach (Ability ability in pilot.Abilities) {
+                if (ability.Def.Id == "AbilityDefT5A") {
+                    SkillBasedInit.Logger.Log($"Pilot {pilot.Name} has AbilityDefT5A, boosting their tactics modifier.");
+                    mod = BoostedModifierBySkill[normalizedVal];
+                }
+            }
 
             return mod;
         }
@@ -134,19 +170,17 @@ namespace SkillBasedInit.Helper {
             float defenseTonnage = tonnage * meleeMultiplier[1];
             SkillBasedInit.LogDebug($"Pilot:{pilot.Name} with tonnage:{tonnage} counts as attack:{attackTonnage} defense:{defenseTonnage}");
 
-            return new int[] { (int)Math.Ceiling(attackTonnage / 5.0), (int)Math.Ceiling(defenseTonnage / 5.0) };
+            int gutsMod = GetGutsModifier(pilot);
+            int attackTonnageMod = (int)Math.Ceiling(attackTonnage / 5.0);
+            int defenseTonnageMod = (int)Math.Ceiling(defenseTonnage / 5.0);
+            SkillBasedInit.LogDebug($"Pilot:{pilot.Name} has attackMod:{attackTonnageMod} + {gutsMod} defenseMod:{defenseTonnageMod} + {gutsMod}");
+
+            return new int[] { attackTonnageMod + gutsMod, defenseTonnageMod + gutsMod};
         }
 
         // Returns a multiplier for unit tonnage for attacker / defense cases
         private static float[] GetMeleeMultipliers(Pilot pilot) {
             float[] multipliers = new float[] { 1.0f, 1.0f };
-
-            // If the pilot has the Juggernaugt skill, give them a bonus to attack
-            foreach (Ability ability in pilot.Abilities) {
-                if (ability.Def.Id == "AbilityDefGu5") {
-                    multipliers[0] += SkillBasedInit.Settings.JuggernaughtBonus;
-                }
-            }
 
             foreach (string tag in pilot.pilotDef.PilotTags) {
                 if (SkillBasedInit.Settings.PilotTagMeleeMultipliers.ContainsKey(tag)) {

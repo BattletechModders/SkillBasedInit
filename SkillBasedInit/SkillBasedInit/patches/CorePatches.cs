@@ -38,7 +38,7 @@ namespace SkillBasedInit {
     public static class AbstractActor_DeferUnit {
         public static void Postfix(AbstractActor __instance) {
             //SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
-            int reservePenalty = SkillBasedInit.Random.Next(2, 7);
+            int reservePenalty = SkillBasedInit.Random.Next(3, 9);
             SkillBasedInit.LogDebug($"  Deferring Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) initiative:{__instance.Initiative} by :{reservePenalty} to {__instance.Initiative + reservePenalty}");
             __instance.Initiative += reservePenalty;
             if (__instance.Initiative > SkillBasedInit.MaxPhase) {
@@ -47,10 +47,29 @@ namespace SkillBasedInit {
 
             // Save some part of the reserve surplus as a penalty for the next round
             ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
-            int deferredPenalty = Math.Min(1, reservePenalty - actorInit.tacticsEffectMod);
+            int deferredPenalty = Math.Min(0, reservePenalty - actorInit.tacticsEffectMod);
             actorInit.deferredReserveMod += deferredPenalty;
             SkillBasedInit.LogDebug($"  Added deferredPenalty:{deferredPenalty} to Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) for total:{actorInit.deferredReserveMod}");
         }
+
+        /*
+         *             if (__instance != null && __instance.team != null && __instance.team.LocalPlayerControlsTeam && __instance.GetPilot() != null) {
+                SkillBasedInit.LogDebug($"AbstractActor:CanDeferUnit:post - Checking player models for the reckless tag.");
+                
+                Pilot pilot = __instance.GetPilot();
+                foreach (string tag in pilot.pilotDef.PilotTags) {
+                    SkillBasedInit.LogDebug($"AbstractActor:CanDeferUnit:post - Actor:{__instance.DisplayName}-Pilot:{pilot.Name} has tag:{tag}");
+                    if (tag.ToLower() == RecklessTag) {
+                        SkillBasedInit.LogDebug($"AbstractActor:CanDeferUnit:post - Actor:{__instance.DisplayName}-Pilot:{pilot.Name} is reckless and won't defer!");
+                        __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"{pilot.Name} is reckless - can't defer!", FloatieMessage.MessageNature.Debuff));
+                        __result = false;
+                    }
+                }
+            };
+
+               public const string RecklessTag = "pilot_reckless";
+            */
+
     }
 
     [HarmonyPatch(typeof(AbstractActor), "InitiativeToString")]
@@ -148,8 +167,11 @@ namespace SkillBasedInit {
                     __result = "1";
                     break;
                 default:
-                    SkillBasedInit.Logger.Log($"AbstractActor:InitiativeToString returning ERROR for initiative value:{initiative}");
-                    __result = "ERROR";
+                    if (initiative > SkillBasedInit.MaxPhase) {
+                        // This looks weird, but it's the only place we can intercept a negative init that I've found.
+                        __instance.Initiative = SkillBasedInit.MaxPhase;
+                    }
+                    __result = "ERROR";                                        
                     break;
             }
             //SkillBasedInit.Logger.Log($"AbstractActor:InitiativeToString returning {__result} for {initiative}");
@@ -169,6 +191,7 @@ namespace SkillBasedInit {
         }
     }
 
+    // TODO: This looks to be unused - can we confirm?
     [HarmonyPatch(typeof(AbstractActor))]
     [HarmonyPatch("BaseInitiative", MethodType.Getter)]
     public static class AbstractActor_BaseInitiative {
@@ -183,31 +206,19 @@ namespace SkillBasedInit {
                 //SkillBasedInit.LogDebug($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has stats BaseInit:{baseInit} / PhaseMod:{phaseMod}");
 
                 if (modifiedInit < SkillBasedInit.MinPhase) {
-                    //SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) being set to {SkillBasedInit.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) being set to {SkillBasedInit.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = SkillBasedInit.MinPhase;
                 } else if (modifiedInit > SkillBasedInit.MaxPhase) {
-                    //SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) being set to {SkillBasedInit.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) being set to {SkillBasedInit.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = SkillBasedInit.MaxPhase;
                 } else {
                     __result = modifiedInit;
                     //SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has stats BaseInit:{baseInit} + PhaseMod:{phaseMod} = modifiedInit:{modifiedInit}.");
                 }
-            }
-            __result = ___Combat.TurnDirector.NonInterleavedPhase;
+            }            
         }
     }
 
-    // Uncomment to prevent deferring
-    //
-    //[HarmonyPatch(typeof(AbstractActor))]
-    //[HarmonyPatch("CanDeferUnit", MethodType.Getter)]
-    //public static class AbstractActor_CanDeferUnit {
-    //    public static void Postfix(AbstractActor __instance, ref bool __result) {
-    //        SkillBasedInit.Logger.Log($"AbstractActor:CanDeferUnit:post - Preventing unit from deferring.");
-    //        __result = false;
-    //    }
-    //}
-    //
     //[HarmonyPatch(typeof(CombatSelectionHandler), "ShowReserveOrSelect")]
     //[HarmonyPatch(new Type[] { })]
     //public static class CombatSelectionHandler_ShowReserveOrSelect {
