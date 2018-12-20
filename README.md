@@ -64,6 +64,7 @@ Works in progress or planned effects include:
 - [x] Called Shot provides an init. penalty of Math.Ceil((gunnery + tactics)/2). The modifier is based upon the amount of stab damage in the attack, perhaps?
 - [] Tooltips for ability boosted state
 - [] Tooltips for melee bonus to attack, resist
+- [] Change text for Called Shot, Vigiliance
 
 ### Bugs and Issues
 
