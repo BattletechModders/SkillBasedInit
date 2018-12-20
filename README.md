@@ -57,11 +57,13 @@ Works in progress or planned effects include:
 
 - [] Units that are unsettled, panicked or similar will have a reduced initiative.
 - [] Show an initiative track at the top of the screen so that players know which models are going when. Perhaps use the unit icons and a number underneath them?
-- [] Tactician (P5 ability) and Ace pilot (P5 ability) will provide a boost to modifiers of about 50%.
-- [] Reserve penalty will no longer be a minimum of -1; a high enough tactics will reduce it to 0
 - [] Modify Reserve button to change to 'Reserve to Phase 1' when ALT key is held down. Model pays for all the phases it holds though.
-- [] Vigiliance provides an initiative boost of Math.Ceil((guts + tactics)/2)
-- [] Called Shot provides an init. penalty of Math.Ceil((gunnery + tactics)/2). The modifier is based upon the amount of stab damage in the attack, perhaps?
+- [x] Tactician (P5 ability) and Ace pilot (P5 ability) will provide a boost to modifiers of about 50%.
+- [x] Reserve penalty will no longer be a minimum of -1; a high enough tactics will reduce it to 0
+- [x] Vigiliance provides an initiative boost of Math.Ceil((guts + tactics)/2)
+- [x] Called Shot provides an init. penalty of Math.Ceil((gunnery + tactics)/2). The modifier is based upon the amount of stab damage in the attack, perhaps?
+- [] Tooltips for ability boosted state
+- [] Tooltips for melee bonus to attack, resist
 
 ### Bugs and Issues
 

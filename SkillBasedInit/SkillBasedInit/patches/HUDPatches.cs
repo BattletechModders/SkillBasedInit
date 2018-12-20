@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace SkillBasedInit {
@@ -366,19 +367,13 @@ namespace SkillBasedInit {
     }
 
     // --- RESERVE BUTTON BELOW ---
-    [HarmonyPatch(typeof(CombatHUDMechCallout))]
-    [HarmonyPatch("DisplayedActor", MethodType.Setter)]
-    public static class CombatHUDMechCallout_DisplayedActor_Setter {
-        public static void Postfix(CombatHUDMechCallout __instance) {
-            SkillBasedInit.LogDebug($"CombatHUDMechCallout:DisplayedActor:Setter:post - invoked!");
+    //[HarmonyPatch(typeof(CombatHUDReserveButton), "CombatHUDReserveButton")]
+    //[HarmonyPatch(new Type[] { typeof(PointerEventData)})]
+    //public static class CombatHUDReserveButton_CombatHUDReserveButton {
+    //    public static void Postfix(CombatHUDReserveButton __instance) {
+    //        SkillBasedInit.LogDebug($"CombatHUDReserveButton:CombatHUDReserveButton:post - invoked!");
 
-            CombatHUD ___HUD = (CombatHUD)Traverse.Create(__instance).Property("HUD").GetValue();
-            ___HUD.PhaseTrack.reserveButton.Text.text = "Reserve to 1";
-            //CombatHUD.PhaseTrack.reserveButton.
-            // CombatHUDReserveButton
-            // CombatHUDMechCallout
-
-        }
-    }
+    //    }
+    //}
 
 }
