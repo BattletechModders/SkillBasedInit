@@ -13,14 +13,17 @@ namespace SkillBasedInit {
         /*
          * Static initiative each round
          */        
-        readonly public int roundInitBase; 
+        readonly public int roundInitBase;
 
+        readonly public int gunneryEffectMod;
         readonly public int gutsEffectMod;
         readonly public int pilotingEffectMod;
         readonly public int tacticsEffectMod;
 
         readonly public int meleeAttackMod;
         readonly public int meleeDefenseMod;
+        readonly public int calledShotMod;
+        readonly public int vigilianceMod;
 
         readonly public bool pilotHasTagReckless;
         readonly public bool pilotHasTagCautious;
@@ -43,6 +46,7 @@ namespace SkillBasedInit {
         public int deferredMeleeMod = 0;
         public int deferredReserveMod = 0;
         public int deferredCalledShotMod = 0;
+        public int deferredVigilanceMod = 0;
 
         public ActorInitiative(AbstractActor actor) {
             //SkillBasedInit.Logger.Log($"Initializing ActorInitiative for {actor.DisplayName} with GUID {actor.GUID}.");
@@ -74,6 +78,8 @@ namespace SkillBasedInit {
             PilotHelper.LogPilotStats(pilot);
 
             // Normalize skills so that values above 10 don't screw the system
+            this.gunneryEffectMod = PilotHelper.GetGunneryModifier(pilot);
+
             this.gutsEffectMod = PilotHelper.GetGutsModifier(pilot);
             this.injuryBounds = PilotHelper.GetInjuryBounds(pilot);
 
@@ -83,6 +89,9 @@ namespace SkillBasedInit {
             this.tacticsEffectMod = PilotHelper.GetTacticsModifier(pilot);
 
             int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
+
+            this.calledShotMod = PilotHelper.GetCalledShotModifier(pilot);
+            this.vigilianceMod = PilotHelper.GetVigilanceModifier(pilot);
 
             // --- COMBO IMPACTS --
             // Determine the melee modifier
@@ -185,13 +194,6 @@ namespace SkillBasedInit {
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"SHUTDOWN! {penalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
 
-            // Check for deferred called shot
-            if (this.deferredCalledShotMod > 0) {
-                roundInitiative -= deferredCalledShotMod;
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was targetd by called shot after activation! Subtracted {this.deferredCalledShotMod} = roundInit:{roundInitiative}");
-                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CALLED SHOT! -{deferredMeleeMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
-            }
-
             // Check for melee impacts        
             if (this.deferredMeleeMod > 0) {
                 roundInitiative -= deferredMeleeMod;
@@ -205,7 +207,21 @@ namespace SkillBasedInit {
                 SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) deferred last round! Subtracted {this.deferredReserveMod} = roundInit:{roundInitiative}");
                 actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"HESITATED! -{deferredReserveMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
             }
-            
+
+            // Check for deferred called shot
+            if (this.deferredCalledShotMod > 0) {
+                roundInitiative -= deferredCalledShotMod;
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was targetd by called shot after activation! Subtracted {this.deferredCalledShotMod} = roundInit:{roundInitiative}");
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"CALLED SHOT! -{deferredMeleeMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            }
+
+            // Check for deferred vigilance bonus
+            if (this.deferredVigilanceMod > 0) {
+                roundInitiative += deferredVigilanceMod;
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) did vigilance last round! Adding {this.deferredVigilanceMod} = roundInit:{roundInitiative}");
+                actor.Combat.MessageCenter.PublishMessage(new FloatieMessage(actor.GUID, actor.GUID, $"VIGILANCE! +{deferredVigilanceMod} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+            }
+
             if (roundInitiative <= 0) {
                 roundInitiative = SkillBasedInit.MinPhase;
                 SkillBasedInit.LogDebug($"  Round init {roundInitiative} less than 0, setting to 1.");
@@ -268,10 +284,12 @@ namespace SkillBasedInit {
                 // Recalculate the random part of their initiative for the round
                 actorInit.CalculateRoundInit(actor);
 
+                // These must occur after calc, or they are lost (duh)
                 actorInit.deferredInjuryMod = 0;
                 actorInit.deferredMeleeMod = 0;
                 actorInit.deferredReserveMod = 0;
                 actorInit.deferredCalledShotMod = 0;
+                actorInit.deferredVigilanceMod = 0;
             }
         }
 

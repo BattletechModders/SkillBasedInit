@@ -23,7 +23,6 @@
             "pilot_morale_high" : 2, 
             "pilot_morale_low" : -2
         },
-        "JuggernaughtBonus" : 0.5,
         "PilotTagMeleeMultipliers" : {
             "pilot_drunk" : [ 0.0, 0.5 ],
             "pilot_gladiator" : [ 0.25, 0.25 ],

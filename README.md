@@ -89,10 +89,11 @@ The sections below detail some of the calculations used by the mod. Please note 
 ### Impact of Tactics Skill
 A MechWarriors's Tactics skill adds a flat modifier to the base initiative defined by the unit tonnage. This value is graduated, as defined in the table below.
 
-                       Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
-                          -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-Modifier                | +0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
-Boosted Modifier | +0 | +1 |+1 |+2 | +3 | +5 | +5 | +6 | +6 | +8 | +9 | +11 | +12
+                         Skill |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  10  | 11 | 12 | 13 |
+                             -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+Modifier                  | +0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
+with Level 5 Ability | +0 | +1 | +1 | +2 | +3 | +4 | +4 | +5 | +5 | +6 | +7 | +8 | +9
+with Level 8 Ability | +0 | +1 | +1 | +2 | +4 | +5 | +5 | +6 | +6 | +7 | +8 | +9 | +10
 
 The following diagram illustrates the combination of tonnage and tactics to show the various ranges in which units will operate. In the table below, the sum is given by the ⌄ symbol, next to the tactics value that would set the boundary. The ⌃4,5 block defines the **minimum** value for a pilot with Piloting skill 4 or 5. As we'll see shortly, this value can be used to evaluate how average skill units will interact across tactics and tonnage limits.
 

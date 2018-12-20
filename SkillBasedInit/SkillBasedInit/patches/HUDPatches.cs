@@ -365,4 +365,20 @@ namespace SkillBasedInit {
         }
     }
 
+    // --- RESERVE BUTTON BELOW ---
+    [HarmonyPatch(typeof(CombatHUDMechCallout))]
+    [HarmonyPatch("DisplayedActor", MethodType.Setter)]
+    public static class CombatHUDMechCallout_DisplayedActor_Setter {
+        public static void Postfix(CombatHUDMechCallout __instance) {
+            SkillBasedInit.LogDebug($"CombatHUDMechCallout:DisplayedActor:Setter:post - invoked!");
+
+            CombatHUD ___HUD = (CombatHUD)Traverse.Create(__instance).Property("HUD").GetValue();
+            ___HUD.PhaseTrack.reserveButton.Text.text = "Reserve to 1";
+            //CombatHUD.PhaseTrack.reserveButton.
+            // CombatHUDReserveButton
+            // CombatHUDMechCallout
+
+        }
+    }
+
 }

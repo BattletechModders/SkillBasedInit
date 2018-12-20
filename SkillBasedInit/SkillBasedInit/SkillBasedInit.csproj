@@ -77,7 +77,7 @@
     <Compile Include="patches\HUDPatches.cs" />
     <Compile Include="patches\LoadoutPatches.cs" />
     <Compile Include="patches\SerializationPatches.cs" />
-    <Compile Include="patches\KnockdownPatches.cs" />
+    <Compile Include="patches\ForceUnitPhasePatches.cs" />
     <Compile Include="Helper\UnitHelper.cs" />
     <Compile Include="Helper\PilotHelper.cs" />
   </ItemGroup>

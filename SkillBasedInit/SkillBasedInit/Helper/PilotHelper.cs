@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using BattleTech;
 
 namespace SkillBasedInit.Helper {
@@ -53,28 +54,11 @@ namespace SkillBasedInit.Helper {
             { 13, 8 }
         };
 
-        // From skill 5 onward, you get a roughly 50% bonus
-        private static readonly Dictionary<int, int> BoostedModifierBySkill = new Dictionary<int, int> {
-            { 1, 0 },
-            { 2, 1 },
-            { 3, 1 },
-            { 4, 2 },
-            { 5, 3 }, 
-            { 6, 5 },
-            { 7, 5 },
-            { 8, 6 },
-            { 9, 6 },
-            { 10, 8 },
-            { 11, 9 },
-            { 12, 11 },
-            { 13, 12 }
-        };
-
         // Process any tags that provide flat bonuses
         public static int GetTagsModifier(Pilot pilot) {
             int mod = 0;
 
-            foreach (string tag in pilot.pilotDef.PilotTags) {
+            foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
                 if (SkillBasedInit.Settings.PilotTagModifiers.ContainsKey(tag)) {
                     int tagMod = SkillBasedInit.Settings.PilotTagModifiers[tag];
                     SkillBasedInit.LogDebug($"Pilot {pilot.Name} has tag:{tag}, applying modifier:{tagMod}");
@@ -89,7 +73,7 @@ namespace SkillBasedInit.Helper {
         public static List<string> GetTagsModifierDetails(Pilot pilot) {
             List<string> details = new List<string>();
 
-            foreach (string tag in pilot.pilotDef.PilotTags) {
+            foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
                 if (SkillBasedInit.Settings.PilotTagModifiers.ContainsKey(tag)) {
                     int tagMod = SkillBasedInit.Settings.PilotTagModifiers[tag];
                     if (tagMod > 0) {
@@ -108,7 +92,7 @@ namespace SkillBasedInit.Helper {
         public static List<string> GetPilotSpecialsDetails(Pilot pilot) {
             List<string> details = new List<string>();
 
-            foreach (string tag in pilot.pilotDef.PilotTags) {
+            foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
                 if (SkillBasedInit.Settings.PilotSpecialTagsDetails.ContainsKey(tag)) {
                     string tagEffect = SkillBasedInit.Settings.PilotSpecialTagsDetails[tag];
                     details.Add($"<space=2em>{tag}: <i>{tagEffect}</i>");
@@ -118,49 +102,33 @@ namespace SkillBasedInit.Helper {
             return details;
         }
 
+        public static int GetGunneryModifier(Pilot pilot) {
+            return GetModifier(pilot, pilot.Gunnery, "AbilityDefG5", "AbilityDefG8");
+        }
+
         public static int GetGutsModifier(Pilot pilot) {
-            int mod = 0;
-
-            int normalizedVal = NormalizeSkill(pilot.Guts);
-
-            mod = ModifierBySkill[normalizedVal];
-            foreach (Ability ability in pilot.Abilities) {
-                if (ability.Def.Id == "AbilityDefGu5") {
-                    SkillBasedInit.Logger.Log($"Pilot {pilot.Name} has AbilityDefGu5, boosting their guts modifier.");
-                    mod = BoostedModifierBySkill[normalizedVal];
-                }
-            }
-
-            return mod;
+            return GetModifier(pilot, pilot.Guts, "AbilityDefGu5", "AbilityDefGu8");
         }
 
         public static int GetPilotingModifier(Pilot pilot) {
-            int mod = 0;
-
-            int normalizedVal = NormalizeSkill(pilot.Piloting);
-            mod = ModifierBySkill[normalizedVal];
-            foreach (Ability ability in pilot.Abilities) {
-                if (ability.Def.Id == "AbilityDefP5") {
-                    SkillBasedInit.Logger.Log($"Pilot {pilot.Name} has AbilityDefP5, boosting their piloting modifier.");
-                    mod = BoostedModifierBySkill[normalizedVal];
-                }
-            }
-
-            return mod;
+            return GetModifier(pilot, pilot.Piloting, "AbilityDefP5", "AbilityDefP8");
         }
 
         public static int GetTacticsModifier(Pilot pilot) {
-            int mod = 0;
+            return GetModifier(pilot, pilot.Tactics, "AbilityDefT5A", "AbilityDefT8A");
+        }
 
-            int normalizedVal = NormalizeSkill(pilot.Tactics);
-            mod = ModifierBySkill[normalizedVal];
-            foreach (Ability ability in pilot.Abilities) {
-                if (ability.Def.Id == "AbilityDefT5A") {
-                    SkillBasedInit.Logger.Log($"Pilot {pilot.Name} has AbilityDefT5A, boosting their tactics modifier.");
-                    mod = BoostedModifierBySkill[normalizedVal];
-                }
+        public static int GetModifier(Pilot pilot, int skillValue, string abilityDefIdL5, string abilityDefIdL8) {
+            int normalizedVal = NormalizeSkill(skillValue);
+            int mod = ModifierBySkill[normalizedVal];
+            foreach (Ability ability in pilot.Abilities.Distinct()) {
+                SkillBasedInit.LogDebug($"Pilot {pilot.Name} has ability:{ability.Def.Id}.");
+                if (ability.Def.Id.ToLower().Equals(abilityDefIdL5.ToLower()) || ability.Def.Id.ToLower().Equals(abilityDefIdL8.ToLower())) {
+                    SkillBasedInit.LogDebug($"Pilot {pilot.Name} has targeted ability:{ability.Def.Id}, boosting their modifier.");
+                    mod += 1;
+                } 
+
             }
-
             return mod;
         }
 
@@ -178,11 +146,25 @@ namespace SkillBasedInit.Helper {
             return new int[] { attackTonnageMod + gutsMod, defenseTonnageMod + gutsMod};
         }
 
+        public static int GetCalledShotModifier(Pilot pilot) {
+            int gunneryMod = GetGunneryModifier(pilot);
+            int tacticsMod = GetTacticsModifier(pilot);
+            int average = (int) Math.Floor((gunneryMod + tacticsMod) / 2.0);
+            return average;
+        }
+
+        public static int GetVigilanceModifier(Pilot pilot) {
+            int gutsMod = GetGutsModifier(pilot);
+            int tacticsMod = GetTacticsModifier(pilot);
+            int average = (int)Math.Floor((gutsMod + tacticsMod) / 2.0);
+            return average;
+        }
+
         // Returns a multiplier for unit tonnage for attacker / defense cases
         private static float[] GetMeleeMultipliers(Pilot pilot) {
             float[] multipliers = new float[] { 1.0f, 1.0f };
 
-            foreach (string tag in pilot.pilotDef.PilotTags) {
+            foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
                 if (SkillBasedInit.Settings.PilotTagMeleeMultipliers.ContainsKey(tag)) {
                     float[] tagMultis = SkillBasedInit.Settings.PilotTagMeleeMultipliers[tag];
                     SkillBasedInit.LogDebug($"Pilot {pilot.Name} has tag:{tag}, applying melee multipliers attack:{tagMultis[0]} defense:{tagMultis[1]}");

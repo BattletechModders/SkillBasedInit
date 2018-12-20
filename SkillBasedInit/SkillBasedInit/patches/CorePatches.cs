@@ -166,12 +166,18 @@ namespace SkillBasedInit {
                 case 30:
                     __result = "1";
                     break;
-                default:
+                default:                    
                     if (initiative > SkillBasedInit.MaxPhase) {
                         // This looks weird, but it's the only place we can intercept a negative init that I've found.
-                        __instance.Initiative = SkillBasedInit.MaxPhase;
-                    }
-                    __result = "ERROR";                                        
+                        if (__instance != null) { __instance.Initiative = SkillBasedInit.MaxPhase; }
+                        SkillBasedInit.Logger.Log($"AbstractActor:InitiativeToString - ERROR - Bad initiative of {initiative} detected!");
+                        __result = "1";
+                    } else if (initiative < SkillBasedInit.MinPhase) {
+                        // This looks weird, but it's the only place we can intercept a negative init that I've found.
+                        if (__instance != null) { __instance.Initiative = SkillBasedInit.MinPhase; }
+                        SkillBasedInit.Logger.Log($"AbstractActor:InitiativeToString - ERROR - Bad initiative of {initiative} detected!");
+                        __result = "30";
+                    }                    
                     break;
             }
             //SkillBasedInit.Logger.Log($"AbstractActor:InitiativeToString returning {__result} for {initiative}");
