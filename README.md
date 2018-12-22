@@ -65,6 +65,8 @@ Works in progress or planned effects include:
 - [] Tooltips for ability boosted state
 - [] Tooltips for melee bonus to attack, resist
 - [] Change text for Called Shot, Vigiliance
+- [] Check all modifiers to ensure they can be reduced to 0 with high enough stats
+
 
 ### Bugs and Issues
 
