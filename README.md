@@ -66,6 +66,7 @@ Works in progress or planned effects include:
 - [] Tooltips for melee bonus to attack, resist
 - [] Change text for Called Shot, Vigiliance
 - [] Check all modifiers to ensure they can be reduced to 0 with high enough stats
+- [] Move combat tooltip so it doesn't interfere with paper doll
 
 
 ### Bugs and Issues
@@ -84,10 +85,10 @@ These items are known bugs or issues that should be resolved before declaring a 
 The sections below detail some of the calculations used by the mod. Please note that these can vary as the code changes, and may be out of date. You are better off checking the code for these details instead of relying upon this documentation.
 
 ### Impact of Tactics Skill
-A MechWarriors's Tactics skill adds a flat modifier to the base initiative defined by the unit tonnage. This value is graduated, as defined in the table below.
+A MechWarriors's **Tactics** skill adds a flat modifier to the base initiative defined by the unit tonnage. This value is graduated, as defined in the table below.
 
-                         Skill |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  10  | 11 | 12 | 13 |
-                             -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+Skill |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |  10  | 11 | 12 | 13 
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- 
 Modifier                  | +0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
 with Level 5 Ability | +0 | +1 | +1 | +2 | +3 | +4 | +4 | +5 | +5 | +6 | +7 | +8 | +9
 with Level 8 Ability | +0 | +1 | +1 | +2 | +4 | +5 | +5 | +6 | +6 | +7 | +8 | +9 | +10
@@ -97,7 +98,7 @@ The following diagram illustrates the combination of tonnage and tactics to show
 ![Tactics Impact Table](tactics_table.png "Tactics Impact on initiative")
 
 #### Reserve Penalty
-In addition, tactics reduces the impact of the reserve carry over penalty. Each time a unit reserves, the number of phases dropped is added to a penalty applied on the following round. Each time the phase drop is applied, it is reduced by the tactics skill modifier defined above. The phase drop modifier will never be reduced below -1 however.
+In addition, tactics reduces the impact of the reserve carry over penalty. Each time a unit reserves, the number of phases dropped is added to a penalty applied on the following round. Each time the phase drop is applied, it is reduced by the tactics skill modifier defined above. A high enough tactics modifier can reduce this penalty to 0.
 
 Example: A unit reserves 3 times during a round, dropping 5 phases, 3 phases, and 7 phases. The reserve penalty applied on the following round would be:
 
@@ -105,15 +106,15 @@ Tactics | Modifier | Calculation | Penalty
 -- | -- | -- | --
 3 | +1 | (-5 + 1 = -4) + (-3 + 1 = -2) + (-7 + 1 = -6) | -12
 5 | +2 | (-5 + 2 = -3) + (-3 + 2 = -1) + (-7 + 2 = -5) | -9
-7 | +3 | (-5 + 3 = -2) + (-3 + 3 = -1) + (-7 + 3 = -4) | -7
-9 | +4 | (-5 + 4 = -1) + (-3 + 4 = -1) + (-7 + 4 = -3) | -5
+7 | +3 | (-5 + 3 = -2) + (-3 + 3 = 0) + (-7 + 3 = -4) | -6 
+9 | +4 | (-5 + 4 = -1) + (-3 + 4 = 0) + (-7 + 4 = -3) | -4 
 
 ### Impact of Piloting
 
 The Piloting skill impacts initiative in two ways. The first is by reducing a random element that is added each turn. Each turn, a unit's maximum initiative (tonnage initiative + tactics modifier + equipment modifiers) is reduced by a random amount, defined in the table below:
 
-Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 
+-- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- 
 Random Modifier | 3-9 | 2-8 | 2-8 | 1-7 | 1-7 | 0-6 | 0-6 | 0-5 | 0-5 | 0-4 | 0-3 | 0-3 | 0-2
 
 The diagram below illustrates this as ranges based around the maximum initiative, represented as 0.
@@ -121,9 +122,11 @@ The diagram below illustrates this as ranges based around the maximum initiative
 
 In addition, some effects that reduce your initiative will be offset by a high piloting skill. Suffering a knockdown, being prone or shutdown results in initiative penalties. These penalties are reduced as per the table below:
 
-Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-Modifier | 0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
+| Skill                | 1    | 2    | 3    | 4    | 5    | 6    | 7    | 8    | 9    | 10   | 11   | 12   | 13   |
+| -------------------- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| Modifier             | +0   | +1   | +1   | +2   | +2   | +3   | +3   | +4   | +4   | +5   | +6   | +7   | +8   |
+| with Level 5 Ability | +0   | +1   | +1   | +2   | +3   | +4   | +4   | +5   | +5   | +6   | +7   | +8   | +9   |
+| with Level 8 Ability | +0   | +1   | +1   | +2   | +4   | +5   | +5   | +6   | +6   | +7   | +8   | +9   | +10  |
 
 If the modifier is greater than the penalty, a flat -1 penalty will be applied.
 
@@ -141,18 +144,20 @@ Each injury adds +1 to the upper bound only. A pilot with Guts 5 and 2 injuries 
 
 When successfully damaged by a melee attack, the unit suffers an initiative penalty determined by the relative tonnage of the attacker and defender (see above). This penalty is reduced by the target's Guts skill rating, as defined by the table below.
 
-Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 |
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-Modifier | 0 | +1 | +1 | +2 | +2 | +3 | +3 | +4 | +4 | +5 | +6 | +7 | +8
+| Skill                | 1    | 2    | 3    | 4    | 5    | 6    | 7    | 8    | 9    | 10   | 11   | 12   | 13   |
+| -------------------- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| Modifier             | +0   | +1   | +1   | +2   | +2   | +3   | +3   | +4   | +4   | +5   | +6   | +7   | +8   |
+| with Level 5 Ability | +0   | +1   | +1   | +2   | +3   | +4   | +4   | +5   | +5   | +6   | +7   | +8   | +9   |
+| with Level 8 Ability | +0   | +1   | +1   | +2   | +4   | +5   | +5   | +6   | +6   | +7   | +8   | +9   | +10  |
 
 If the modifier is greater than the penalty, a flat -1 penalty will be applied.
 
 ### Pilot Tags
 
 Pilot tags impact the game in three major ways:
-    1) some provide a direct bonus or penalty to initiative
-    2) some provide a bonus or penalty to the tonnage calculation for melee purposes
-    3) a rare few provide subtle, unique benefits
+​    1) some provide a direct bonus or penalty to initiative
+​    2) some provide a bonus or penalty to the tonnage calculation for melee purposes
+​    3) a rare few provide subtle, unique benefits
 
 #### Direct Modifiers
 
