@@ -188,7 +188,7 @@ Tonnage | 05 | 10-15 | 20-25 | 30-35 | 40-45 | 50-55 | 60-65 | 70-75 | 80-85 | 9
 *Base Initiative* | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 9
 
 ### Engine Impact
-This mod breaks units down into 10-ton ranges, such as 20-25 tons, 30-35 tons, etc. Within each range, there is a sweet-spot for engine ratings where a unit is considered to have a typical engine for its class. Units with engine ratings less than this midpoint suffer an initiative penalty from -3 to -1, while units with engine ratings above this midpoint gain a bonus between +1 to +3.
+This mod breaks units down into 10-ton ranges, such as 20-25 tons, 30-35 tons, etc. Within each range, there is a sweet-spot for engine ratings where a unit is considered to have a typical engine for its class. Units with engine ratings less than this midpoint suffer an initiative penalty from -6 to -2, while units with engine ratings above this midpoint gain a bonus between +2 to +6.
 
 For a given midpoint, the modifier bounds are defined below.
 
@@ -226,9 +226,9 @@ Tons / Mod | -6 | -4 | -2 | +0 | +2 | +4 | +6
 150 | NA | 150 | 150 | 300 | NA | NA | NA
 200 | NA | 200 | 200 | 400 | NA | NA | NA
 
-This feature on the [MechEngineer](https://github.com/BattletechModders/MechEngineer/) mod.
-
 Units with the `unit_powerarmor` tag have neither a bonus nor penalty.
+
+This feature depends on the [MechEngineer](https://github.com/BattletechModders/MechEngineer/) mod, which depends on [CustomComponents](http://github.com/denadan/CustomComponents/). As such both mods are required for this check.
 
 ### Miscellaneous
 
