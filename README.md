@@ -56,17 +56,16 @@ These colors can be customized through the `mod.json`.
 Works in progress or planned effects include:
 
 - [] Units that are unsettled, panicked or similar will have a reduced initiative.
+- [] Reduce penalties for injuries at the bottom end of the guts range
+- [] Change start-of-phase popups to be buff/debuff icons shown when a friendly mech is selected
+- [] Change combat tooltip to show both static and dynamic effects
+- [] Change combat tooltip to no longer obscure the paperdoll
 - [] Show an initiative track at the top of the screen so that players know which models are going when. Perhaps use the unit icons and a number underneath them?
-- [] Modify Reserve button to change to 'Reserve to Phase 1' when ALT key is held down. Model pays for all the phases it holds though.
-- [x] Tactician (P5 ability) and Ace pilot (P5 ability) will provide a boost to modifiers of about 50%.
-- [x] Reserve penalty will no longer be a minimum of -1; a high enough tactics will reduce it to 0
-- [x] Vigiliance provides an initiative boost of Math.Ceil((guts + tactics)/2)
-- [x] Called Shot provides an init. penalty of Math.Ceil((gunnery + tactics)/2). The modifier is based upon the amount of stab damage in the attack, perhaps?
+- [] Modify Reserve button to change to 'Reserve to Phase 1' when ALT key is held down. Model pays for all the phases it holds though. (See BTDebug for how to lash to ALT key)
 - [] Tooltips for ability boosted state
 - [] Tooltips for melee bonus to attack, resist
-- [] Change text for Called Shot, Vigiliance
+- [] Change text for Called Shot, Vigiliance to reflect the new functions under SBI
 - [] Check all modifiers to ensure they can be reduced to 0 with high enough stats
-- [] Move combat tooltip so it doesn't interfere with paper doll
 
 
 ### Bugs and Issues
