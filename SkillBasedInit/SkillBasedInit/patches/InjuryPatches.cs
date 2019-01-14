@@ -26,7 +26,7 @@ namespace SkillBasedInit {
             }
             int bonusDelta = __state - currentBonus;
             int damageTaken = dmg - bonusDelta;
-            SkillBasedInit.LogDebug($"Pilot:InjurePilot:post - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) lost bonusHealth:{bonusDelta}, while results in damage:{damageTaken} from the attack.");
+            SkillBasedInit.Logger.LogIfDebug($"Pilot:InjurePilot:post - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) lost bonusHealth:{bonusDelta}, while results in damage:{damageTaken} from the attack.");
 
             // If the attacker took any damage, apply it
             if (damageTaken > 0) {

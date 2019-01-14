@@ -6,14 +6,15 @@ using BattleTech;
 namespace SkillBasedInit.Helper {
     public class PilotHelper {
 
+        // The penalty range for injuries, keyed by guts level.
         private static readonly Dictionary<int, int[]> InjuryBounds = new Dictionary<int, int[]> {
-            {  1, new[] { 6, 9 } },
-            {  2, new[] { 5, 8 } },
-            {  3, new[] { 5, 8 } },
-            {  4, new[] { 4, 7 } },
-            {  5, new[] { 4, 7 } },
-            {  6, new[] { 3, 6 } },
-            {  7, new[] { 3, 6 } },
+            {  1, new[] { 5, 7 } },
+            {  2, new[] { 4, 6 } },
+            {  3, new[] { 4, 6 } },
+            {  4, new[] { 3, 6 } },
+            {  5, new[] { 3, 6 } },
+            {  6, new[] { 3, 5 } },
+            {  7, new[] { 3, 5 } },
             {  8, new[] { 2, 5 } },
             {  9, new[] { 2, 5 } },
             { 10, new[] { 1, 4 } },
@@ -22,6 +23,7 @@ namespace SkillBasedInit.Helper {
             { 13, new[] { 1, 2 } }
         };
 
+        // The randomness each round, keyed by piloting level.
         private static readonly Dictionary<int, int[]> RandomnessBounds = new Dictionary<int, int[]> {
             {  1, new[] { 3, 9 } },
             {  2, new[] { 2, 8 } },
@@ -59,9 +61,9 @@ namespace SkillBasedInit.Helper {
             int mod = 0;
 
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (SkillBasedInit.Settings.PilotTagModifiers.ContainsKey(tag)) {
-                    int tagMod = SkillBasedInit.Settings.PilotTagModifiers[tag];
-                    SkillBasedInit.LogDebug($"Pilot {pilot.Name} has tag:{tag}, applying modifier:{tagMod}");
+                if (SkillBasedInit.Config.PilotTagModifiers.ContainsKey(tag)) {
+                    int tagMod = SkillBasedInit.Config.PilotTagModifiers[tag];
+                    SkillBasedInit.Logger.LogIfDebug($"Pilot {pilot.Name} has tag:{tag}, applying modifier:{tagMod}");
                     mod += tagMod;
                 }
             }
@@ -70,16 +72,16 @@ namespace SkillBasedInit.Helper {
         }
 
         // Generates tooltip details for tags that provide modifiers
-        public static List<string> GetTagsModifierDetails(Pilot pilot) {
+        public static List<string> GetTagsModifierDetails(Pilot pilot, int space=2) {
             List<string> details = new List<string>();
 
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (SkillBasedInit.Settings.PilotTagModifiers.ContainsKey(tag)) {
-                    int tagMod = SkillBasedInit.Settings.PilotTagModifiers[tag];
+                if (SkillBasedInit.Config.PilotTagModifiers.ContainsKey(tag)) {
+                    int tagMod = SkillBasedInit.Config.PilotTagModifiers[tag];
                     if (tagMod > 0) {
-                        details.Add($"<space=2em><color=#00FF00>{tag}: {tagMod:+0}</color>");
+                        details.Add($"<space={space}em><color=#00FF00>{tag}: {tagMod:+0}</color>");
                     } else if (tagMod < 0) {
-                        details.Add($"<space=2em><color=#FF0000>{tag}: {tagMod}</color>");
+                        details.Add($"<space={space}em><color=#FF0000>{tag}: {tagMod}</color>");
                     }
                 }
             }
@@ -89,13 +91,13 @@ namespace SkillBasedInit.Helper {
 
         // Generates tooltip details for tags that have a non-modifier effect.
         //  This would be for things like juggernaught ability, drunk, etc
-        public static List<string> GetPilotSpecialsDetails(Pilot pilot) {
+        public static List<string> GetPilotSpecialsDetails(Pilot pilot, int space=2) {
             List<string> details = new List<string>();
 
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (SkillBasedInit.Settings.PilotSpecialTagsDetails.ContainsKey(tag)) {
-                    string tagEffect = SkillBasedInit.Settings.PilotSpecialTagsDetails[tag];
-                    details.Add($"<space=2em>{tag}: <i>{tagEffect}</i>");
+                if (SkillBasedInit.Config.PilotSpecialTagsDetails.ContainsKey(tag)) {
+                    string tagEffect = SkillBasedInit.Config.PilotSpecialTagsDetails[tag];
+                    details.Add($"<space={space}em>{tag}: <i>{tagEffect}</i>");
                 }
             }
 
@@ -122,9 +124,9 @@ namespace SkillBasedInit.Helper {
             int normalizedVal = NormalizeSkill(skillValue);
             int mod = ModifierBySkill[normalizedVal];
             foreach (Ability ability in pilot.Abilities.Distinct()) {
-                SkillBasedInit.LogDebug($"Pilot {pilot.Name} has ability:{ability.Def.Id}.");
+                SkillBasedInit.Logger.LogIfDebug($"Pilot {pilot.Name} has ability:{ability.Def.Id}.");
                 if (ability.Def.Id.ToLower().Equals(abilityDefIdL5.ToLower()) || ability.Def.Id.ToLower().Equals(abilityDefIdL8.ToLower())) {
-                    SkillBasedInit.LogDebug($"Pilot {pilot.Name} has targeted ability:{ability.Def.Id}, boosting their modifier.");
+                    SkillBasedInit.Logger.LogIfDebug($"Pilot {pilot.Name} has targeted ability:{ability.Def.Id}, boosting their modifier.");
                     mod += 1;
                 } 
 
@@ -136,12 +138,12 @@ namespace SkillBasedInit.Helper {
             float[] meleeMultiplier = PilotHelper.GetMeleeMultipliers(pilot);
             float attackTonnage = tonnage * meleeMultiplier[0];
             float defenseTonnage = tonnage * meleeMultiplier[1];
-            SkillBasedInit.LogDebug($"Pilot:{pilot.Name} with tonnage:{tonnage} counts as attack:{attackTonnage} defense:{defenseTonnage}");
+            SkillBasedInit.Logger.LogIfDebug($"Pilot:{pilot.Name} with tonnage:{tonnage} counts as attack:{attackTonnage} defense:{defenseTonnage}");
 
             int gutsMod = GetGutsModifier(pilot);
             int attackTonnageMod = (int)Math.Ceiling(attackTonnage / 5.0);
             int defenseTonnageMod = (int)Math.Ceiling(defenseTonnage / 5.0);
-            SkillBasedInit.LogDebug($"Pilot:{pilot.Name} has attackMod:{attackTonnageMod} + {gutsMod} defenseMod:{defenseTonnageMod} + {gutsMod}");
+            SkillBasedInit.Logger.LogIfDebug($"Pilot:{pilot.Name} has attackMod:{attackTonnageMod} + {gutsMod} defenseMod:{defenseTonnageMod} + {gutsMod}");
 
             return new int[] { attackTonnageMod + gutsMod, defenseTonnageMod + gutsMod};
         }
@@ -165,9 +167,9 @@ namespace SkillBasedInit.Helper {
             float[] multipliers = new float[] { 1.0f, 1.0f };
 
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (SkillBasedInit.Settings.PilotTagMeleeMultipliers.ContainsKey(tag)) {
-                    float[] tagMultis = SkillBasedInit.Settings.PilotTagMeleeMultipliers[tag];
-                    SkillBasedInit.LogDebug($"Pilot {pilot.Name} has tag:{tag}, applying melee multipliers attack:{tagMultis[0]} defense:{tagMultis[1]}");
+                if (SkillBasedInit.Config.PilotTagMeleeMultipliers.ContainsKey(tag)) {
+                    float[] tagMultis = SkillBasedInit.Config.PilotTagMeleeMultipliers[tag];
+                    SkillBasedInit.Logger.LogIfDebug($"Pilot {pilot.Name} has tag:{tag}, applying melee multipliers attack:{tagMultis[0]} defense:{tagMultis[1]}");
                     multipliers[0] += tagMultis[0];
                     multipliers[1] += tagMultis[1];
                 }
@@ -209,7 +211,7 @@ namespace SkillBasedInit.Helper {
         }
 
         public static void LogPilotStats(Pilot pilot) {
-            if (SkillBasedInit.Settings.Debug) {
+            if (SkillBasedInit.Config.Debug) {
                 int normedGuts = NormalizeSkill(pilot.Guts);
                 int gutsMod = GetGutsModifier(pilot);
                 int normdPilot = NormalizeSkill(pilot.Piloting);
@@ -217,7 +219,7 @@ namespace SkillBasedInit.Helper {
                 int normedTactics = NormalizeSkill(pilot.Tactics);
                 int tacticsMod = GetTacticsModifier(pilot);
 
-                SkillBasedInit.LogDebug($"{pilot.Name} skill profile is " +
+                SkillBasedInit.Logger.LogIfDebug($"{pilot.Name} skill profile is " +
                     $"g:{pilot.Guts}->{normedGuts}={gutsMod}" +
                     $"p:{pilot.Piloting}->{normdPilot}={pilotingMod} " +
                     $"t:{pilot.Tactics}->{normedTactics}={tacticsMod} "

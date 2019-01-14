@@ -55,13 +55,13 @@ namespace SkillBasedInit.Helper {
 
                 TagSet actorTags = actor.GetTags();
                 if (actorTags != null && actorTags.Contains("unit_light")) {
-                    tonnage = SkillBasedInit.Settings.TurretTonnageTagUnitLight;
+                    tonnage = SkillBasedInit.Config.TurretTonnageTagUnitLight;
                 } else if (actorTags != null && actorTags.Contains("unit_medium")) {
-                    tonnage = SkillBasedInit.Settings.TurretTonnageTagUnitMedium;
+                    tonnage = SkillBasedInit.Config.TurretTonnageTagUnitMedium;
                 } else if (actorTags != null && actorTags.Contains("unit_heavy")) {
-                    tonnage = SkillBasedInit.Settings.TurretTonnageTagUnitHeavy;
+                    tonnage = SkillBasedInit.Config.TurretTonnageTagUnitHeavy;
                 } else {
-                    tonnage = SkillBasedInit.Settings.TurretTonnageTagUnitNone;
+                    tonnage = SkillBasedInit.Config.TurretTonnageTagUnitNone;
                 }
             }
             return tonnage;
@@ -78,7 +78,7 @@ namespace SkillBasedInit.Helper {
             if (tonnageRange > 10) {
                 tonnageRange = SuperHeavyTonnage;
             }
-            SkillBasedInit.LogDebug($"for raw tonnage {tonnage} returning tonnageRange:{tonnageRange}");
+            SkillBasedInit.Logger.LogIfDebug($"for raw tonnage {tonnage} returning tonnageRange:{tonnageRange}");
             return tonnageRange;
         }
 
@@ -165,13 +165,15 @@ namespace SkillBasedInit.Helper {
                         baseMod -= 5;
                         break;
                     default:
-                        SkillBasedInit.LogDebug($"Actor:{actor.DisplayName}_{actor.GetPilot().Name} has unknown or undefined weight class:{weightClass}!");
+                        SkillBasedInit.Logger.LogIfDebug($"Actor:{actor.DisplayName}_{actor.GetPilot().Name}" +
+                            $" has unknown or undefined weight class:{weightClass}!");
                         break;
                 }
 
                 // Because HBS init values were from 2-5, bonuses will be negative at this point and penalties positive. Invert these.
                 unitInit = baseMod * -1;
-                SkillBasedInit.LogDebug($"Normalized BaseInit for Actor:{actor.DisplayName}_{actor.GetPilot().Name} from {actor.StatCollection.GetValue<int>("BaseInitiative")} to unitInit:{unitInit}");
+                SkillBasedInit.Logger.LogIfDebug($"Normalized BaseInit for Actor:{actor.DisplayName}_{actor.GetPilot().Name}" +
+                    $" from {actor.StatCollection.GetValue<int>("BaseInitiative")} to unitInit:{unitInit}");
             }
 
             return unitInit;
@@ -195,21 +197,21 @@ namespace SkillBasedInit.Helper {
                 }
             }
 
-            SkillBasedInit.LogDebug($"Normalized BaseInit for mechDef:{mechDef.Name} is unitInit:{unitInit}");
+            SkillBasedInit.Logger.LogIfDebug($"Normalized BaseInit for mechDef:{mechDef.Name} is unitInit:{unitInit}");
             return unitInit;
         }
 
         public static int GetEngineModifier(AbstractActor actor) {
             int engineMod = 0;
             if (actor.GetTags().Contains("unit_powerarmor")) {
-                SkillBasedInit.LogDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} is PowerArmor, skipping engine bonus.");
+                SkillBasedInit.Logger.LogIfDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} is PowerArmor, skipping engine bonus.");
             } else {
                 MechComponent mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
                 if (mainEngineComponent != null) {
                     EngineCoreDef engine = mainEngineComponent?.componentDef?.GetComponent<EngineCoreDef>();
                     float tonnage = GetUnitTonnage(actor);
                     engineMod = CalculateEngineModifier(tonnage, engine.Rating);
-                    SkillBasedInit.LogDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} with engine rating: {engine?.Rating} has engineMod:{engineMod}");
+                    SkillBasedInit.Logger.LogIfDebug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} with engine rating: {engine?.Rating} has engineMod:{engineMod}");
                 } else {
                     SkillBasedInit.Logger.Log($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has no engine - is this expected?");
                 }
@@ -223,7 +225,7 @@ namespace SkillBasedInit.Helper {
 
             // var mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
             MechComponentRef engineRef = mechDef.Inventory.FirstOrDefault(mcr => mcr?.GetComponent<EngineCoreDef>() != null);
-            SkillBasedInit.LogDebug($"MechDef:{mechDef.Name} has engineComponent:{engineRef}?");
+            SkillBasedInit.Logger.LogIfDebug($"MechDef:{mechDef.Name} has engineComponent:{engineRef}?");
             if (engineRef != null) {
                 EngineCoreDef engine = engineRef.Def.GetComponent<EngineCoreDef>();
                 float tonnage = mechDef.Chassis.Tonnage;
@@ -239,7 +241,7 @@ namespace SkillBasedInit.Helper {
             float engineRatio = rating / tonnage;
             int tonnageRange = GetTonnageRange(tonnage);
             int ratioMidpoint = EngineMidpointByTonnage[tonnageRange];
-            SkillBasedInit.LogDebug($"Comparing engineRatio:{engineRatio} from rating:{rating} / tonnage:{tonnage} vs midpoint:{ratioMidpoint}");
+            SkillBasedInit.Logger.LogIfDebug($"Comparing engineRatio:{engineRatio} from rating:{rating} / tonnage:{tonnage} vs midpoint:{ratioMidpoint}");
             if (engineRatio > ratioMidpoint) {
                 int oneSigma = (int)Math.Ceiling(ratioMidpoint * 1.2);
                 int twoSigma = (int)Math.Ceiling(ratioMidpoint * 1.4);
@@ -253,7 +255,7 @@ namespace SkillBasedInit.Helper {
                 } else {
                     engineMod = 6;
                 }
-                SkillBasedInit.LogDebug($"Oversized engine, returning bonus engineMod:{engineMod}");
+                SkillBasedInit.Logger.LogIfDebug($"Oversized engine, returning bonus engineMod:{engineMod}");
             } else if (engineRatio < ratioMidpoint) {
                 int oneSigma = (int)Math.Floor(ratioMidpoint * 0.8);
                 int twoSigma = (int)Math.Floor(ratioMidpoint * 0.6);
@@ -267,9 +269,9 @@ namespace SkillBasedInit.Helper {
                 } else {
                     engineMod = -6;
                 }
-                SkillBasedInit.LogDebug($"Undersized engine, returning penalty engineMod:{engineMod}");
+                SkillBasedInit.Logger.LogIfDebug($"Undersized engine, returning penalty engineMod:{engineMod}");
             } else {
-                SkillBasedInit.LogDebug("Balanced engine, returning engineMod:0");
+                SkillBasedInit.Logger.LogIfDebug("Balanced engine, returning engineMod:0");
                 engineMod = 0;
             }
 
@@ -281,9 +283,9 @@ namespace SkillBasedInit.Helper {
             if (actor.GetType() == typeof(Mech)) {
                 typeMod = 0;
             } else if (actor.GetType() == typeof(Vehicle)) {
-                typeMod = SkillBasedInit.Settings.VehicleROCModifier;
+                typeMod = SkillBasedInit.Config.VehicleROCModifier;
             } else {
-                typeMod = SkillBasedInit.Settings.TurretROCModifier;
+                typeMod = SkillBasedInit.Config.TurretROCModifier;
             }
             return typeMod;
         }

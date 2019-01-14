@@ -11,7 +11,7 @@ namespace SkillBasedInit {
     public static class Mech_TakeWeaponDamage {
         public static void Postfix(Mech __instance, WeaponHitInfo hitInfo, int hitLocation, Weapon weapon, float damageAmount, int hitIndex, DamageType damageType) {
             if (weapon != null && weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.LogDebug($"Mech:TakeWeaponDamage:post - Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has suffered a melee attack from:{weapon.parent.DisplayName}.");
+                SkillBasedInit.Logger.LogIfDebug($"Mech:TakeWeaponDamage:post - Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has suffered a melee attack from:{weapon.parent.DisplayName}.");
 
                 ActorInitiative attacker = ActorInitiativeHolder.GetOrCreate(weapon.parent);
                 ActorInitiative target = ActorInitiativeHolder.GetOrCreate(__instance);
@@ -26,7 +26,7 @@ namespace SkillBasedInit {
     public static class Vehicle_TakeWeaponDamage {
         public static void Postfix(Vehicle __instance, WeaponHitInfo hitInfo, int hitLocation, Weapon weapon, float damageAmount, int hitIndex, DamageType damageType) {
             if (weapon != null && weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.LogDebug($"Vehicle:TakeWeaponDamage:post - Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has suffered a melee attack from:{weapon.parent.DisplayName}.");
+                SkillBasedInit.Logger.LogIfDebug($"Vehicle:TakeWeaponDamage:post - Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has suffered a melee attack from:{weapon.parent.DisplayName}.");
 
                 ActorInitiative attacker = ActorInitiativeHolder.GetOrCreate(weapon.parent);
                 ActorInitiative target = ActorInitiativeHolder.GetOrCreate(__instance);
@@ -42,7 +42,7 @@ namespace SkillBasedInit {
     public static class Turret_TakeWeaponDamage {
         public static void Postfix(Turret __instance, WeaponHitInfo hitInfo, int hitLocation, Weapon weapon, float damageAmount, int hitIndex, DamageType damageType) {
             if (weapon != null && weapon.Category == WeaponCategory.Melee) {
-                SkillBasedInit.LogDebug($"Turret:TakeWeaponDamage:post - Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has suffered a melee attack from:{weapon.parent.DisplayName}.");
+                SkillBasedInit.Logger.LogIfDebug($"Turret:TakeWeaponDamage:post - Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has suffered a melee attack from:{weapon.parent.DisplayName}.");
 
                 ActorInitiative attacker = ActorInitiativeHolder.GetOrCreate(weapon.parent);
                 ActorInitiative target = ActorInitiativeHolder.GetOrCreate(__instance);

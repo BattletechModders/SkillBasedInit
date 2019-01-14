@@ -7,120 +7,119 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace SkillBasedInit {
 
-    [HarmonyPatch(typeof(CombatHUDMechTray), "Init")]
-    [HarmonyPatch(new Type[] { typeof(MessageCenter), typeof(CombatHUD) })]
-    public static class CombatHUDMechTray_Init {
+    //[HarmonyPatch(typeof(CombatHUDMechTray), "Init")]
+    //[HarmonyPatch(new Type[] { typeof(MessageCenter), typeof(CombatHUD) })]
+    //public static class CombatHUDMechTray_Init {
 
-        public static HBSTooltip CombatInitTooltip;
+    //    public static HBSTooltip CombatInitTooltip;
 
-        public static void Postfix(CombatHUDMechTray __instance, MessageCenter messageCenter, CombatHUD HUD) {
-            //SkillBasedInit.Logger.Log($"CombatHUDMechTray:Init - entered");
+    //    public static void Postfix(CombatHUDMechTray __instance, MessageCenter messageCenter, CombatHUD HUD) {
+    //        //SkillBasedInit.Logger.Log($"CombatHUDMechTray:Init - entered");
 
-            CombatInitTooltip = __instance.gameObject.AddComponent(typeof(HBSTooltip)) as HBSTooltip;
-            CombatInitTooltip.enabled = true;
-            CombatInitTooltip.AllowRightClickExpansion = false;
-            CombatInitTooltip.Show = true;
-            CombatInitTooltip.gameObject.SetActive(true);
+    //        CombatInitTooltip = __instance.gameObject.AddComponent(typeof(HBSTooltip)) as HBSTooltip;
+    //        CombatInitTooltip.enabled = true;
+    //        CombatInitTooltip.AllowRightClickExpansion = false;
+    //        CombatInitTooltip.Show = true;
+    //        CombatInitTooltip.gameObject.SetActive(true);
 
-            BaseDescriptionDef initiativeData = new BaseDescriptionDef("CHUDMT_INIT", "TEST", $"{__instance}", null);
-            CombatInitTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(initiativeData));
-        }
+    //        BaseDescriptionDef initiativeData = new BaseDescriptionDef("CHUDMT_INIT", "TEST", $"{__instance}", null);
+    //        CombatInitTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(initiativeData));
+    //    }
 
-    }
+    //}
 
-    [HarmonyPatch(typeof(CombatHUDMechTray))]
-    [HarmonyPatch("DisplayedActor", MethodType.Setter)]
-    public static class CombatHUDMechTray_DisplayedActor_Setter {
+    //[HarmonyPatch(typeof(CombatHUDMechTray))]
+    //[HarmonyPatch("DisplayedActor", MethodType.Setter)]
+    //public static class CombatHUDMechTray_DisplayedActor_Setter {
 
-        public static void Postfix(CombatHUDMechTray __instance) {
-            //SkillBasedInit.Logger.Log($"CombatHUDMechTray:DisplayedActor:post - entered");
+    //    public static void Postfix(CombatHUDMechTray __instance) {
+    //        //SkillBasedInit.Logger.Log($"CombatHUDMechTray:DisplayedActor:post - entered");
 
-            if (__instance != null && __instance.DisplayedActor != null) {
-                AbstractActor actor = __instance.DisplayedActor;
+    //        if (__instance != null && __instance.DisplayedActor != null) {
+    //            AbstractActor actor = __instance.DisplayedActor;
 
-                ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(actor);
-                List<string> details = new List<string> {
-                    $"Static Initiative: {actorInit.roundInitBase}",
-                    $"<space=2em><color=#FF0000>-{actorInit.randomnessBounds[0]} to -{actorInit.randomnessBounds[1]} randomness</color> (piloting)"
-                };
+    //            ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(actor);
+    //            List<string> details = new List<string> {
+    //                $"Static Initiative: {actorInit.roundInitBase}",
+    //                $"<space=2em><color=#FF0000>-{actorInit.randomnessBounds[0]} to -{actorInit.randomnessBounds[1]} randomness</color> (piloting)"
+    //            };
 
-                int expectedInitMax = actorInit.roundInitBase;
-                int expectedInitRandMin = actorInit.randomnessBounds[0];
-                int expectedInitRandMax = actorInit.randomnessBounds[1];
+    //            int expectedInitMax = actorInit.roundInitBase;
+    //            int expectedInitRandMin = actorInit.randomnessBounds[0];
+    //            int expectedInitRandMax = actorInit.randomnessBounds[1];
 
-                // Check for inspired status                
-                if (actor.IsMoraleInspired || actor.IsFuryInspired) {
-                    details.Add($"<space=2em><color=#00FF00>+1 to +3 Inspired</color>");
-                    expectedInitRandMin += 1;
-                    expectedInitRandMin += 3;
-                }
+    //            // Check for inspired status                
+    //            if (actor.IsMoraleInspired || actor.IsFuryInspired) {
+    //                details.Add($"<space=2em><color=#00FF00>+1 to +3 Inspired</color>");
+    //                expectedInitRandMin += 1;
+    //                expectedInitRandMin += 3;
+    //            }
 
-                // Check for injuries. If there injuries on the previous round, apply them in full force. Otherwise, reduce them.
-                if (actorInit.deferredInjuryMod != 0) {
-                    details.Add($"<space=2em><color=#FF0000>-{actorInit.deferredInjuryMod} Deferred Injury</color>");
-                    expectedInitMax -= actorInit.deferredInjuryMod;
-                } else if (actor.GetPilot().Injuries != 0) {
-                    // TODO: fold this in
-                    int rawPenalty = actorInit.CalculateInjuryPenalty(0, actor.GetPilot().Injuries);
-                    int penalty = (int)Math.Ceiling(rawPenalty / 2.0);
-                    details.Add($"<space=2em><color=#FF0000>-{penalty} Previous Injuries</color>");
-                    expectedInitMax -= penalty;
-                }
+    //            // Check for injuries. If there injuries on the previous round, apply them in full force. Otherwise, reduce them.
+    //            if (actorInit.deferredInjuryMod != 0) {
+    //                details.Add($"<space=2em><color=#FF0000>-{actorInit.deferredInjuryMod} Deferred Injury</color>");
+    //                expectedInitMax -= actorInit.deferredInjuryMod;
+    //            } else if (actor.GetPilot().Injuries != 0) {
+    //                // TODO: fold this in
+    //                int rawPenalty = actorInit.CalculateInjuryPenalty(0, actor.GetPilot().Injuries);
+    //                int penalty = (int)Math.Ceiling(rawPenalty / 2.0);
+    //                details.Add($"<space=2em><color=#FF0000>-{penalty} Previous Injuries</color>");
+    //                expectedInitMax -= penalty;
+    //            }
 
-                // Check for leg / side loss
-                Mech mech = (Mech)actor;
-                if (mech.IsLocationDestroyed(ChassisLocations.LeftLeg) || mech.IsLocationDestroyed(ChassisLocations.RightLeg)) {
-                    int rawMod = SkillBasedInit.Settings.CrippledMovementModifier + actorInit.pilotingEffectMod;
-                    int penalty = Math.Min(-1, rawMod);
-                    details.Add($"<space=2em><color=#FF0000>{penalty} Crippled Movement</color>");
-                    expectedInitMax += penalty;
-                }
+    //            // Check for leg / side loss
+    //            Mech mech = (Mech)actor;
+    //            if (mech.IsLocationDestroyed(ChassisLocations.LeftLeg) || mech.IsLocationDestroyed(ChassisLocations.RightLeg)) {
+    //                int rawMod = SkillBasedInit.Config.CrippledMovementModifier + actorInit.pilotingEffectMod;
+    //                int penalty = Math.Min(-1, rawMod);
+    //                details.Add($"<space=2em><color=#FF0000>{penalty} Crippled Movement</color>");
+    //                expectedInitMax += penalty;
+    //            }
                
-                // Check for prone 
-                if (actor.IsProne) {
-                    int rawMod = SkillBasedInit.Settings.ProneModifier + actorInit.pilotingEffectMod;               
-                    int penalty = Math.Min(-1, rawMod);
-                    details.Add($"<space=2em><color=#FF0000>{penalty} Prone</color>");
-                    expectedInitMax += penalty;
-                }
+    //            // Check for prone 
+    //            if (actor.IsProne) {
+    //                int rawMod = SkillBasedInit.Config.ProneModifier + actorInit.pilotingEffectMod;               
+    //                int penalty = Math.Min(-1, rawMod);
+    //                details.Add($"<space=2em><color=#FF0000>{penalty} Prone</color>");
+    //                expectedInitMax += penalty;
+    //            }
 
-                // Check for shutdown
-                if (actor.IsShutDown) {
-                    int rawMod = SkillBasedInit.Settings.ShutdownModifier + actorInit.pilotingEffectMod;
-                    int penalty = Math.Min(-1, rawMod);
-                    details.Add($"<space=2em><color=#FF0000>{penalty} Shutdown</color>");
-                    expectedInitMax += penalty;
-                }
+    //            // Check for shutdown
+    //            if (actor.IsShutDown) {
+    //                int rawMod = SkillBasedInit.Config.ShutdownModifier + actorInit.pilotingEffectMod;
+    //                int penalty = Math.Min(-1, rawMod);
+    //                details.Add($"<space=2em><color=#FF0000>{penalty} Shutdown</color>");
+    //                expectedInitMax += penalty;
+    //            }
 
-                // Check for melee impacts        
-                if (actorInit.deferredMeleeMod > 0) {
-                    expectedInitMax -= actorInit.deferredMeleeMod;
-                    details.Add($"<space=2em><color=#FF0000>-{actorInit.deferredMeleeMod} Shutdown</color>");
-                }
+    //            // Check for melee impacts        
+    //            if (actorInit.deferredMeleeMod > 0) {
+    //                expectedInitMax -= actorInit.deferredMeleeMod;
+    //                details.Add($"<space=2em><color=#FF0000>-{actorInit.deferredMeleeMod} Shutdown</color>");
+    //            }
 
-                // Check for an overly cautious player
-                if (actorInit.deferredReserveMod > 0) {
-                    expectedInitMax -= actorInit.deferredReserveMod;
-                    details.Add($"<space=2em><color=#FF0000>-{actorInit.deferredReserveMod} Hesitation</color>");
-                }
+    //            // Check for an overly cautious player
+    //            if (actorInit.deferredReserveMod > 0) {
+    //                expectedInitMax -= actorInit.deferredReserveMod;
+    //                details.Add($"<space=2em><color=#FF0000>-{actorInit.deferredReserveMod} Hesitation</color>");
+    //            }
 
-                int maxInit = Math.Max(expectedInitMax - expectedInitRandMin, SkillBasedInit.MinPhase);
-                int minInit = Math.Max(expectedInitMax - expectedInitRandMax, SkillBasedInit.MinPhase);
-                details.Add($"\nExpected Phase: <b>{maxInit} to {minInit}</b>");
+    //            int maxInit = Math.Max(expectedInitMax - expectedInitRandMin, SkillBasedInit.MinPhase);
+    //            int minInit = Math.Max(expectedInitMax - expectedInitRandMax, SkillBasedInit.MinPhase);
+    //            details.Add($"\nExpected Phase: <b>{maxInit} to {minInit}</b>");
 
-                string tooltipTitle = $"{actor.DisplayName}: {actor.GetPilot().Name}";
-                string tooltipText = String.Join("\n", details.ToArray());
+    //            string tooltipTitle = $"{actor.DisplayName}: {actor.GetPilot().Name}";
+    //            string tooltipText = String.Join("\n", details.ToArray());
 
-                BaseDescriptionDef initiativeData = new BaseDescriptionDef("CHUDMT_INIT", tooltipTitle, tooltipText, null);
-                CombatHUDMechTray_Init.CombatInitTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(initiativeData));
-            }
-        }
-    }
+    //            BaseDescriptionDef initiativeData = new BaseDescriptionDef("CHUDMT_INIT", tooltipTitle, tooltipText, null);
+    //            CombatHUDMechTray_Init.CombatInitTooltip.SetDefaultStateData(TooltipUtilities.GetStateDataFromObject(initiativeData));
+    //        }
+    //    }
+    //}
 
 
     // ========== CombatHUDPhaseTrack ==========
@@ -138,6 +137,8 @@ namespace SkillBasedInit {
             combat.MessageCenter.Subscribe(MessageCenterMessageType.OnPhaseBegin, new ReceiveMessageCenterMessage(__instance.OnPhaseBegin), true);
 
             ___reserveButton.DisableButton();
+
+            __instance.Visible = false;
         }
     }
 
@@ -209,7 +210,7 @@ namespace SkillBasedInit {
                 if (nameRectT != null) {
                     GameObject nameRect = nameRectT.gameObject;
                     Image nameImg = nameRect.GetComponent<Image>();
-                    nameImg.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+                    nameImg.color = SkillBasedInit.Config.FriendlyAlreadyActivated;
                 }
             }
         }
@@ -233,9 +234,9 @@ namespace SkillBasedInit {
                     Image nameImg = nameRect.GetComponent<Image>();
 
                     if (__instance.DisplayedActor.HasActivatedThisRound) {
-                        nameImg.color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+                        nameImg.color = SkillBasedInit.Config.FriendlyAlreadyActivated;
                     } else {
-                        nameImg.color = SkillBasedInit.Settings.FriendlyUnactivated;
+                        nameImg.color = SkillBasedInit.Config.FriendlyUnactivated;
                     }
 
                 }
@@ -259,7 +260,7 @@ namespace SkillBasedInit {
                 if (nameRectT != null) {
                     GameObject nameRect = nameRectT.gameObject;
                     Image imgByCmp = nameRect.GetComponent<Image>();
-                    imgByCmp.color = SkillBasedInit.Settings.FriendlyUnactivated;
+                    imgByCmp.color = SkillBasedInit.Config.FriendlyUnactivated;
 
                 } 
             } 
@@ -281,24 +282,24 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPhaseDisplay_IndicatePastPhase {
         public static void Postfix(CombatHUDPhaseDisplay __instance) {
-            //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicatePastPhase:post - init");
+            //SkillBasedInit.Logger.LogIfDebug($"CombatHUDPhaseDisplay:IndicatePastPhase:post - init");
             __instance.FlagOutline.color = Color.white;
             __instance.NumText.color = Color.white;
 
             Hostility hostility = __instance.Combat.HostilityMatrix.GetHostility(__instance.DisplayedActor.team, __instance.Combat.LocalPlayerTeam);
             bool isPlayer = __instance.DisplayedActor.team == __instance.Combat.LocalPlayerTeam;
 
-            Color color = SkillBasedInit.Settings.FriendlyAlreadyActivated;
+            Color color = SkillBasedInit.Config.FriendlyAlreadyActivated;
             if (hostility == Hostility.ENEMY) {
-                color = SkillBasedInit.Settings.EnemyAlreadyActivated;
+                color = SkillBasedInit.Config.EnemyAlreadyActivated;
             } else {
                 if (!isPlayer) {
                     switch (hostility) {
                         case Hostility.FRIENDLY:
-                            color = SkillBasedInit.Settings.AlliedAlreadyActivated;
+                            color = SkillBasedInit.Config.AlliedAlreadyActivated;
                             break;
                         case Hostility.NEUTRAL:
-                            color = SkillBasedInit.Settings.NeutralAlreadyActivated;
+                            color = SkillBasedInit.Config.NeutralAlreadyActivated;
                             break;
                     }
                 }
@@ -312,21 +313,21 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { typeof(bool), typeof(Hostility) })]
     public static class CombatHUDPhaseDisplay_IndicateCurrentPhase {
         public static void Postfix(CombatHUDPhaseDisplay __instance, bool isPlayer, Hostility hostility) {
-            //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateCurrentPhase:post - init");
+            //SkillBasedInit.Logger.LogIfDebug($"CombatHUDPhaseDisplay:IndicateCurrentPhase:post - init");
             __instance.FlagOutline.color = Color.white;
             __instance.NumText.color = Color.white;
 
-            Color color = SkillBasedInit.Settings.FriendlyUnactivated;
+            Color color = SkillBasedInit.Config.FriendlyUnactivated;
             if (hostility == Hostility.ENEMY) {
-                color = SkillBasedInit.Settings.EnemyUnactivated;
+                color = SkillBasedInit.Config.EnemyUnactivated;
             } else {
                 if (!isPlayer) {
                     switch (hostility) {
                         case Hostility.FRIENDLY:
-                            color = SkillBasedInit.Settings.AlliedUnactivated;
+                            color = SkillBasedInit.Config.AlliedUnactivated;
                             break;
                         case Hostility.NEUTRAL:
-                            color = SkillBasedInit.Settings.NeutralUnactivated;
+                            color = SkillBasedInit.Config.NeutralUnactivated;
                             break;
                     }
                 }
@@ -339,7 +340,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(new Type[] { })]
     public static class CombatHUDPhaseDisplay_IndicateFuturePhase {
         public static void Postfix(CombatHUDPhaseDisplay __instance) {
-            //SkillBasedInit.LogDebug($"CombatHUDPhaseDisplay:IndicateFuturePhase:post - init");
+            //SkillBasedInit.Logger.LogIfDebug($"CombatHUDPhaseDisplay:IndicateFuturePhase:post - init");
 
             __instance.FlagOutline.color = Color.white;
             __instance.NumText.color = Color.white;
@@ -347,17 +348,17 @@ namespace SkillBasedInit {
             Hostility hostility = __instance.Combat.HostilityMatrix.GetHostility(__instance.DisplayedActor.team, __instance.Combat.LocalPlayerTeam);
             bool isPlayer = __instance.DisplayedActor.team == __instance.Combat.LocalPlayerTeam;
 
-            Color color = SkillBasedInit.Settings.FriendlyUnactivated;
+            Color color = SkillBasedInit.Config.FriendlyUnactivated;
             if (hostility == Hostility.ENEMY) {
-                color = SkillBasedInit.Settings.EnemyUnactivated;
+                color = SkillBasedInit.Config.EnemyUnactivated;
             } else {
                 if (!isPlayer) {
                     switch (hostility) {
                         case Hostility.FRIENDLY:
-                            color = SkillBasedInit.Settings.AlliedUnactivated;
+                            color = SkillBasedInit.Config.AlliedUnactivated;
                             break;
                         case Hostility.NEUTRAL:
-                            color = SkillBasedInit.Settings.NeutralUnactivated;
+                            color = SkillBasedInit.Config.NeutralUnactivated;
                             break;
                     }
                 }
@@ -371,7 +372,7 @@ namespace SkillBasedInit {
     //[HarmonyPatch(new Type[] { typeof(PointerEventData)})]
     //public static class CombatHUDReserveButton_CombatHUDReserveButton {
     //    public static void Postfix(CombatHUDReserveButton __instance) {
-    //        SkillBasedInit.LogDebug($"CombatHUDReserveButton:CombatHUDReserveButton:post - invoked!");
+    //        SkillBasedInit.Logger.LogIfDebug($"CombatHUDReserveButton:CombatHUDReserveButton:post - invoked!");
 
     //    }
     //}

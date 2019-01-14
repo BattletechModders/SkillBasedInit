@@ -10,6 +10,7 @@
     "DependsOn" : [ "AlwaysCombatTurns", "CustomComponents", "MechEngineer" ],
     "Settings": {
         "Debug" : false,
+        "Trace" : false,
         "ProneModifier" : -9,
         "ShutdownModifier" : -6,
         "CrippledMovementModifier" : -13,

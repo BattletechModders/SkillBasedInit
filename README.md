@@ -56,10 +56,10 @@ These colors can be customized through the `mod.json`.
 Works in progress or planned effects include:
 
 - [] Units that are unsettled, panicked or similar will have a reduced initiative.
-- [] Reduce penalties for injuries at the bottom end of the guts range
-- [] Change start-of-phase popups to be buff/debuff icons shown when a friendly mech is selected
-- [] Change combat tooltip to show both static and dynamic effects
-- [] Change combat tooltip to no longer obscure the paperdoll
+- [x] Reduce penalties for injuries at the bottom end of the guts range
+- [x] Change start-of-phase popups to be buff/debuff icons shown when a friendly mech is selected
+- [x] Change combat tooltip to show both static and dynamic effects
+- [x] Change combat tooltip to no longer obscure the paperdoll
 - [] Show an initiative track at the top of the screen so that players know which models are going when. Perhaps use the unit icons and a number underneath them?
 - [] Modify Reserve button to change to 'Reserve to Phase 1' when ALT key is held down. Model pays for all the phases it holds though. (See BTDebug for how to lash to ALT key)
 - [] Tooltips for ability boosted state
@@ -137,7 +137,7 @@ When a pilot is injured, they suffer a random penalty within a range bounded by 
 
 Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13
 -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
-Injury Modifier | 6-9 | 5-8 | 5-8 | 4-7 | 4-7 | 3-6 | 3-6 | 2-5 | 2-5 | 1-4 | 1-3 | 1-3 | 1-2
+Injury Modifier | 5-7 | 4-6 | 4-6 | 3-6 | 3-6 | 3-5 | 3-5 | 2-5 | 2-5 | 1-4 | 1-3 | 1-3 | 1-2
 
 Each injury adds +1 to the upper bound only. A pilot with Guts 5 and 2 injuries would suffer between -4 and -9 when they are injured, both on the turn they are injured and on subsequent turns. However, on subsequent turns this penalty is halved, representing the pilot fighting through the pain.
 

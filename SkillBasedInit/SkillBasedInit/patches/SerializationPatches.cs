@@ -39,7 +39,7 @@ namespace SkillBasedInit {
             references.AddItemList<Jumpjet>(__instance, "JumpJets", __instance.jumpjets);
             references.AddItem<Weapon>(__instance, "ImaginaryLaser", __instance.ImaginaryLaserWeapon);
             if (! (__instance.Initiative > 0 && __instance.Initiative < (SkillBasedInit.MaxPhase + 1)) ) {
-                SkillBasedInit.Logger.LogError(string.Format("Saving an AbstractActor of type {0} with an invalid initiative of {1}", __instance.ClassName, __instance.Initiative));
+                SkillBasedInit.Logger.Log(string.Format("Saving an AbstractActor of type {0} with an invalid initiative of {1}", __instance.ClassName, __instance.Initiative));
             }
 
             return false;
