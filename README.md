@@ -55,6 +55,7 @@ These colors can be customized through the `mod.json`.
 
 Works in progress or planned effects include:
 
+- [] BUG: Hesitation not working as expected. Math.min used instead of Math.max
 - [] Units that are unsettled, panicked or similar will have a reduced initiative.
 - [x] Reduce penalties for injuries at the bottom end of the guts range
 - [x] Change start-of-phase popups to be buff/debuff icons shown when a friendly mech is selected
