@@ -17,8 +17,8 @@ namespace SkillBasedInit {
 
         }
 
-        public void LogIfDebug(string message) { if (SkillBasedInit.Config.Debug) { Log(message); } }
-        public void LogIfTrace(string message) { if (SkillBasedInit.Config.Trace) { Log(message); } }
+        public void LogIfDebug(string message) { if (SkillBasedInit.ModConfig.Debug) { Log(message); } }
+        public void LogIfTrace(string message) { if (SkillBasedInit.ModConfig.Trace) { Log(message); } }
 
         public void Log(string message) {
             string now = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture);

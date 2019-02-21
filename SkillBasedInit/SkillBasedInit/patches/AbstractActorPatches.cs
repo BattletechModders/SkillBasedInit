@@ -6,8 +6,6 @@ using System;
 
 namespace SkillBasedInit {
 
-
-
     [HarmonyPatch(typeof(AbstractActor), "OnNewRound")]
     public static class AbstractActor_OnNewRound {
         public static void Postfix(AbstractActor __instance, int round) {
@@ -20,9 +18,9 @@ namespace SkillBasedInit {
     public static class AbstractActor_DeferUnit {
         public static void Postfix(AbstractActor __instance) {
             //SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
-            int reservePenalty = SkillBasedInit.Random.Next(3, 9);
+            int reservePenalty = SkillBasedInit.Random.Next(SkillBasedInit.ModConfig.ReservedPenaltyBounds[0], SkillBasedInit.ModConfig.ReservedPenaltyBounds[1]);
             SkillBasedInit.Logger.LogIfDebug($"  Deferring Actor:({CombatantHelper.LogLabel(__instance)}) " +
-                $"initiative:{__instance.Initiative} by :{reservePenalty} to {__instance.Initiative + reservePenalty}");
+                $"initiative:{__instance.Initiative} by:{reservePenalty} to:{__instance.Initiative + reservePenalty}");
             __instance.Initiative += reservePenalty;
             if (__instance.Initiative > SkillBasedInit.MaxPhase) {
                 __instance.Initiative = SkillBasedInit.MaxPhase;
@@ -30,29 +28,9 @@ namespace SkillBasedInit {
 
             // Save some part of the reserve surplus as a penalty for the next round
             ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
-            int deferredPenalty = Math.Min(0, reservePenalty - actorInit.tacticsEffectMod);
-            actorInit.deferredReserveMod += deferredPenalty;
-            SkillBasedInit.Logger.LogIfDebug($"  Added deferredPenalty:{deferredPenalty} to " +
-                $"Actor:({CombatantHelper.LogLabel(__instance)}) for total:{actorInit.deferredReserveMod}");
+            actorInit.reservedCount++;
+            SkillBasedInit.Logger.LogIfDebug($"  Actor:({CombatantHelper.LogLabel(__instance)}) reservedCount incremented to:{actorInit.reservedCount}");
         }
-
-        /*
-         *             if (__instance != null && __instance.team != null && __instance.team.LocalPlayerControlsTeam && __instance.GetPilot() != null) {
-                SkillBasedInit.Logger.LogIfDebug($"AbstractActor:CanDeferUnit:post - Checking player models for the reckless tag.");
-                
-                Pilot pilot = __instance.GetPilot();
-                foreach (string tag in pilot.pilotDef.PilotTags) {
-                    SkillBasedInit.Logger.LogIfDebug($"AbstractActor:CanDeferUnit:post - Actor:{__instance.DisplayName}-Pilot:{pilot.Name} has tag:{tag}");
-                    if (tag.ToLower() == RecklessTag) {
-                        SkillBasedInit.Logger.LogIfDebug($"AbstractActor:CanDeferUnit:post - Actor:{__instance.DisplayName}-Pilot:{pilot.Name} is reckless and won't defer!");
-                        __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, $"{pilot.Name} is reckless - can't defer!", FloatieMessage.MessageNature.Debuff));
-                        __result = false;
-                    }
-                }
-            };
-
-               public const string RecklessTag = "pilot_reckless";
-            */
 
     }
 
@@ -208,27 +186,5 @@ namespace SkillBasedInit {
             }            
         }
     }
-
-    //[HarmonyPatch(typeof(CombatSelectionHandler), "ShowReserveOrSelect")]
-    //[HarmonyPatch(new Type[] { })]
-    //public static class CombatSelectionHandler_ShowReserveOrSelect {
-    //    public static void Postfix(CombatSelectionHandler __instance) {            
-    //        CombatHUD ___HUD = (CombatHUD)Traverse.Create(__instance).Property("HUD").GetValue();
-    //        CombatGameState ___Combat = (CombatGameState)Traverse.Create(__instance).Property("Combat").GetValue();
-
-    //        SkillBasedInit.Logger.Log($"CombatSelectionHandler::ShowReserveOrSelect::post - HUD null:{___HUD == null} CGS null:{___Combat == null}");
-    //        if (!___Combat.TurnDirector.IsInterleaved || ___Combat.TurnDirector.CurrentPhase == ___Combat.TurnDirector.LastPhase) {
-    //            if (___Combat.Constants.CombatUIConstants.ShowDoneWithAllButton) {
-    //                ___HUD.HideFireButton();
-    //            }
-    //            ___HUD.MechWarriorTray.ShowAvailableChevrons();
-    //        } else {
-    //            if (!___HUD.MechWarriorTray.IsReserveButtonSuppressed) {
-    //                ___HUD.HideFireButton();
-    //            }
-    //            ___HUD.MechWarriorTray.ShowAvailableChevrons();
-    //        }
-    //    }
-    //}
 
 }

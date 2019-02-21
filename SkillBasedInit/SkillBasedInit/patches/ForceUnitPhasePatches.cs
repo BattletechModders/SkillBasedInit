@@ -92,7 +92,7 @@ namespace SkillBasedInit {
 
                 int penalty = 0;
                 if (InvokeIsKnockdown) {
-                    penalty = Math.Max(0, (-1 * SkillBasedInit.Config.ProneModifier) - actorInit.pilotingEffectMod);                    
+                    penalty = Math.Max(0, (-1 * SkillBasedInit.ModConfig.ProneModifier) - actorInit.pilotingEffectMod);                    
                 } else if (InvokeIsCalledShot) {
                     int randVal = SkillBasedInit.Random.Next(0, 2);
                     penalty = Math.Max(0, AttackStackSequence_OnAdded.MoraleAttackMod + randVal - actorInit.pilotingEffectMod);

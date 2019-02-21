@@ -61,8 +61,8 @@ namespace SkillBasedInit.Helper {
             int mod = 0;
 
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (SkillBasedInit.Config.PilotTagModifiers.ContainsKey(tag)) {
-                    int tagMod = SkillBasedInit.Config.PilotTagModifiers[tag];
+                if (SkillBasedInit.ModConfig.PilotTagModifiers.ContainsKey(tag)) {
+                    int tagMod = SkillBasedInit.ModConfig.PilotTagModifiers[tag];
                     SkillBasedInit.Logger.LogIfDebug($"Pilot {pilot.Name} has tag:{tag}, applying modifier:{tagMod}");
                     mod += tagMod;
                 }
@@ -76,8 +76,8 @@ namespace SkillBasedInit.Helper {
             List<string> details = new List<string>();
 
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (SkillBasedInit.Config.PilotTagModifiers.ContainsKey(tag)) {
-                    int tagMod = SkillBasedInit.Config.PilotTagModifiers[tag];
+                if (SkillBasedInit.ModConfig.PilotTagModifiers.ContainsKey(tag)) {
+                    int tagMod = SkillBasedInit.ModConfig.PilotTagModifiers[tag];
                     if (tagMod > 0) {
                         details.Add($"<space={space}em><color=#00FF00>{tag}: {tagMod:+0}</color>");
                     } else if (tagMod < 0) {
@@ -95,8 +95,8 @@ namespace SkillBasedInit.Helper {
             List<string> details = new List<string>();
 
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (SkillBasedInit.Config.PilotSpecialTagsDetails.ContainsKey(tag)) {
-                    string tagEffect = SkillBasedInit.Config.PilotSpecialTagsDetails[tag];
+                if (SkillBasedInit.ModConfig.PilotSpecialTagsDetails.ContainsKey(tag)) {
+                    string tagEffect = SkillBasedInit.ModConfig.PilotSpecialTagsDetails[tag];
                     details.Add($"<space={space}em>{tag}: <i>{tagEffect}</i>");
                 }
             }
@@ -167,8 +167,8 @@ namespace SkillBasedInit.Helper {
             float[] multipliers = new float[] { 1.0f, 1.0f };
 
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (SkillBasedInit.Config.PilotTagMeleeMultipliers.ContainsKey(tag)) {
-                    float[] tagMultis = SkillBasedInit.Config.PilotTagMeleeMultipliers[tag];
+                if (SkillBasedInit.ModConfig.PilotTagMeleeMultipliers.ContainsKey(tag)) {
+                    float[] tagMultis = SkillBasedInit.ModConfig.PilotTagMeleeMultipliers[tag];
                     SkillBasedInit.Logger.LogIfDebug($"Pilot {pilot.Name} has tag:{tag}, applying melee multipliers attack:{tagMultis[0]} defense:{tagMultis[1]}");
                     multipliers[0] += tagMultis[0];
                     multipliers[1] += tagMultis[1];
@@ -211,7 +211,7 @@ namespace SkillBasedInit.Helper {
         }
 
         public static void LogPilotStats(Pilot pilot) {
-            if (SkillBasedInit.Config.Debug) {
+            if (SkillBasedInit.ModConfig.Debug) {
                 int normedGuts = NormalizeSkill(pilot.Guts);
                 int gutsMod = GetGutsModifier(pilot);
                 int normdPilot = NormalizeSkill(pilot.Piloting);

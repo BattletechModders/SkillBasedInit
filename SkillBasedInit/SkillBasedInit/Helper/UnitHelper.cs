@@ -55,13 +55,13 @@ namespace SkillBasedInit.Helper {
 
                 TagSet actorTags = actor.GetTags();
                 if (actorTags != null && actorTags.Contains("unit_light")) {
-                    tonnage = SkillBasedInit.Config.TurretTonnageTagUnitLight;
+                    tonnage = SkillBasedInit.ModConfig.TurretTonnageTagUnitLight;
                 } else if (actorTags != null && actorTags.Contains("unit_medium")) {
-                    tonnage = SkillBasedInit.Config.TurretTonnageTagUnitMedium;
+                    tonnage = SkillBasedInit.ModConfig.TurretTonnageTagUnitMedium;
                 } else if (actorTags != null && actorTags.Contains("unit_heavy")) {
-                    tonnage = SkillBasedInit.Config.TurretTonnageTagUnitHeavy;
+                    tonnage = SkillBasedInit.ModConfig.TurretTonnageTagUnitHeavy;
                 } else {
-                    tonnage = SkillBasedInit.Config.TurretTonnageTagUnitNone;
+                    tonnage = SkillBasedInit.ModConfig.TurretTonnageTagUnitNone;
                 }
             }
             return tonnage;
@@ -283,9 +283,9 @@ namespace SkillBasedInit.Helper {
             if (actor.GetType() == typeof(Mech)) {
                 typeMod = 0;
             } else if (actor.GetType() == typeof(Vehicle)) {
-                typeMod = SkillBasedInit.Config.VehicleROCModifier;
+                typeMod = SkillBasedInit.ModConfig.VehicleROCModifier;
             } else {
-                typeMod = SkillBasedInit.Config.TurretROCModifier;
+                typeMod = SkillBasedInit.ModConfig.TurretROCModifier;
             }
             return typeMod;
         }

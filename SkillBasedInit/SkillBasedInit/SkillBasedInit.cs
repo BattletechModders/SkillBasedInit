@@ -1,6 +1,7 @@
 ﻿using Harmony;
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace SkillBasedInit {
@@ -15,7 +16,7 @@ namespace SkillBasedInit {
 
         public static Logger Logger;
         public static string ModDir;
-        public static ModConfig Config;
+        public static ModConfig ModConfig;
 
         public static readonly Random Random = new Random();
 
@@ -24,17 +25,21 @@ namespace SkillBasedInit {
 
             Exception configE;
             try {
-                Config = JsonConvert.DeserializeObject<ModConfig>(settingsJSON);
+                ModConfig = JsonConvert.DeserializeObject<ModConfig>(settingsJSON);
             } catch (Exception e) {
-                configE = e;                
-                Config = new ModConfig();
+                configE = e;
+                ModConfig = new ModConfig();
             }
-            Config.InitializeColors();
 
+            ModConfig.InitializeColors();
+
+            Assembly asm = Assembly.GetExecutingAssembly();
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(asm?.Location);
+            //Logger.Log($"Assembly version: {fvi?.ProductVersion}");
 
             Logger = new Logger(modDirectory, "skill_based_init");
             Logger.LogIfDebug($"mod.json settings are:({settingsJSON})");
-            Logger.LogIfDebug($"mergedConfig is:{Config}");
+            Logger.Log($"mergedConfig is:{ModConfig}");
 
             var harmony = HarmonyInstance.Create(HarmonyPackage);
             harmony.PatchAll(Assembly.GetExecutingAssembly());

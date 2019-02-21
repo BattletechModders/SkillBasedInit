@@ -1,4 +1,5 @@
 ﻿using BattleTech;
+using BattleTech.Data;
 using BattleTech.Save.Test;
 using Harmony;
 using System;
@@ -99,7 +100,8 @@ namespace SkillBasedInit {
                 __instance.ImaginaryLaserWeapon.Hydrate(references);
             }
             if (__instance.CustomHeraldryDef != null) {
-                __instance.CustomHeraldryDef.RequestResources(loadedState.DataManager, true);
+                Traverse requestResources = Traverse.Create(__instance).Method("RequestResources", new Type[] { typeof(DataManager), typeof(Action) });
+                requestResources.GetValue(new object[] { loadedState.DataManager, true });
             }
 
             // OriginalLogic: Initiative > 0 && Initiative < 6;

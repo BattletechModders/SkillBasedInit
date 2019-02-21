@@ -28,6 +28,12 @@ namespace SkillBasedInit {
         // Modifier applied to make turrets slower
         public int TurretROCModifier = -4;
 
+        // How many phases to reduce the init of a deferred actor on each deferral
+        public int[] ReservedPenaltyBounds = new int[] { 3, 9 };
+
+        // How many phases to reduce the init of an actor that deferred last round
+        public int[] HesitationPenaltyBounds = new int[] { 2, 7 };
+
         // Turrets don't have tonnage; supply a tonnage based upon unit tags
         public float TurretTonnageTagUnitLight = 60.0f;
         public float TurretTonnageTagUnitMedium = 80.0f;

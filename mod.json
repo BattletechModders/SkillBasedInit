@@ -20,6 +20,8 @@
         "TurretTonnageTagUnitMedium" : 80.0,
         "TurretTonnageTagUnitHeavy" : 100.0,
         "TurretTonnageTagUnitNone" : 120.0,
+        "ReservedPenaltyBounds" : [ 3, 9 ],
+        "HesitationPenaltyBounds" : [ 2, 7 ],
         "PilotTagModifiers" : { 
             "pilot_morale_high" : 2, 
             "pilot_morale_low" : -2

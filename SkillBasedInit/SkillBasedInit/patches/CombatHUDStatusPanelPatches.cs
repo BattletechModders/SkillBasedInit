@@ -80,7 +80,7 @@ namespace SkillBasedInit.patches {
             // Check for leg / side loss
             Mech mech = (Mech)actor;
             if (mech.IsLocationDestroyed(ChassisLocations.LeftLeg) || mech.IsLocationDestroyed(ChassisLocations.RightLeg)) {
-                int rawMod = SkillBasedInit.Config.CrippledMovementModifier + actorInit.pilotingEffectMod;
+                int rawMod = SkillBasedInit.ModConfig.CrippledMovementModifier + actorInit.pilotingEffectMod;
                 int penalty = Math.Min(-1, rawMod);
                 mechDetails.Add($"<color=#FF0000>{penalty} Leg Destroyed</color>");
                 expectedInitMax += penalty;
@@ -88,7 +88,7 @@ namespace SkillBasedInit.patches {
 
             // Check for prone 
             if (actor.IsProne) {
-                int rawMod = SkillBasedInit.Config.ProneModifier + actorInit.pilotingEffectMod;
+                int rawMod = SkillBasedInit.ModConfig.ProneModifier + actorInit.pilotingEffectMod;
                 int penalty = Math.Min(-1, rawMod);
                 mechDetails.Add($"<color=#FF0000>{penalty} Prone</color>");
                 expectedInitMax += penalty;
@@ -96,7 +96,7 @@ namespace SkillBasedInit.patches {
 
             // Check for shutdown
             if (actor.IsShutDown) {
-                int rawMod = SkillBasedInit.Config.ShutdownModifier + actorInit.pilotingEffectMod;
+                int rawMod = SkillBasedInit.ModConfig.ShutdownModifier + actorInit.pilotingEffectMod;
                 int penalty = Math.Min(-1, rawMod);
                 mechDetails.Add($"<color=#FF0000>{penalty} Shutdown</color>");
                 expectedInitMax += penalty;
@@ -144,9 +144,9 @@ namespace SkillBasedInit.patches {
             }
 
             // Check for an overly cautious player
-            if (actorInit.lastRoundReserveMod > 0) {
-                expectedInitMax -= actorInit.lastRoundReserveMod;
-                pilotDetails.Add($"<color=#FF0000>-{actorInit.lastRoundReserveMod} Hesitation</color>");
+            if (actorInit.lastRoundHesitationPenalty > 0) {
+                expectedInitMax -= actorInit.lastRoundHesitationPenalty;
+                pilotDetails.Add($"<color=#FF0000>-{actorInit.lastRoundHesitationPenalty} Hesitation</color>");
             }
 
             // Check for called shot

@@ -44,16 +44,17 @@ namespace SkillBasedInit {
         // Values carried over from a previous round
         public int deferredInjuryMod = 0;
         public int deferredMeleeMod = 0;
-        public int deferredReserveMod = 0;
         public int deferredCalledShotMod = 0;
         public int deferredVigilanceMod = 0;
+        public int reservedCount = 0;
 
         // Values preserved for UI display
         public int lastRoundInjuryMod = 0;
         public int lastRoundMeleeMod = 0;
-        public int lastRoundReserveMod = 0;
         public int lastRoundCalledShotMod = 0;
         public int lastRoundVigilanceMod = 0;
+        public int lastRoundHesitationPenalty = 0;
+        public int lastRoundReservedCount = 0;
 
         public ActorInitiative(AbstractActor actor) {
             //SkillBasedInit.Logger.Log($"Initializing ActorInitiative for {actor.DisplayName} with GUID {actor.GUID}.");
@@ -167,8 +168,8 @@ namespace SkillBasedInit {
             }
 
             if (isMovementCrippled) {
-                int rawMod = SkillBasedInit.Config.CrippledMovementModifier + this.pilotingEffectMod;
-                SkillBasedInit.Logger.LogIfDebug($"  Crippled Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Config.CrippledMovementModifier} - {this.pilotingEffectMod})");
+                int rawMod = SkillBasedInit.ModConfig.CrippledMovementModifier + this.pilotingEffectMod;
+                SkillBasedInit.Logger.LogIfDebug($"  Crippled Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.ModConfig.CrippledMovementModifier} - {this.pilotingEffectMod})");
 
                 int penalty = Math.Min(-1, rawMod);
                 roundInitiative += penalty;
@@ -177,8 +178,8 @@ namespace SkillBasedInit {
 
             // Check for prone 
             if (actor.IsProne) {
-                int rawMod = SkillBasedInit.Config.ProneModifier + this.pilotingEffectMod;
-                SkillBasedInit.Logger.LogIfDebug($"  Prone Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Config.ProneModifier} - {this.pilotingEffectMod})");
+                int rawMod = SkillBasedInit.ModConfig.ProneModifier + this.pilotingEffectMod;
+                SkillBasedInit.Logger.LogIfDebug($"  Prone Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.ModConfig.ProneModifier} - {this.pilotingEffectMod})");
 
                 int penalty = Math.Min(0, rawMod);
                 roundInitiative += penalty;
@@ -187,8 +188,8 @@ namespace SkillBasedInit {
 
             // Check for shutdown
             if (actor.IsShutDown) {
-                int rawMod = SkillBasedInit.Config.ShutdownModifier + this.pilotingEffectMod;
-                SkillBasedInit.Logger.LogIfDebug($"  Shutdown Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.Config.ShutdownModifier} - {this.pilotingEffectMod})");
+                int rawMod = SkillBasedInit.ModConfig.ShutdownModifier + this.pilotingEffectMod;
+                SkillBasedInit.Logger.LogIfDebug($"  Shutdown Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({SkillBasedInit.ModConfig.ShutdownModifier} - {this.pilotingEffectMod})");
 
                 int penalty = Math.Min(0, rawMod);
                 roundInitiative += penalty;
@@ -202,9 +203,14 @@ namespace SkillBasedInit {
             }
 
             // Check for an overly cautious player
-            if (this.deferredReserveMod > 0) {
-                roundInitiative -= deferredReserveMod;
-                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) deferred last round! Subtracted {this.deferredReserveMod} = roundInit:{roundInitiative}");                
+            if (this.reservedCount > 0) {
+                int reserveRand = SkillBasedInit.Random.Next(SkillBasedInit.ModConfig.HesitationPenaltyBounds[0], SkillBasedInit.ModConfig.HesitationPenaltyBounds[1]);
+                int hesitationPenalty = reserveRand * this.reservedCount - this.tacticsEffectMod;
+                this.lastRoundHesitationPenalty = hesitationPenalty;
+                roundInitiative -= hesitationPenalty;
+                SkillBasedInit.Logger.Log($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) deferred last round! " +
+                    $"Random penalty:{reserveRand} * reserveCount:{this.reservedCount} - tacticsMod:{this.tacticsEffectMod} = penalty:{hesitationPenalty}. " +
+                    $"roundInit currently:{roundInitiative}");
             }
 
             // Check for deferred called shot
@@ -278,21 +284,29 @@ namespace SkillBasedInit {
                 // If the actor already exists, don't change them
                 ActorInitiative actorInit = GetOrCreate(actor);
 
+                // This should be initialized to 0, so it can be changed in CalculateRoundInit
+                actorInit.lastRoundHesitationPenalty = 0;
+
+                if (actorInit.lastRoundReservedCount != 0) {
+                    actorInit.reservedCount += (int)Math.Floor(actorInit.lastRoundReservedCount / 2f);
+                }
+
                 // Recalculate the random part of their initiative for the round
                 actorInit.CalculateRoundInit(actor);
 
                 // These must occur after calc, or they are lost (duh)
                 actorInit.lastRoundInjuryMod = actorInit.deferredInjuryMod;
                 actorInit.lastRoundMeleeMod = actorInit.deferredMeleeMod;
-                actorInit.lastRoundReserveMod = actorInit.deferredReserveMod;
+                actorInit.lastRoundReservedCount = actorInit.reservedCount;
                 actorInit.lastRoundCalledShotMod = actorInit.deferredCalledShotMod;
                 actorInit.lastRoundVigilanceMod = actorInit.deferredVigilanceMod;
 
                 actorInit.deferredInjuryMod = 0;
                 actorInit.deferredMeleeMod = 0;
-                actorInit.deferredReserveMod = 0;
                 actorInit.deferredCalledShotMod = 0;
                 actorInit.deferredVigilanceMod = 0;
+                actorInit.reservedCount = 0;
+
             }
         }
 
