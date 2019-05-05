@@ -4,7 +4,7 @@ using System.Linq;
 using BattleTech;
 using CustomComponents;
 using HBS.Collections;
-using MechEngineer;
+using MechEngineer.Features.Engines;
 
 namespace SkillBasedInit.Helper {
     public class UnitHelper {
