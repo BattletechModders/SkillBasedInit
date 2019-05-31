@@ -39,8 +39,8 @@ namespace SkillBasedInit {
             references.AddItemList<AmmunitionBox>(__instance, "AmmoBox", __instance.ammoBoxes);
             references.AddItemList<Jumpjet>(__instance, "JumpJets", __instance.jumpjets);
             references.AddItem<Weapon>(__instance, "ImaginaryLaser", __instance.ImaginaryLaserWeapon);
-            if (! (__instance.Initiative > 0 && __instance.Initiative < (SkillBasedInit.MaxPhase + 1)) ) {
-                SkillBasedInit.Logger.Log(string.Format("Saving an AbstractActor of type {0} with an invalid initiative of {1}", __instance.ClassName, __instance.Initiative));
+            if (! (__instance.Initiative > 0 && __instance.Initiative < (Mod.MaxPhase + 1)) ) {
+                Mod.Log.Log(string.Format("Saving an AbstractActor of type {0} with an invalid initiative of {1}", __instance.ClassName, __instance.Initiative));
             }
 
             return false;
@@ -105,8 +105,8 @@ namespace SkillBasedInit {
             }
 
             // OriginalLogic: Initiative > 0 && Initiative < 6;
-            if (!(__instance.Initiative > 0 && __instance.Initiative <= SkillBasedInit.MaxPhase)) {
-                SkillBasedInit.Logger.Log(string.Format("Loading an AbstractActor of type {0} with an invalid initiative of {1}, Reverting to BaseInitiative", __instance.ClassName, __instance.Initiative));
+            if (!(__instance.Initiative > 0 && __instance.Initiative <= Mod.MaxPhase)) {
+                Mod.Log.Log(string.Format("Loading an AbstractActor of type {0} with an invalid initiative of {1}, Reverting to BaseInitiative", __instance.ClassName, __instance.Initiative));
                 __instance.Initiative = 1;
             }
 

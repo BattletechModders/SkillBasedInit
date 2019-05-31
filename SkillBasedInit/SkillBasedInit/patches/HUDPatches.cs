@@ -98,7 +98,7 @@ namespace SkillBasedInit {
                 if (nameRectT != null) {
                     GameObject nameRect = nameRectT.gameObject;
                     Image nameImg = nameRect.GetComponent<Image>();
-                    nameImg.color = SkillBasedInit.ModConfig.FriendlyAlreadyActivated;
+                    nameImg.color = Mod.Config.FriendlyAlreadyActivated;
                 }
             }
         }
@@ -122,9 +122,9 @@ namespace SkillBasedInit {
                     Image nameImg = nameRect.GetComponent<Image>();
 
                     if (__instance.DisplayedActor.HasActivatedThisRound) {
-                        nameImg.color = SkillBasedInit.ModConfig.FriendlyAlreadyActivated;
+                        nameImg.color = Mod.Config.FriendlyAlreadyActivated;
                     } else {
-                        nameImg.color = SkillBasedInit.ModConfig.FriendlyUnactivated;
+                        nameImg.color = Mod.Config.FriendlyUnactivated;
                     }
 
                 }
@@ -148,7 +148,7 @@ namespace SkillBasedInit {
                 if (nameRectT != null) {
                     GameObject nameRect = nameRectT.gameObject;
                     Image imgByCmp = nameRect.GetComponent<Image>();
-                    imgByCmp.color = SkillBasedInit.ModConfig.FriendlyUnactivated;
+                    imgByCmp.color = Mod.Config.FriendlyUnactivated;
 
                 } 
             } 
@@ -177,17 +177,17 @@ namespace SkillBasedInit {
             Hostility hostility = __instance.Combat.HostilityMatrix.GetHostility(__instance.DisplayedActor.team, __instance.Combat.LocalPlayerTeam);
             bool isPlayer = __instance.DisplayedActor.team == __instance.Combat.LocalPlayerTeam;
 
-            Color color = SkillBasedInit.ModConfig.FriendlyAlreadyActivated;
+            Color color = Mod.Config.FriendlyAlreadyActivated;
             if (hostility == Hostility.ENEMY) {
-                color = SkillBasedInit.ModConfig.EnemyAlreadyActivated;
+                color = Mod.Config.EnemyAlreadyActivated;
             } else {
                 if (!isPlayer) {
                     switch (hostility) {
                         case Hostility.FRIENDLY:
-                            color = SkillBasedInit.ModConfig.AlliedAlreadyActivated;
+                            color = Mod.Config.AlliedAlreadyActivated;
                             break;
                         case Hostility.NEUTRAL:
-                            color = SkillBasedInit.ModConfig.NeutralAlreadyActivated;
+                            color = Mod.Config.NeutralAlreadyActivated;
                             break;
                     }
                 }
@@ -205,17 +205,17 @@ namespace SkillBasedInit {
             __instance.FlagOutline.color = Color.white;
             __instance.NumText.color = Color.white;
 
-            Color color = SkillBasedInit.ModConfig.FriendlyUnactivated;
+            Color color = Mod.Config.FriendlyUnactivated;
             if (hostility == Hostility.ENEMY) {
-                color = SkillBasedInit.ModConfig.EnemyUnactivated;
+                color = Mod.Config.EnemyUnactivated;
             } else {
                 if (!isPlayer) {
                     switch (hostility) {
                         case Hostility.FRIENDLY:
-                            color = SkillBasedInit.ModConfig.AlliedUnactivated;
+                            color = Mod.Config.AlliedUnactivated;
                             break;
                         case Hostility.NEUTRAL:
-                            color = SkillBasedInit.ModConfig.NeutralUnactivated;
+                            color = Mod.Config.NeutralUnactivated;
                             break;
                     }
                 }
@@ -236,17 +236,17 @@ namespace SkillBasedInit {
             Hostility hostility = __instance.Combat.HostilityMatrix.GetHostility(__instance.DisplayedActor.team, __instance.Combat.LocalPlayerTeam);
             bool isPlayer = __instance.DisplayedActor.team == __instance.Combat.LocalPlayerTeam;
 
-            Color color = SkillBasedInit.ModConfig.FriendlyUnactivated;
+            Color color = Mod.Config.FriendlyUnactivated;
             if (hostility == Hostility.ENEMY) {
-                color = SkillBasedInit.ModConfig.EnemyUnactivated;
+                color = Mod.Config.EnemyUnactivated;
             } else {
                 if (!isPlayer) {
                     switch (hostility) {
                         case Hostility.FRIENDLY:
-                            color = SkillBasedInit.ModConfig.AlliedUnactivated;
+                            color = Mod.Config.AlliedUnactivated;
                             break;
                         case Hostility.NEUTRAL:
-                            color = SkillBasedInit.ModConfig.NeutralUnactivated;
+                            color = Mod.Config.NeutralUnactivated;
                             break;
                     }
                 }

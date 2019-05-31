@@ -21,15 +21,15 @@ namespace SkillBasedInit.patches {
         }
 
         private static bool Prefix(ref float __result, AbstractActor unit, AbstractActor target, Vector3 targetPosition, int pipsRemoved) {
-            SkillBasedInit.Logger.LogIfTrace($"  ---- AE_ADFP: Building list.");
+            Mod.Log.LogIfTrace($"  ---- AE_ADFP: Building list.");
             List<AbstractActor> list = new List<AbstractActor>();
             Dictionary<int, List<AbstractActor>> dictionary = new Dictionary<int, List<AbstractActor>>();
             int i;
-            for (i = SkillBasedInit.MinPhase; i <= SkillBasedInit.MaxPhase; i++) {
+            for (i = Mod.MinPhase; i <= Mod.MaxPhase; i++) {
                 dictionary[i] = new List<AbstractActor>();
             }
 
-            SkillBasedInit.Logger.LogIfTrace($"  ---- AE_ADFP: Mapping lance to init.");
+            Mod.Log.LogIfTrace($"  ---- AE_ADFP: Mapping lance to init.");
             for (int j = 0; j < unit.lance.unitGuids.Count; j++) {
                 string text = unit.lance.unitGuids[j];
                 if (!(text == unit.GUID)) {
@@ -39,7 +39,7 @@ namespace SkillBasedInit.patches {
                 }
             }
 
-            SkillBasedInit.Logger.LogIfTrace($"  ---- AE_ADFP: Mapping all actors.");
+            Mod.Log.LogIfTrace($"  ---- AE_ADFP: Mapping all actors.");
             int currentPhase = unit.Combat.TurnDirector.CurrentPhase;
             for (int k = 0; k < dictionary[currentPhase].Count; k++) {
                 AbstractActor abstractActor = dictionary[currentPhase][k];
@@ -48,12 +48,12 @@ namespace SkillBasedInit.patches {
                 }
             }
 
-            SkillBasedInit.Logger.LogIfTrace($"  ---- AE_ADFP: actors for init");
+            Mod.Log.LogIfTrace($"  ---- AE_ADFP: actors for init");
             i = currentPhase;
             while (target.Initiative != i) {
                 i++;
-                if (i > SkillBasedInit.MaxPhase) {
-                    i = SkillBasedInit.MinPhase;
+                if (i > Mod.MaxPhase) {
+                    i = Mod.MinPhase;
                 }
                 for (int l = 0; l < dictionary[i].Count; l++) {
                     AbstractActor item = dictionary[i][l];
@@ -61,7 +61,7 @@ namespace SkillBasedInit.patches {
                 }
             }
 
-            SkillBasedInit.Logger.LogIfTrace($"  ---- AE_ADFP: Calulating");
+            Mod.Log.LogIfTrace($"  ---- AE_ADFP: Calulating");
             float num = 0f;
             float num2 = 0f;
             int evasivePipsCurrent = target.EvasivePipsCurrent;

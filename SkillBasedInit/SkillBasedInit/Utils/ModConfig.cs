@@ -3,6 +3,10 @@ using UnityEngine;
 
 namespace SkillBasedInit {
 
+    public static class ModStats {
+
+    }
+
     public class ModConfig {
         // If true, extra logging will be printed
         public bool Debug = false;
@@ -58,20 +62,6 @@ namespace SkillBasedInit {
             { "pilot_assassin", "Assassin: +50% melee penalty" }
         };
 
-        public void InitializeColors() {
-            FriendlyUnactivated = new Color(ColorFriendlyUnactivated[0], ColorFriendlyUnactivated[1], ColorFriendlyUnactivated[2], ColorFriendlyUnactivated[3]);
-            FriendlyAlreadyActivated = new Color(ColorFriendlyAlreadyActivated[0], ColorFriendlyAlreadyActivated[1], ColorFriendlyAlreadyActivated[2], ColorFriendlyAlreadyActivated[3]);
-
-            AlliedUnactivated = new Color(ColorAlliedUnactivated[0], ColorAlliedUnactivated[1], ColorAlliedUnactivated[2], ColorAlliedUnactivated[3]);
-            AlliedAlreadyActivated = new Color(ColorAlliedAlreadyActivated[0], ColorAlliedAlreadyActivated[1], ColorAlliedAlreadyActivated[2], ColorAlliedAlreadyActivated[3]);
-
-            NeutralUnactivated = new Color(ColorNeutralUnactivated[0], ColorNeutralUnactivated[1], ColorNeutralUnactivated[2], ColorNeutralUnactivated[3]);
-            NeutralAlreadyActivated = new Color(ColorNeutralAlreadyActivated[0], ColorNeutralAlreadyActivated[1], ColorNeutralAlreadyActivated[2], ColorNeutralAlreadyActivated[3]);
-
-            EnemyUnactivated = new Color(ColorEnemyUnactivated[0], ColorEnemyUnactivated[1], ColorEnemyUnactivated[2], ColorEnemyUnactivated[3]);
-            EnemyAlreadyActivated = new Color(ColorEnemyAlreadyActivated[0], ColorEnemyAlreadyActivated[1], ColorEnemyAlreadyActivated[2], ColorEnemyAlreadyActivated[3]);
-        }
-
         // Colors for the UI elements
         /* No affiliation
          default color is: UILookAndColorConstants.PhaseCurrentFill.color
@@ -117,5 +107,45 @@ namespace SkillBasedInit {
         public Color EnemyUnactivated;
         public Color EnemyAlreadyActivated;
 
+        public void InitializeColors() {
+            FriendlyUnactivated = new Color(ColorFriendlyUnactivated[0], ColorFriendlyUnactivated[1], ColorFriendlyUnactivated[2], ColorFriendlyUnactivated[3]);
+            FriendlyAlreadyActivated = new Color(ColorFriendlyAlreadyActivated[0], ColorFriendlyAlreadyActivated[1], ColorFriendlyAlreadyActivated[2], ColorFriendlyAlreadyActivated[3]);
+
+            AlliedUnactivated = new Color(ColorAlliedUnactivated[0], ColorAlliedUnactivated[1], ColorAlliedUnactivated[2], ColorAlliedUnactivated[3]);
+            AlliedAlreadyActivated = new Color(ColorAlliedAlreadyActivated[0], ColorAlliedAlreadyActivated[1], ColorAlliedAlreadyActivated[2], ColorAlliedAlreadyActivated[3]);
+
+            NeutralUnactivated = new Color(ColorNeutralUnactivated[0], ColorNeutralUnactivated[1], ColorNeutralUnactivated[2], ColorNeutralUnactivated[3]);
+            NeutralAlreadyActivated = new Color(ColorNeutralAlreadyActivated[0], ColorNeutralAlreadyActivated[1], ColorNeutralAlreadyActivated[2], ColorNeutralAlreadyActivated[3]);
+
+            EnemyUnactivated = new Color(ColorEnemyUnactivated[0], ColorEnemyUnactivated[1], ColorEnemyUnactivated[2], ColorEnemyUnactivated[3]);
+            EnemyAlreadyActivated = new Color(ColorEnemyAlreadyActivated[0], ColorEnemyAlreadyActivated[1], ColorEnemyAlreadyActivated[2], ColorEnemyAlreadyActivated[3]);
+        }
+
+        public void LogConfig() {
+            Mod.Log.Info("=== MOD CONFIG BEGIN ===");
+            Mod.Log.Info($"  DEBUG:{this.Debug} Trace:{this.Trace}");
+
+            Mod.Log.Info($"  ProneMod:{ProneModifier} ShutdownMod:{ShutdownModifier} CrippledMovementMod:{CrippledMovementModifier} ");
+            Mod.Log.Info($"  MeleeTonnageMalus:{MeleeTonnageMalus} VehicleROCMod:{VehicleROCModifier} TurretROCMod:{TurretROCModifier} ");
+            Mod.Log.Info($"  ReservedPenaltyBounds:{ReservedPenaltyBounds[0]}-{ReservedPenaltyBounds[1]} HestitationPenaltyBounds:{HesitationPenaltyBounds[0]}-{HesitationPenaltyBounds[1]} ");
+            Mod.Log.Info($"  Turret Tonnage -> Light:{TurretTonnageTagUnitLight} Medium:{TurretTonnageTagUnitMedium} Heavy:{TurretTonnageTagUnitHeavy} None:{TurretTonnageTagUnitNone}");
+
+            Mod.Log.Info($"  == Pilot Tag Modifiers");
+            foreach (KeyValuePair<string,int> kvp in PilotTagModifiers) {
+                Mod.Log.Info($"    tag:{kvp.Key} modifier:{kvp.Value}");
+            }
+
+            Mod.Log.Info($"  == Pilot Melee Multipliers");
+            foreach (KeyValuePair<string, float[]> kvp in PilotTagMeleeMultipliers) {
+                Mod.Log.Info($"    tag:{kvp.Key} attack:{kvp.Value[0]} defense:{kvp.Value[1]}");
+            }
+
+            Mod.Log.Info($"  == Pilot Special Tags");
+            foreach (KeyValuePair<string, string> kvp in PilotSpecialTagsDetails) {
+                Mod.Log.Info($"    tag:{kvp.Key} detail:{kvp.Value}");
+            }
+
+            Mod.Log.Info("=== MOD CONFIG END ===");
+        }
     }
 }

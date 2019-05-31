@@ -12,7 +12,7 @@ namespace SkillBasedInit.patches {
             //SkillBasedInit.Logger.Log($"TurnDirector::ctor::post - was initialized with {___FirstPhase} / {___LastPhase}");
 
             Traverse.Create(__instance).Property("FirstPhase").SetValue(1);
-            Traverse.Create(__instance).Property("LastPhase").SetValue(SkillBasedInit.MaxPhase);
+            Traverse.Create(__instance).Property("LastPhase").SetValue(Mod.MaxPhase);
         }
     }
 
