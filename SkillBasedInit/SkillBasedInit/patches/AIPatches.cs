@@ -21,7 +21,7 @@ namespace SkillBasedInit.patches {
         }
 
         private static bool Prefix(ref float __result, AbstractActor unit, AbstractActor target, Vector3 targetPosition, int pipsRemoved) {
-            Mod.Log.LogIfTrace($"  ---- AE_ADFP: Building list.");
+            Mod.Log.Trace($"  ---- AE_ADFP: Building list.");
             List<AbstractActor> list = new List<AbstractActor>();
             Dictionary<int, List<AbstractActor>> dictionary = new Dictionary<int, List<AbstractActor>>();
             int i;
@@ -29,7 +29,7 @@ namespace SkillBasedInit.patches {
                 dictionary[i] = new List<AbstractActor>();
             }
 
-            Mod.Log.LogIfTrace($"  ---- AE_ADFP: Mapping lance to init.");
+            Mod.Log.Trace($"  ---- AE_ADFP: Mapping lance to init.");
             for (int j = 0; j < unit.lance.unitGuids.Count; j++) {
                 string text = unit.lance.unitGuids[j];
                 if (!(text == unit.GUID)) {
@@ -39,7 +39,7 @@ namespace SkillBasedInit.patches {
                 }
             }
 
-            Mod.Log.LogIfTrace($"  ---- AE_ADFP: Mapping all actors.");
+            Mod.Log.Trace($"  ---- AE_ADFP: Mapping all actors.");
             int currentPhase = unit.Combat.TurnDirector.CurrentPhase;
             for (int k = 0; k < dictionary[currentPhase].Count; k++) {
                 AbstractActor abstractActor = dictionary[currentPhase][k];
@@ -48,7 +48,7 @@ namespace SkillBasedInit.patches {
                 }
             }
 
-            Mod.Log.LogIfTrace($"  ---- AE_ADFP: actors for init");
+            Mod.Log.Trace($"  ---- AE_ADFP: actors for init");
             i = currentPhase;
             while (target.Initiative != i) {
                 i++;
@@ -61,7 +61,7 @@ namespace SkillBasedInit.patches {
                 }
             }
 
-            Mod.Log.LogIfTrace($"  ---- AE_ADFP: Calulating");
+            Mod.Log.Trace($"  ---- AE_ADFP: Calulating");
             float num = 0f;
             float num2 = 0f;
             int evasivePipsCurrent = target.EvasivePipsCurrent;

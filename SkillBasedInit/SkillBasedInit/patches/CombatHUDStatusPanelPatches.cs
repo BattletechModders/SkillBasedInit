@@ -21,7 +21,7 @@ namespace SkillBasedInit.patches {
 
         // Display the initiative modifiers for the current unit as a buff that folks can hover over for details.
         public static void Postfix(CombatHUDStatusPanel __instance) {
-            Mod.Log.LogIfDebug("___ CombatHUDStatusPanel:ShowActorStatuses:post - entered.");
+            Mod.Log.Debug("___ CombatHUDStatusPanel:ShowActorStatuses:post - entered.");
 
             if (__instance.DisplayedCombatant != null) {
 

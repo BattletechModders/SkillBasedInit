@@ -63,7 +63,7 @@ namespace SkillBasedInit.Helper {
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
                 if (Mod.Config.PilotTagModifiers.ContainsKey(tag)) {
                     int tagMod = Mod.Config.PilotTagModifiers[tag];
-                    Mod.Log.LogIfDebug($"Pilot {pilot.Name} has tag:{tag}, applying modifier:{tagMod}");
+                    Mod.Log.Debug($"Pilot {pilot.Name} has tag:{tag}, applying modifier:{tagMod}");
                     mod += tagMod;
                 }
             }
@@ -124,9 +124,9 @@ namespace SkillBasedInit.Helper {
             int normalizedVal = NormalizeSkill(skillValue);
             int mod = ModifierBySkill[normalizedVal];
             foreach (Ability ability in pilot.Abilities.Distinct()) {
-                Mod.Log.LogIfDebug($"Pilot {pilot.Name} has ability:{ability.Def.Id}.");
+                Mod.Log.Debug($"Pilot {pilot.Name} has ability:{ability.Def.Id}.");
                 if (ability.Def.Id.ToLower().Equals(abilityDefIdL5.ToLower()) || ability.Def.Id.ToLower().Equals(abilityDefIdL8.ToLower())) {
-                    Mod.Log.LogIfDebug($"Pilot {pilot.Name} has targeted ability:{ability.Def.Id}, boosting their modifier.");
+                    Mod.Log.Debug($"Pilot {pilot.Name} has targeted ability:{ability.Def.Id}, boosting their modifier.");
                     mod += 1;
                 } 
 
@@ -138,12 +138,12 @@ namespace SkillBasedInit.Helper {
             float[] meleeMultiplier = PilotHelper.GetMeleeMultipliers(pilot);
             float attackTonnage = tonnage * meleeMultiplier[0];
             float defenseTonnage = tonnage * meleeMultiplier[1];
-            Mod.Log.LogIfDebug($"Pilot:{pilot.Name} with tonnage:{tonnage} counts as attack:{attackTonnage} defense:{defenseTonnage}");
+            Mod.Log.Debug($"Pilot:{pilot.Name} with tonnage:{tonnage} counts as attack:{attackTonnage} defense:{defenseTonnage}");
 
             int gutsMod = GetGutsModifier(pilot);
             int attackTonnageMod = (int)Math.Ceiling(attackTonnage / 5.0);
             int defenseTonnageMod = (int)Math.Ceiling(defenseTonnage / 5.0);
-            Mod.Log.LogIfDebug($"Pilot:{pilot.Name} has attackMod:{attackTonnageMod} + {gutsMod} defenseMod:{defenseTonnageMod} + {gutsMod}");
+            Mod.Log.Debug($"Pilot:{pilot.Name} has attackMod:{attackTonnageMod} + {gutsMod} defenseMod:{defenseTonnageMod} + {gutsMod}");
 
             return new int[] { attackTonnageMod + gutsMod, defenseTonnageMod + gutsMod};
         }
@@ -169,7 +169,7 @@ namespace SkillBasedInit.Helper {
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
                 if (Mod.Config.PilotTagMeleeMultipliers.ContainsKey(tag)) {
                     float[] tagMultis = Mod.Config.PilotTagMeleeMultipliers[tag];
-                    Mod.Log.LogIfDebug($"Pilot {pilot.Name} has tag:{tag}, applying melee multipliers attack:{tagMultis[0]} defense:{tagMultis[1]}");
+                    Mod.Log.Debug($"Pilot {pilot.Name} has tag:{tag}, applying melee multipliers attack:{tagMultis[0]} defense:{tagMultis[1]}");
                     multipliers[0] += tagMultis[0];
                     multipliers[1] += tagMultis[1];
                 }
@@ -219,7 +219,7 @@ namespace SkillBasedInit.Helper {
                 int normedTactics = NormalizeSkill(pilot.Tactics);
                 int tacticsMod = GetTacticsModifier(pilot);
 
-                Mod.Log.LogIfDebug($"{pilot.Name} skill profile is " +
+                Mod.Log.Debug($"{pilot.Name} skill profile is " +
                     $"g:{pilot.Guts}->{normedGuts}={gutsMod}" +
                     $"p:{pilot.Piloting}->{normdPilot}={pilotingMod} " +
                     $"t:{pilot.Tactics}->{normedTactics}={tacticsMod} "

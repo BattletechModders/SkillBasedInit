@@ -19,7 +19,7 @@ namespace SkillBasedInit {
         public static void Postfix(AbstractActor __instance) {
             //SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
             int reservePenalty = Mod.Random.Next(Mod.Config.ReservedPenaltyBounds[0], Mod.Config.ReservedPenaltyBounds[1]);
-            Mod.Log.LogIfDebug($"  Deferring Actor:({CombatantHelper.LogLabel(__instance)}) " +
+            Mod.Log.Debug($"  Deferring Actor:({CombatantHelper.LogLabel(__instance)}) " +
                 $"initiative:{__instance.Initiative} by:{reservePenalty} to:{__instance.Initiative + reservePenalty}");
             __instance.Initiative += reservePenalty;
             if (__instance.Initiative > Mod.MaxPhase) {
@@ -29,7 +29,7 @@ namespace SkillBasedInit {
             // Save some part of the reserve surplus as a penalty for the next round
             ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
             actorInit.reservedCount++;
-            Mod.Log.LogIfDebug($"  Actor:({CombatantHelper.LogLabel(__instance)}) reservedCount incremented to:{actorInit.reservedCount}");
+            Mod.Log.Debug($"  Actor:({CombatantHelper.LogLabel(__instance)}) reservedCount incremented to:{actorInit.reservedCount}");
         }
 
     }
@@ -132,12 +132,12 @@ namespace SkillBasedInit {
                     if (initiative > Mod.MaxPhase) {
                         // This looks weird, but it's the only place we can intercept a negative init that I've found.
                         if (__instance != null) { __instance.Initiative = Mod.MaxPhase; }
-                        Mod.Log.Log($"AbstractActor:InitiativeToString - ERROR - Bad initiative of {initiative} detected!");
+                        Mod.Log.Info($"AbstractActor:InitiativeToString - ERROR - Bad initiative of {initiative} detected!");
                         __result = "1";
                     } else if (initiative < Mod.MinPhase) {
                         // This looks weird, but it's the only place we can intercept a negative init that I've found.
                         if (__instance != null) { __instance.Initiative = Mod.MinPhase; }
-                        Mod.Log.Log($"AbstractActor:InitiativeToString - ERROR - Bad initiative of {initiative} detected!");
+                        Mod.Log.Info($"AbstractActor:InitiativeToString - ERROR - Bad initiative of {initiative} detected!");
                         __result = "30";
                     }                    
                     break;
@@ -152,10 +152,10 @@ namespace SkillBasedInit {
         public static void Postfix(AbstractActor __instance, bool __result) {
             bool isValid = __instance.Initiative >= Mod.MinPhase && __instance.Initiative <= Mod.MaxPhase;
             if (!isValid) {
-                Mod.Log.Log($"Actor:{CombatantHelper.LogLabel(__instance)} has invalid initiative {__instance.Initiative}!");
+                Mod.Log.Info($"Actor:{CombatantHelper.LogLabel(__instance)} has invalid initiative {__instance.Initiative}!");
             }
             __result = isValid;
-            Mod.Log.LogIfDebug($"AbstractActor:HasValidInitiative returning {__result} for {__instance.Initiative}");
+            Mod.Log.Debug($"AbstractActor:HasValidInitiative returning {__result} for {__instance.Initiative}");
         }
     }
 
@@ -174,10 +174,10 @@ namespace SkillBasedInit {
                 //SkillBasedInit.Logger.LogIfDebug($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has stats BaseInit:{baseInit} / PhaseMod:{phaseMod}");
 
                 if (modifiedInit < Mod.MinPhase) {
-                    Mod.Log.Log($"Actor:({CombatantHelper.LogLabel(__instance)}) being set to {Mod.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    Mod.Log.Info($"Actor:({CombatantHelper.LogLabel(__instance)}) being set to {Mod.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = Mod.MinPhase;
                 } else if (modifiedInit > Mod.MaxPhase) {
-                    Mod.Log.Log($"Actor:({CombatantHelper.LogLabel(__instance)}) being set to {Mod.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    Mod.Log.Info($"Actor:({CombatantHelper.LogLabel(__instance)}) being set to {Mod.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = Mod.MaxPhase;
                 } else {
                     __result = modifiedInit;

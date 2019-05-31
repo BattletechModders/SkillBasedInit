@@ -10,15 +10,12 @@ namespace SkillBasedInit {
         public const string HarmonyPackage = "us.frostraptor.SkillBasedInit";
         public const string LogName = "skill_based_init";
 
-        public static string Path { get; private set; }
-
-        public static int MaxPhase = 30;
-        public static int MinPhase = 1;
-
         public static Logger Log;
         public static string ModDir;
         public static ModConfig Config;
 
+        public const int MaxPhase = 30;
+        public const int MinPhase = 1;
         public static readonly Random Random = new Random();
 
         public static void Init(string modDirectory, string settingsJSON) {
