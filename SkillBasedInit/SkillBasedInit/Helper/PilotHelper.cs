@@ -123,14 +123,24 @@ namespace SkillBasedInit.Helper {
         public static int GetModifier(Pilot pilot, int skillValue, string abilityDefIdL5, string abilityDefIdL8) {
             int normalizedVal = NormalizeSkill(skillValue);
             int mod = ModifierBySkill[normalizedVal];
-            foreach (Ability ability in pilot.Abilities.Distinct()) {
-                Mod.Log.Debug($"Pilot {pilot.Name} has ability:{ability.Def.Id}.");
-                if (ability.Def.Id.ToLower().Equals(abilityDefIdL5.ToLower()) || ability.Def.Id.ToLower().Equals(abilityDefIdL8.ToLower())) {
-                    Mod.Log.Debug($"Pilot {pilot.Name} has targeted ability:{ability.Def.Id}, boosting their modifier.");
-                    mod += 1;
-                } 
 
+            bool hasL5 = false;
+            bool hasL8 = false;
+            foreach (Ability ability in pilot.Abilities) {
+                Mod.Log.Trace($"Pilot {pilot.Name} has ability:{ability.Def.Id}.");
+                if (ability.Def.Id.ToLower().Equals(abilityDefIdL5.ToLower())) {
+                    Mod.Log.Debug($"Pilot {pilot.Name} has L5 ability:{ability.Def.Id}.");
+                    hasL5 = true;
+                }
+
+                if (ability.Def.Id.ToLower().Equals(abilityDefIdL8.ToLower())) {
+                    Mod.Log.Debug($"Pilot {pilot.Name} has L8 ability:{ability.Def.Id}.");
+                    hasL5 = true;
+                }
             }
+            if (hasL5) mod++;
+            if (hasL8) mod++;
+
             return mod;
         }
 
