@@ -78,7 +78,7 @@
     <Compile Include="patches\CombatHUDStatusPanelPatches.cs" />
     <Compile Include="patches\TurnDirectorPatches.cs" />
     <Compile Include="SkillBasedInit.cs" />
-    <Compile Include="Logger.cs" />
+    <Compile Include="Utils\Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\ModConfig.cs" />
     <Compile Include="patches\AbstractActorPatches.cs" />
@@ -90,6 +90,7 @@
     <Compile Include="patches\ForceUnitPhasePatches.cs" />
     <Compile Include="Helper\UnitHelper.cs" />
     <Compile Include="Helper\PilotHelper.cs" />
+    <Compile Include="Utils\State.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

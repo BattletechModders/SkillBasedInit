@@ -54,7 +54,7 @@ namespace SkillBasedInit {
                 ___initiativeText.SetText($"{tonnageMod + componentsMod + engineMod}");
 
                 // --- Tooltip ---
-                int maxInit = Math.Max(tonnageMod + componentsMod + engineMod, SkillBasedInit.MinPhase);
+                int maxInit = Math.Max(tonnageMod + componentsMod + engineMod, Mod.MinPhase);
                 details.Add($"Expected Phase: <b>{maxInit}</b> ");
 
                 string tooltipTitle = $"{___selectedMech.Name}";
@@ -145,8 +145,8 @@ namespace SkillBasedInit {
                 ___initiativeColor.SetUIColor(UIColor.White);
 
                 // --- Tooltip ---
-                int maxInit = Math.Max(initValue - randomnessBounds[0], SkillBasedInit.MinPhase);
-                int minInit = Math.Max(initValue - randomnessBounds[1], SkillBasedInit.MinPhase);
+                int maxInit = Math.Max(initValue - randomnessBounds[0], Mod.MinPhase);
+                int minInit = Math.Max(initValue - randomnessBounds[1], Mod.MinPhase);
                 details.Add($"Total:{initValue}");
                 details.Add($"<space=2em><color=#FF0000>-{randomnessBounds[0]} to -{randomnessBounds[1]} randomness</color> (piloting)");                
                 details.Add($"<b>Expected Phase<b>: {maxInit} to {minInit}");

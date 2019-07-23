@@ -21,7 +21,7 @@ namespace SkillBasedInit.patches {
 
         // Display the initiative modifiers for the current unit as a buff that folks can hover over for details.
         public static void Postfix(CombatHUDStatusPanel __instance) {
-            SkillBasedInit.Logger.LogIfDebug("___ CombatHUDStatusPanel:ShowActorStatuses:post - entered.");
+            Mod.Log.Debug("___ CombatHUDStatusPanel:ShowActorStatuses:post - entered.");
 
             if (__instance.DisplayedCombatant != null) {
 
@@ -80,7 +80,7 @@ namespace SkillBasedInit.patches {
             // Check for leg / side loss
             Mech mech = (Mech)actor;
             if (mech.IsLocationDestroyed(ChassisLocations.LeftLeg) || mech.IsLocationDestroyed(ChassisLocations.RightLeg)) {
-                int rawMod = SkillBasedInit.ModConfig.CrippledMovementModifier + actorInit.pilotingEffectMod;
+                int rawMod = Mod.Config.CrippledMovementModifier + actorInit.pilotingEffectMod;
                 int penalty = Math.Min(-1, rawMod);
                 mechDetails.Add($"<color=#FF0000>{penalty} Leg Destroyed</color>");
                 expectedInitMax += penalty;
@@ -88,7 +88,7 @@ namespace SkillBasedInit.patches {
 
             // Check for prone 
             if (actor.IsProne) {
-                int rawMod = SkillBasedInit.ModConfig.ProneModifier + actorInit.pilotingEffectMod;
+                int rawMod = Mod.Config.ProneModifier + actorInit.pilotingEffectMod;
                 int penalty = Math.Min(-1, rawMod);
                 mechDetails.Add($"<color=#FF0000>{penalty} Prone</color>");
                 expectedInitMax += penalty;
@@ -96,7 +96,7 @@ namespace SkillBasedInit.patches {
 
             // Check for shutdown
             if (actor.IsShutDown) {
-                int rawMod = SkillBasedInit.ModConfig.ShutdownModifier + actorInit.pilotingEffectMod;
+                int rawMod = Mod.Config.ShutdownModifier + actorInit.pilotingEffectMod;
                 int penalty = Math.Min(-1, rawMod);
                 mechDetails.Add($"<color=#FF0000>{penalty} Shutdown</color>");
                 expectedInitMax += penalty;
@@ -164,8 +164,8 @@ namespace SkillBasedInit.patches {
             // Finally, randomness bounds
             pilotDetails.Add($"\nRandom (tactics): <color=#FF0000>-{actorInit.randomnessBounds[0]} to -{actorInit.randomnessBounds[1]}</color>");
 
-            int maxInit = Math.Max(expectedInitMax - expectedInitRandMin, SkillBasedInit.MinPhase);
-            int minInit = Math.Max(expectedInitMax - expectedInitRandMax, SkillBasedInit.MinPhase);
+            int maxInit = Math.Max(expectedInitMax - expectedInitRandMin, Mod.MinPhase);
+            int minInit = Math.Max(expectedInitMax - expectedInitRandMax, Mod.MinPhase);
 
             List<string> toolTipDetails = new List<string> { };
             toolTipDetails.Add(String.Join(", ", mechDetails.ToArray()));

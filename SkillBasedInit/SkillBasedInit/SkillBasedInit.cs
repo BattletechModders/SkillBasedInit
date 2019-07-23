@@ -5,19 +5,17 @@ using System.Diagnostics;
 using System.Reflection;
 
 namespace SkillBasedInit {
-    public class SkillBasedInit {
+    public class Mod {
 
         public const string HarmonyPackage = "us.frostraptor.SkillBasedInit";
+        public const string LogName = "skill_based_init";
 
-        public static string Path { get; private set; }
-
-        public static int MaxPhase = 30;
-        public static int MinPhase = 1;
-
-        public static Logger Logger;
+        public static Logger Log;
         public static string ModDir;
-        public static ModConfig ModConfig;
+        public static ModConfig Config;
 
+        public const int MaxPhase = 30;
+        public const int MinPhase = 1;
         public static readonly Random Random = new Random();
 
         public static void Init(string modDirectory, string settingsJSON) {
@@ -25,21 +23,23 @@ namespace SkillBasedInit {
 
             Exception configE;
             try {
-                ModConfig = JsonConvert.DeserializeObject<ModConfig>(settingsJSON);
+                Config = JsonConvert.DeserializeObject<ModConfig>(settingsJSON);
             } catch (Exception e) {
                 configE = e;
-                ModConfig = new ModConfig();
+                Config = new ModConfig();
+            } finally {
+                Config.InitializeColors();
             }
 
-            ModConfig.InitializeColors();
+            Log = new Logger(modDirectory, "skill_based_init");
 
             Assembly asm = Assembly.GetExecutingAssembly();
-            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(asm?.Location);
-            //Logger.Log($"Assembly version: {fvi?.ProductVersion}");
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(asm.Location);
+            Log.Info($"Assembly version: {fvi.ProductVersion}");
 
-            Logger = new Logger(modDirectory, "skill_based_init");
-            Logger.LogIfDebug($"mod.json settings are:({settingsJSON})");
-            Logger.Log($"mergedConfig is:{ModConfig}");
+            Log.Debug($"ModDir is:{modDirectory}");
+            Log.Debug($"mod.json settings are:({settingsJSON})");
+            Mod.Config.LogConfig();
 
             var harmony = HarmonyInstance.Create(HarmonyPackage);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
