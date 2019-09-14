@@ -24,7 +24,7 @@ namespace SkillBasedInit {
             //SkillBasedInit.Logger.Log($"MechBayMechInfoWidget::SetInitiative::post - disabling text");
             if (___selectedMech == null) {
                 ___initiativeObj.SetActive(true);
-                ___initiativeText.SetText("{0}", new object[] { "-" });
+                ___initiativeText.SetText("-");
             } else {
                 List<string> details = new List<string>();
 
@@ -81,7 +81,7 @@ namespace SkillBasedInit {
             //SkillBasedInit.Logger.Log($"LanceLoadoutSlot::RefreshInitiativeData::post - disabling text");
             bool bothSelected = __instance.SelectedMech != null && __instance.SelectedPilot != null;
             if (!bothSelected) {
-                ___initiativeText.SetText("{0}", new object[] { "-" });
+                ___initiativeText.SetText("-");
                 ___initiativeColor.SetUIColor(UIColor.MedGray);
             } else {
                 int initValue = 0;

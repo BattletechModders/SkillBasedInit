@@ -55,7 +55,7 @@ namespace SkillBasedInit {
             //SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack:OnPhaseBegin:post - Init");
             PhaseBeginMessage phaseBeginMessage = message as PhaseBeginMessage;
             string phaseText = string.Format("{0} - Phase {1}", phaseBeginMessage.Round, 31 - phaseBeginMessage.Phase);
-            ___roundCounterText.SetText(phaseText, new object[0]);
+            ___roundCounterText.SetText(phaseText);
             //SkillBasedInit.Logger.Log($"CombatHUDPhaseTrack:OnPhaseBegin:post - for {phaseText}");
         }
     }
