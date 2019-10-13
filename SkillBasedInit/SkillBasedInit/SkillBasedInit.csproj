@@ -50,16 +50,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\..\Steam\steamapps\common\BATTLETECH\BattleTech_Data\Managed\BattleTech.Common.dll</HintPath>
     </Reference>
-    <Reference Include="CustomComponents, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\Steam\steamapps\common\BATTLETECH\Mods\CustomComponents\CustomComponents.dll</HintPath>
-    </Reference>
     <Reference Include="IRBTModUtils">
       <HintPath>..\..\..\IRBTModUtils\IRBTModUtils\IRBTModUtils\bin\Debug\IRBTModUtils.dll</HintPath>
-    </Reference>
-    <Reference Include="MechEngineer, Version=1.0.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\Steam\steamapps\common\BATTLETECH\Mods\MechEngineer\MechEngineer.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -85,20 +77,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActorInitiative.cs" />
-    <Compile Include="Helper\CombatantHelper.cs" />
-    <Compile Include="patches\AIPatches.cs" />
+    <Compile Include="patches\AI\AIPatches.cs" />
     <Compile Include="patches\CombatHUDStatusPanelPatches.cs" />
+    <Compile Include="patches\UI\HUDPhaseTrack.cs" />
     <Compile Include="patches\TurnDirectorPatches.cs" />
     <Compile Include="SkillBasedInit.cs" />
-    <Compile Include="Utils\Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\ModConfig.cs" />
     <Compile Include="patches\AbstractActorPatches.cs" />
     <Compile Include="patches\MeleePatches.cs" />
     <Compile Include="patches\InjuryPatches.cs" />
-    <Compile Include="patches\HUDPatches.cs" />
+    <Compile Include="patches\UI\HUDPatches.cs" />
     <Compile Include="patches\LoadoutPatches.cs" />
-    <Compile Include="patches\SerializationPatches.cs" />
     <Compile Include="patches\ForceUnitPhasePatches.cs" />
     <Compile Include="Helper\UnitHelper.cs" />
     <Compile Include="Helper\PilotHelper.cs" />
@@ -111,6 +101,7 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetDir)$(TargetFileName)" "%25userprofile%25\Documents\My Games\BattleTech\mods\SkillBasedInit" /y</PostBuildEvent>
