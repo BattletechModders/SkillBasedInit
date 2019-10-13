@@ -39,10 +39,12 @@ namespace SkillBasedInit {
                     details.Add($"<space=2em><color=#00FF00>{componentsMod:+0} components</color>");
                 } else if (componentsMod < 0) {
                     details.Add($"<space=2em><color=#FF0000>{componentsMod:0} components </color>");
-                } 
+                }
 
                 // Modifier from the engine
-                int engineMod = UnitHelper.GetEngineModifier(___selectedMech);
+                // TODO: FIX WHEN CC IS BACK
+                //int engineMod = UnitHelper.GetEngineModifier(___selectedMech);
+                int engineMod = 0;
                 if (engineMod > 0) {
                     details.Add($"<space=2em><color=#00FF00>{engineMod:+0} engine</color>");
                 } else if (engineMod < 0) {
@@ -105,10 +107,12 @@ namespace SkillBasedInit {
                     details.Add($"<space=2em><color=#00FF00>{componentsMod:+0} components</color>");
                 } else if (componentsMod < 0) {
                     details.Add($"<space=2em><color=#FF0000>{componentsMod:0} components</color>");
-                } 
+                }
 
                 // Modifier from the engine
-                int engineMod = UnitHelper.GetEngineModifier(selectedMechDef);
+                // TODO: FIX WHEN CC BACK
+                //int engineMod = UnitHelper.GetEngineModifier(selectedMechDef);
+                int engineMod = 0;
                 initValue += engineMod;
                 if (engineMod > 0) {
                     details.Add($"<space=2em><color=#00FF00>{engineMod:+0} engine</color>");

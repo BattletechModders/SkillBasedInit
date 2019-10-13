@@ -69,7 +69,9 @@ namespace SkillBasedInit.patches {
             expectedInitMax += componentsMod;
 
             // Modifier from the engine
-            int engineMod = UnitHelper.GetEngineModifier(actor);
+            // TODO: FIX WHEN CC IS BACK
+            //int engineMod = UnitHelper.GetEngineModifier(actor);
+            int engineMod = 0;
             if (engineMod > 0) {
                 mechDetails.Add($"<color=#00FF00>{engineMod:+0} engine</color>");
             } else if (engineMod < 0) {

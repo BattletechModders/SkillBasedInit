@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using BattleTech;
-using CustomComponents;
+//using CustomComponents;
 using HBS.Collections;
-using MechEngineer.Features.Engines;
+//using MechEngineer.Features.Engines;
 
 namespace SkillBasedInit.Helper {
     public class UnitHelper {
@@ -201,39 +201,40 @@ namespace SkillBasedInit.Helper {
             return unitInit;
         }
 
-        public static int GetEngineModifier(AbstractActor actor) {
-            int engineMod = 0;
-            if (actor.GetTags().Contains("unit_powerarmor")) {
-                Mod.Log.Debug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} is PowerArmor, skipping engine bonus.");
-            } else {
-                MechComponent mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
-                if (mainEngineComponent != null) {
-                    EngineCoreDef engine = mainEngineComponent?.componentDef?.GetComponent<EngineCoreDef>();
-                    float tonnage = GetUnitTonnage(actor);
-                    engineMod = CalculateEngineModifier(tonnage, engine.Rating);
-                    Mod.Log.Debug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} with engine rating: {engine?.Rating} has engineMod:{engineMod}");
-                } else {
-                    Mod.Log.Info($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has no engine - is this expected?");
-                }
-            }
+        // TODO: Re implement?
+        //public static int GetEngineModifier(AbstractActor actor) {
+        //    int engineMod = 0;
+        //    if (actor.GetTags().Contains("unit_powerarmor")) {
+        //        Mod.Log.Debug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} is PowerArmor, skipping engine bonus.");
+        //    } else {
+        //        MechComponent mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
+        //        if (mainEngineComponent != null) {
+        //            EngineCoreDef engine = mainEngineComponent?.componentDef?.GetComponent<EngineCoreDef>();
+        //            float tonnage = GetUnitTonnage(actor);
+        //            engineMod = CalculateEngineModifier(tonnage, engine.Rating);
+        //            Mod.Log.Debug($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} with engine rating: {engine?.Rating} has engineMod:{engineMod}");
+        //        } else {
+        //            Mod.Log.Info($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has no engine - is this expected?");
+        //        }
+        //    }
 
-            return engineMod;
-        }
+        //    return engineMod;
+        //}
 
-        public static int GetEngineModifier(MechDef mechDef) {
-            int engineMod = 0;
+        //public static int GetEngineModifier(MechDef mechDef) {
+        //    int engineMod = 0;
 
-            // var mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
-            MechComponentRef engineRef = mechDef.Inventory.FirstOrDefault(mcr => mcr?.GetComponent<EngineCoreDef>() != null);
-            Mod.Log.Debug($"MechDef:{mechDef.Name} has engineComponent:{engineRef}?");
-            if (engineRef != null) {
-                EngineCoreDef engine = engineRef.Def.GetComponent<EngineCoreDef>();
-                float tonnage = mechDef.Chassis.Tonnage;
-                engineMod = CalculateEngineModifier(tonnage, engine.Rating);
-            }
+        //    // var mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
+        //    MechComponentRef engineRef = mechDef.Inventory.FirstOrDefault(mcr => mcr?.GetComponent<EngineCoreDef>() != null);
+        //    Mod.Log.Debug($"MechDef:{mechDef.Name} has engineComponent:{engineRef}?");
+        //    if (engineRef != null) {
+        //        EngineCoreDef engine = engineRef.Def.GetComponent<EngineCoreDef>();
+        //        float tonnage = mechDef.Chassis.Tonnage;
+        //        engineMod = CalculateEngineModifier(tonnage, engine.Rating);
+        //    }
 
-            return engineMod;
-        }
+        //    return engineMod;
+        //}
 
         private static int CalculateEngineModifier(float tonnage, int rating) {
             int engineMod = 0;
