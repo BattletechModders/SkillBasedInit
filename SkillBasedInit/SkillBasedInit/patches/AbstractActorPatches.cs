@@ -3,6 +3,7 @@ using BattleTech.UI;
 using Harmony;
 using SkillBasedInit.Helper;
 using System;
+using us.frostraptor.modUtils;
 
 namespace SkillBasedInit {
 
@@ -19,7 +20,7 @@ namespace SkillBasedInit {
         public static void Postfix(AbstractActor __instance) {
             //SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
             int reservePenalty = Mod.Random.Next(Mod.Config.ReservedPenaltyBounds[0], Mod.Config.ReservedPenaltyBounds[1]);
-            Mod.Log.Debug($"  Deferring Actor:({CombatantHelper.LogLabel(__instance)}) " +
+            Mod.Log.Debug($"  Deferring Actor:({CombatantUtils.Label(__instance)}) " +
                 $"initiative:{__instance.Initiative} by:{reservePenalty} to:{__instance.Initiative + reservePenalty}");
             __instance.Initiative += reservePenalty;
             if (__instance.Initiative > Mod.MaxPhase) {
@@ -29,7 +30,7 @@ namespace SkillBasedInit {
             // Save some part of the reserve surplus as a penalty for the next round
             ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
             actorInit.reservedCount++;
-            Mod.Log.Debug($"  Actor:({CombatantHelper.LogLabel(__instance)}) reservedCount incremented to:{actorInit.reservedCount}");
+            Mod.Log.Debug($"  Actor:({CombatantUtils.Label(__instance)}) reservedCount incremented to:{actorInit.reservedCount}");
         }
 
     }
@@ -152,7 +153,7 @@ namespace SkillBasedInit {
         public static void Postfix(AbstractActor __instance, bool __result) {
             bool isValid = __instance.Initiative >= Mod.MinPhase && __instance.Initiative <= Mod.MaxPhase;
             if (!isValid) {
-                Mod.Log.Info($"Actor:{CombatantHelper.LogLabel(__instance)} has invalid initiative {__instance.Initiative}!");
+                Mod.Log.Info($"Actor:{CombatantUtils.Label(__instance)} has invalid initiative {__instance.Initiative}!");
             }
             __result = isValid;
             Mod.Log.Debug($"AbstractActor:HasValidInitiative returning {__result} for {__instance.Initiative}");
@@ -174,10 +175,10 @@ namespace SkillBasedInit {
                 //SkillBasedInit.Logger.LogIfDebug($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has stats BaseInit:{baseInit} / PhaseMod:{phaseMod}");
 
                 if (modifiedInit < Mod.MinPhase) {
-                    Mod.Log.Info($"Actor:({CombatantHelper.LogLabel(__instance)}) being set to {Mod.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    Mod.Log.Info($"Actor:({CombatantUtils.Label(__instance)}) being set to {Mod.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = Mod.MinPhase;
                 } else if (modifiedInit > Mod.MaxPhase) {
-                    Mod.Log.Info($"Actor:({CombatantHelper.LogLabel(__instance)}) being set to {Mod.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    Mod.Log.Info($"Actor:({CombatantUtils.Label(__instance)}) being set to {Mod.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = Mod.MaxPhase;
                 } else {
                     __result = modifiedInit;
