@@ -14,13 +14,15 @@ namespace SkillBasedInit.patches {
      *     method replaces the logic to support all phases in this mod.
      */
     [HarmonyPatch()]
-    public static class AttackEvaluator_AdditionalDamageFromPips {
+    public static class AttackEvaluator_AdditionalDamageFromFriendsGainedByAttackingEvasiveTarget {
 
         public static MethodInfo TargetMethod() {
             return AccessTools.Method(typeof(AttackEvaluator), "AdditionalDamageFromFriendsGainedByAttackingEvasiveTarget");
         }
 
         private static bool Prefix(ref float __result, AbstractActor unit, AbstractActor target, Vector3 targetPosition, int pipsRemoved) {
+            Mod.Log.Trace("AE:ADFP:pre - entered.");
+
             Mod.Log.Trace($"  ---- AE_ADFP: Building list.");
             List<AbstractActor> list = new List<AbstractActor>();
             Dictionary<int, List<AbstractActor>> dictionary = new Dictionary<int, List<AbstractActor>>();
@@ -66,6 +68,7 @@ namespace SkillBasedInit.patches {
             float num2 = 0f;
             int evasivePipsCurrent = target.EvasivePipsCurrent;
             int evasivePipsCurrent2 = Mathf.Max(0, evasivePipsCurrent - pipsRemoved);
+            Mod.Log.Debug($"  ---- AE_ADFP: Assumes we can remove: {evasivePipsCurrent2} pips ");
             for (int m = 0; m < list.Count; m++) {
                 AbstractActor abstractActor2 = list[m];
                 for (int n = 0; n < abstractActor2.Weapons.Count; n++) {
@@ -82,6 +85,7 @@ namespace SkillBasedInit.patches {
             }
             target.EvasivePipsCurrent = evasivePipsCurrent;
             __result = num - num2;
+
             return false;
         }
     }
