@@ -7,6 +7,8 @@ Instead of four weight classes (light / medium / heavy / assault), this mod divi
 
 Almost all values are available through tooltips in the mech bay, lance drop and combat UI screens. Hover over the initiative badges (the hexagons) and many details of the system will be defined.
 
+This mod requires [https://github.com/iceraptor/IRBTModUtils/]. Grab the latest release of __IRBTModUtils__ and extract it in your Mods/ directory alongside of this mod.
+
 ## Skills
 
 This mod emphasizes a MechWarrior's Tactics, Guts, and Piloting skills.
