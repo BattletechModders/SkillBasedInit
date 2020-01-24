@@ -1,22 +1,19 @@
 ﻿using BattleTech;
 using Harmony;
-using System;
 
 namespace SkillBasedInit.patches {
-    [HarmonyPatch(typeof(TurnDirector), MethodType.Constructor)]
-    [HarmonyPatch(new Type[] { typeof(CombatGameState) })]
-    public static class TurnDirector_ctor {
-        public static void Postfix(TurnDirector __instance) {
-            Mod.Log.Trace("TD:ctor:post - entered.");
-            int ___FirstPhase = (int)Traverse.Create(__instance).Property("FirstPhase").GetValue();
-            int ___LastPhase = (int)Traverse.Create(__instance).Property("LastPhase").GetValue();
-            Mod.Log.Debug($" TurnDirector init with phases: {___FirstPhase} / {___LastPhase}");
 
-            //Traverse.Create(__instance).Property("FirstPhase").SetValue(1);
-            //Traverse.Create(__instance).Property("LastPhase").SetValue(Mod.MaxPhase);
-            //Mod.Log.Debug($" TurnDirector phases changed to: {___FirstPhase} / {Mod.MaxPhase}");
-        }
-    }
+    // TODO: Never invoked - remove?
+    //[HarmonyPatch(typeof(TurnDirector), MethodType.Constructor)]
+    //[HarmonyPatch(new Type[] { typeof(CombatGameState) })]
+    //public static class TurnDirector_ctor {
+    //    public static void Postfix(TurnDirector __instance) {
+    //        Mod.Log.Debug("TD:ctor:post - entered.");
+    //        int ___FirstPhase = (int)Traverse.Create(__instance).Property("FirstPhase").GetValue();
+    //        int ___LastPhase = (int)Traverse.Create(__instance).Property("LastPhase").GetValue();
+    //        Mod.Log.Debug($" TurnDirector init with phases: {___FirstPhase} / {___LastPhase}");
+    //    }
+    //}
 
     [HarmonyPatch(typeof(TurnDirector), "OnCombatGameDestroyed")]
     public static class TurnDirector_OnCombatGameDestroyed {

@@ -39,7 +39,7 @@
   <ItemGroup>
     <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\Steam\steamapps\common\BATTLETECH\Mods\ModTek\0Harmony.dll</HintPath>
+      <HintPath>E:\steam\SteamApps\common\BATTLETECH\BattleTech_Data\Managed\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -108,6 +108,7 @@
     <Compile Include="ActorInitiative.cs" />
     <Compile Include="Helper\PhaseHelper.cs" />
     <Compile Include="patches\AI\AIPatches.cs" />
+    <Compile Include="patches\CombatGameStatePatches.cs" />
     <Compile Include="patches\Mech.cs" />
     <Compile Include="patches\UI\CombatHUDStatusPanelPatches.cs" />
     <Compile Include="patches\Team.cs" />

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using BattleTech;
+using us.frostraptor.modUtils;
 
 namespace SkillBasedInit.Helper {
     public class PilotHelper {
@@ -121,7 +122,7 @@ namespace SkillBasedInit.Helper {
         }
 
         public static int GetModifier(Pilot pilot, int skillValue, string abilityDefIdL5, string abilityDefIdL8) {
-            int normalizedVal = NormalizeSkill(skillValue);
+            int normalizedVal = SkillUtils.NormalizeSkill(skillValue);
             int mod = ModifierBySkill[normalizedVal];
 
             bool hasL5 = false;
@@ -188,45 +189,26 @@ namespace SkillBasedInit.Helper {
         }
 
         public static int[] GetInjuryBounds(Pilot pilot) {
-            int normalizedVal = NormalizeSkill(pilot.Guts);
+            int normalizedVal = SkillUtils.NormalizeSkill(pilot.Guts);
             int[] bounds = new int[2];
             InjuryBounds[normalizedVal].CopyTo(bounds, 0);
             return bounds;
         }
 
         public static int[] GetRandomnessBounds(Pilot pilot) {
-            int normalizedVal = NormalizeSkill(pilot.Piloting);
+            int normalizedVal = SkillUtils.NormalizeSkill(pilot.Piloting);
             int[] bounds = new int[2];
             RandomnessBounds[normalizedVal].CopyTo(bounds, 0);
             return bounds;
         }
 
-        private static int NormalizeSkill(int rawValue) {
-            int normalizedVal = rawValue;
-            if (rawValue >= 11 && rawValue <= 14) {
-                // 11, 12, 13, 14 normalizes to 11
-                normalizedVal = 11;
-            } else if (rawValue >= 15 && rawValue <= 18) {
-                // 15, 16, 17, 18 normalizes to 14
-                normalizedVal = 12;
-            } else if (rawValue == 19 || rawValue == 20) {
-                // 19, 20 normalizes to 13
-                normalizedVal = 13;
-            } else if (rawValue <= 0) {
-                normalizedVal = 1;
-            } else if (rawValue > 20) {
-                normalizedVal = 13;
-            }
-            return normalizedVal;
-        }
-
         public static void LogPilotStats(Pilot pilot) {
             if (Mod.Config.Debug) {
-                int normedGuts = NormalizeSkill(pilot.Guts);
+                int normedGuts = SkillUtils.NormalizeSkill(pilot.Guts);
                 int gutsMod = GetGutsModifier(pilot);
-                int normdPilot = NormalizeSkill(pilot.Piloting);
+                int normdPilot = SkillUtils.NormalizeSkill(pilot.Piloting);
                 int pilotingMod = GetPilotingModifier(pilot);
-                int normedTactics = NormalizeSkill(pilot.Tactics);
+                int normedTactics = SkillUtils.NormalizeSkill(pilot.Tactics);
                 int tacticsMod = GetTacticsModifier(pilot);
 
                 Mod.Log.Debug($"{pilot.Name} skill profile is " +
