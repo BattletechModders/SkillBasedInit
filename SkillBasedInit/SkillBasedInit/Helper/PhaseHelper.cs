@@ -25,15 +25,15 @@ namespace SkillBasedInit {
             // Normalize phase to initiative values
             int currentInit = (Mod.MaxPhase + 1) - currentPhase;
             
-            int leftPhase = currentInit;
-            if (currentInit + 2 > Mod.MaxPhase) {
-                leftPhase = Mod.MaxPhase;
-            } else if (currentInit - 2 < Mod.MinPhase) {
-                leftPhase = Mod.MinPhase + 4;
+            int midPoint = currentInit;
+            if (midPoint + 2 > Mod.MaxPhase || midPoint +1 > Mod.MaxPhase) {
+                midPoint = Mod.MaxPhase - 2;
+            } else if (midPoint - 2 < Mod.MinPhase || midPoint - 1 < Mod.MinPhase) {
+                midPoint = Mod.MinPhase + 2;
             }
 
-            int[] bounds = new int[] { leftPhase, leftPhase -4 };
-            Mod.Log.Info($"For phase {currentPhase}, init bounds are: {bounds[0]} to {bounds[1]}");
+            int[] bounds = new int[] { midPoint +2, midPoint +1, midPoint, midPoint -1, midPoint -2 };
+            //Mod.Log.Info($"For phase {currentPhase}, init bounds are: {bounds[0]} to {bounds[4]}");
             return bounds;
         }
     }

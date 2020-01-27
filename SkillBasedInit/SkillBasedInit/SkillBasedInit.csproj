@@ -108,6 +108,7 @@
     <Compile Include="objects\ActorInitiative.cs" />
     <Compile Include="Helper\PhaseHelper.cs" />
     <Compile Include="patches\AI\AIPatches.cs" />
+    <Compile Include="patches\CombatGameStatePatches.cs" />
     <Compile Include="patches\Mech.cs" />
     <Compile Include="patches\UI\CombatHUDStatusPanelPatches.cs" />
     <Compile Include="patches\Team.cs" />

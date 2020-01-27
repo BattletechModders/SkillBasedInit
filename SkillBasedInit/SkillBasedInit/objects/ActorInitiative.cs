@@ -192,7 +192,6 @@ namespace SkillBasedInit {
             if (actor.IsShutDown) {
                 int rawMod = Mod.Config.ShutdownModifier + this.pilotingEffectMod;
                 Mod.Log.Debug($"  Shutdown Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({Mod.Config.ShutdownModifier} - {this.pilotingEffectMod})");
-
                 int penalty = Math.Min(0, rawMod);
                 roundInitiative += penalty;
                 Mod.Log.Info($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is shutdown! Subtracted {penalty} = roundInit:{roundInitiative}");                
@@ -236,7 +235,9 @@ namespace SkillBasedInit {
             }
 
             // Init is flipped... 1 acts in first phase, then 2, etc.
-            actor.Initiative = (Mod.MaxPhase + 1) - roundInitiative;
+            if (!actor.Combat.TurnDirector.IsInterleaved) { actor.Initiative = actor.Combat.TurnDirector.NonInterleavedPhase;  }
+            else { actor.Initiative = (Mod.MaxPhase + 1) - roundInitiative; }
+
             Mod.Log.Info($"== Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has init:({roundInitiative}) from base:{roundInitBase} - variance:{roundVariance} plus modifiers.");
         }
 
