@@ -1,4 +1,5 @@
 ﻿using BattleTech;
+using Localize;
 using SkillBasedInit.Helper;
 using System;
 using System.Collections.Generic;
@@ -255,7 +256,9 @@ namespace SkillBasedInit {
             if (target.HasActivatedThisRound) {
                 Mod.Log.Info($"Melee impact will slow Actor:({target.DisplayName}_{target.GetPilot().Name}) by {impact} init on next activation!");
                 this.deferredMeleeMod += impact;
-                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID, $"CLANG! -{impact} INITIATIVE NEXT ROUND", FloatieMessage.MessageNature.Debuff));
+                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID, 
+                    new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_MELEE_IMPACT_LATER], new object[] { impact }).ToString(), 
+                    FloatieMessage.MessageNature.Debuff));
             } else {
                 Mod.Log.Info($"Melee impact immediately slows Actor:({target.DisplayName}_{target.GetPilot().Name}) by {impact} init!");
                 // Add to the target's initiative. Remember higher init -> higher phase
@@ -264,7 +267,8 @@ namespace SkillBasedInit {
                     target.Initiative = Mod.MaxPhase;
                 }
                 target.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(target.GUID));
-                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID, $"CLANG! -{impact} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID,
+                    new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_MELEE_IMPACT_NOW], new object[] { impact }).ToString(), FloatieMessage.MessageNature.Debuff));
             }
         }
 

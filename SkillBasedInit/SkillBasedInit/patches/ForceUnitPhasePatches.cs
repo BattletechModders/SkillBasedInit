@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using Harmony;
+using Localize;
 using System;
 using System.Collections.Generic;
 
@@ -114,7 +115,9 @@ namespace SkillBasedInit {
                         actorInit.deferredCalledShotMod += penalty;
                     }
 
-                    string floatieMsg = InvokeIsKnockdown ? $"GOING DOWN! -{penalty} INITIATIVE NEXT ROUND" : $"CALLED SHOT! -{penalty} INITIATIVE NEXT ROUND";
+                    string floatieMsg = InvokeIsKnockdown ?
+                        new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_KNOCKDOWN_LATER], new object[] { penalty }).ToString() :
+                        new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_CALLED_SHOT_LATER], new object[] { penalty }).ToString();
                     __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, floatieMsg, FloatieMessage.MessageNature.Debuff));
 
                     // Reset their initiative on this round
@@ -128,7 +131,9 @@ namespace SkillBasedInit {
                         __instance.Initiative = Mod.MaxPhase;
                     }
                     __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
-                    string floatieMsg = InvokeIsKnockdown ? $"GOING DOWN! -{penalty} INITIATIVE" : $"CALLED SHOT! -{penalty} INITIATIVE";
+                    string floatieMsg = InvokeIsKnockdown ?
+                        new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_KNOCKDOWN_NOW], new object[] { penalty }).ToString() :
+                        new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_CALLED_SHOT_NOW], new object[] { penalty }).ToString();
                     __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, floatieMsg, FloatieMessage.MessageNature.Debuff));
                 }
             }
@@ -190,7 +195,7 @@ namespace SkillBasedInit {
 
                 actorInit.deferredVigilanceMod = actorInit.vigilianceMod + Mod.Random.Next(0, 2);
                 Mod.Log.Debug($"AbstractActor:ForceUnitOnePhaseUp:Postfix - actor {__instance.DisplayName}_{__instance.GetPilot().Name} will gain  {actorInit.deferredVigilanceMod} init next round.");
-                string floatieMsg = $"VIGILANCE! +{actorInit.vigilianceMod} INITIATIVE NEXT ROUND!";
+                string floatieMsg = new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_VIGILANCE], new object[] { actorInit.vigilianceMod }).ToString();
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, floatieMsg, FloatieMessage.MessageNature.Debuff));
 
                 // TODO: Test that this eliminates the portrait remaining activated

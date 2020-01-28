@@ -85,7 +85,30 @@ namespace SkillBasedInit {
         public const string LT_TT_EXPECTED = "TOOLTIP_EXPECTED";
         public const string LT_TT_HOVER = "TOOLTIP_HOVER";
 
+        // Floaties
+        public const string LT_FT_INJURY_NOW = "FLOATIE_INJURY_NOW";
+        public const string LT_FT_INJURY_LATER = "FLOATIE_INJURY_LATER";
+        public const string LT_FT_KNOCKDOWN_NOW = "FLOATIE_KNOCKDOWN_NOW";
+        public const string LT_FT_KNOCKDOWN_LATER = "FLOATIE_KNOCKDOWN_LATER";
+        public const string LT_FT_CALLED_SHOT_NOW = "FLOATIE_CALLED_SHOT_NOW";
+        public const string LT_FT_CALLED_SHOT_LATER = "FLOATIE_CALLED_SHOT_LATER";
+        public const string LT_FT_MELEE_IMPACT_NOW = "FLOATIE_MELEE_IMPACT_NOW";
+        public const string LT_FT_MELEE_IMPACT_LATER = "FLOATIE_MELEE_IMPACT_LATER";
+        public const string LT_FT_VIGILANCE = "FLOATIE_VIGILANCE";
+
+        // Mech Bay
+        public const string LT_MB_TONNAGE = "MECHBAY_TONNAGE";
+        public const string LT_MB_COMPONENTS = "MECHBAY_COMPONENTS";
+        public const string LT_MB_ENGINES = "MECHBAY_ENGINES";
+        public const string LT_MB_LANCE = "MECHBAY_LANCE";
+        public const string LT_MB_TACTICS = "MECHBAY_TACTICS";
+        public const string LT_MB_TOTAL = "MECHBAY_TOTAL";
+        public const string LT_MB_RANDOM = "MECHBAY_RANDOM";
+        public const string LT_MB_EXPECTED_NO_PILOT = "MECHBAY_EXPECTED_NO_PILOT";
+        public const string LT_MB_EXPECTED = "MECHBAY_EXPECTED";
+
         public Dictionary<string, string> LocalizedText = new Dictionary<string, string>() {
+            // Tooltip
             { LT_TT_TITLE, "INITIATIVE" },
             { LT_TT_MECH_TONNAGE, "MECH => tonnage: {0}" },
             { LT_TT_COMPONENTS, "<color=#{0}>{1:+0} components</color>" },
@@ -101,10 +124,32 @@ namespace SkillBasedInit {
             { LT_TT_HESITATION, "<color=#FF0000>-{0} Hesitation</color>" },
             { LT_TT_CALLED_SHOT_TARG, "<color=#FF0000>-{0} Called Shot Target</color>" },
             { LT_TT_VIGILANCE, "<color=#00FF00>-{0} Vigilance</color>" },
-            { LT_TT_RANDOM, "\nRANDOM => <color=#FF0000>-{0} to -{1}</color> (Reduced by tactics)" },
+            { LT_TT_RANDOM, "\nRANDOM => <color=#FF0000>-{0} to -{1}</color> <i>(reduced by tactics)</i>" },
             { LT_TT_EXPECTED, "EXPECTED PHASE: <b>{0} to {1}</b>" },
-            { LT_TT_HOVER, "<i>Hover initiative in Mechlab & Deploy for details." }
-        };
+            { LT_TT_HOVER, "<i>Hover initiative in Mechlab & Deploy for details.</i>" },
+
+            // Floaties
+            { LT_FT_INJURY_LATER, "OUCH! -{0} INITIATIVE" },
+            { LT_FT_INJURY_NOW, "OUCH! -{0} INITIATIVE NEXT ROUND" },
+            { LT_FT_KNOCKDOWN_NOW, "GOING DOWN! -{0} INITIATIVE" },
+            { LT_FT_KNOCKDOWN_LATER, "GOING DOWN! -{0} INITIATIVE NEXT ROUND" },
+            { LT_FT_CALLED_SHOT_NOW, "CALLED SHOT! -{0} INITIATIVE" },
+            { LT_FT_CALLED_SHOT_LATER, "CALLED SHOT! -{0} INITIATIVE NEXT ROUND" },
+            { LT_FT_MELEE_IMPACT_NOW, "CLANG! -{0} INITIATIVE NEXT ROUND" },
+            { LT_FT_MELEE_IMPACT_LATER, "CLANG! -{0} INITIATIVE NEXT ROUND" },
+            { LT_FT_VIGILANCE, "VIGILANCE! +{0} INITIATIVE NEXT ROUND!" },
+
+            // Mech Bay
+            { LT_MB_TONNAGE, "<b>BASE</b>: {0} (<i>from tonnage</i>)" },
+            { LT_MB_COMPONENTS, "<space=2em><color=#{0}>{1:+0;-#} components</color>" },
+            { LT_MB_ENGINES, "<space=2em><color=#{0}>{1:+0;-#} engine</color>" },
+            { LT_MB_LANCE, "<space=2em><color=#{0}>{1:+0;-#} lance</color>" },
+            { LT_MB_TACTICS, "<space=2em>{0:+0;-#} tactics" },
+            { LT_MB_TOTAL, "<b>TOTAL</b>: {0}" },
+            { LT_MB_RANDOM, "<space=2em><color=#FF0000>-{0} to -{1} random</color> (<i>reduced by tactics</i>)" },
+            { LT_MB_EXPECTED_NO_PILOT, "<b>EXPECTED PHASE</b>: {0}" },
+            { LT_MB_EXPECTED, "<b>EXPECTED PHASE</b>: {0} to {1}" },
+    };
 
         // Colors for the UI elements
         /* No affiliation

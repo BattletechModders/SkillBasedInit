@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using Harmony;
+using Localize;
 using System;
 
 namespace SkillBasedInit {
@@ -36,6 +37,7 @@ namespace SkillBasedInit {
                 ActorInitiative target = ActorInitiativeHolder.GetOrCreate(parent);
                 int injuryPenalty = target.CalculateInjuryPenalty(damageTaken, __instance.Injuries);
 
+                string floatieText = null;
                 if (!parent.HasActivatedThisRound) {
                     // Apply penalty in current round. Remember high init -> higher phase
                     parent.Initiative += injuryPenalty;
@@ -43,12 +45,12 @@ namespace SkillBasedInit {
                         parent.Initiative = Mod.MaxPhase;
                     }
                     parent.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(parent.GUID));
-                    parent.Combat.MessageCenter.PublishMessage(new FloatieMessage(parent.GUID, parent.GUID, $"OUCH! -{injuryPenalty} INITIATIVE", FloatieMessage.MessageNature.Debuff));
                 } else {
                     // Injuries are cumulative
                     target.deferredInjuryMod += injuryPenalty;
-                    parent.Combat.MessageCenter.PublishMessage(new FloatieMessage(parent.GUID, parent.GUID, $"OUCH! -{injuryPenalty} INITIATIVE NEXT ROUND", FloatieMessage.MessageNature.Debuff));
+                    floatieText = new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_INJURY_LATER], new object[] { injuryPenalty }).ToString();
                 }
+                parent.Combat.MessageCenter.PublishMessage(new FloatieMessage(parent.GUID, parent.GUID, floatieText, FloatieMessage.MessageNature.Debuff));
 
             }
         }
