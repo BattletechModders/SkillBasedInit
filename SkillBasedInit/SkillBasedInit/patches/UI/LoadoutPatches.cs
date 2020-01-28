@@ -127,14 +127,17 @@ namespace SkillBasedInit {
                     details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_LANCE], new object[] { lanceColor, ___LC.lanceInitiativeModifier }).ToString());
                 }
 
-                // --- Badge ---
-                ___initiativeText.SetText($"{initValue}");
-                ___initiativeText.color = Color.black;
-                ___initiativeColor.SetUIColor(UIColor.White);
-
                 // --- Tooltip ---
                 int maxInit = Math.Max(initValue - randomnessBounds[0], Mod.MinPhase);
                 int minInit = Math.Max(initValue - randomnessBounds[1], Mod.MinPhase);
+                int avgMod = (int)Math.Ceiling((maxInit - minInit) / 2f);
+                int avgInit = maxInit - avgMod;
+
+                // --- Badge ---
+                ___initiativeText.SetText($"{avgInit}");
+                ___initiativeText.color = Color.black;
+                ___initiativeColor.SetUIColor(UIColor.White);
+
                 details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_TOTAL], new object[] { initValue }).ToString());
                 details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_RANDOM], new object[] { randomnessBounds[0], randomnessBounds[1] }).ToString());
                 details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_EXPECTED], new object[] { maxInit, minInit }).ToString());
