@@ -3,8 +3,6 @@ using BattleTech.UI;
 using Harmony;
 using System;
 using System.Collections.Generic;
-using TMPro;
-using UnityEngine;
 
 namespace SkillBasedInit {
 

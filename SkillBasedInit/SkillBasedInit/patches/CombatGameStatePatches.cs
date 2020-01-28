@@ -5,7 +5,6 @@ namespace SkillBasedInit.patches {
 
     [HarmonyPatch(typeof(CombatGameState), "_Init")]
     public static class CombatGameState__Init {
-        
         public static void Postfix(CombatGameState __instance) {
             Mod.Log.Debug("Caching CombatGameState");
             ModState.Combat = __instance;

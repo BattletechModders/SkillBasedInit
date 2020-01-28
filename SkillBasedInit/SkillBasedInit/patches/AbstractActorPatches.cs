@@ -203,36 +203,4 @@ namespace SkillBasedInit {
         }
     }
 
-    // Required to apply the negative as soon as it happens in the knockdown case
-    //[HarmonyPatch(typeof(AbstractActor), "ForceUnitOnePhaseDown")]
-    //[HarmonyPatch(new Type[] { typeof(string), typeof(int), typeof(bool) })]
-    //public static class AbstractActor_ForceUnitOnePhaseDown {
-
-    //    public static boolean Prefix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf) {
-    //        Mod.Log.Trace("AA:FUOPD:pre - entered.");
-
-    //        Mod.Log.Info($"AbstractActor:ForceUnitOnePhaseDown:prefix - sourceID:{sourceID} vs actor: {__instance.GUID}");
-    //        if (sourceID == Mech_CompleteKnockdown.KnockdownSourceID && stackItemUID == Mech_CompleteKnockdown.KnockdownStackItemUID) {
-    //            InvokeIsKnockdown = true;
-    //            InvokeIsCalledShot = false;
-    //        } else if (AttackStackSequence_OnAdded.IsMoraleAttack) {
-    //            InvokeIsKnockdown = false;
-    //            InvokeIsCalledShot = true;
-    //        } else {
-    //            InvokeIsKnockdown = false;
-    //            InvokeIsCalledShot = false;
-    //        }
-
-    //        // In either of these cases, we want our logic to apply, not default. Fake out the call temporarily, then restore init at the end.
-    //        if (InvokeIsKnockdown || InvokeIsCalledShot) {
-    //            PreInvokeInitiative = __instance.Initiative;
-    //            __instance.Initiative = __instance.Combat.Constants.Phase.PhaseAssault;
-    //        }
-
-    //        return true;
-    //    }
-    //}
-
-
-
 }
