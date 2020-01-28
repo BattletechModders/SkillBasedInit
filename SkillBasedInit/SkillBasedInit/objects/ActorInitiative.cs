@@ -80,9 +80,7 @@ namespace SkillBasedInit {
             int componentsMod = UnitHelper.GetNormalizedComponentModifier(actor);
 
             // Modifier from the engine
-            // TODO: FIX WHEN CC IS BACK?
-            //int engineMod = UnitHelper.GetEngineModifier(actor);
-            int engineMod = 0;
+            int engineMod = UnitHelper.GetEngineModifier(actor);
 
             // --- PILOT IMPACTS ---
             Pilot pilot = actor.GetPilot();

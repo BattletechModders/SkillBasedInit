@@ -129,18 +129,18 @@ namespace SkillBasedInit {
 
             int[] bounds = PhaseHelper.CalcPhaseIconBounds(___currentPhase);
             int phaseAsInit = (Mod.MaxPhase + 1) - phase;
-            Mod.Log.Info($"Phase {phase} is init {phaseAsInit} within currentPhase: {___currentPhase} with bounds: {bounds[0]}-{bounds[4]}");
+            Mod.Log.Trace($"Phase {phase} is init {phaseAsInit} within currentPhase: {___currentPhase} with bounds: {bounds[0]}-{bounds[4]}");
 
             if (phaseAsInit > bounds[1]) {
-                Mod.Log.Info($"  -- Phase icon is higher than {bounds[1]}, setting to P phase.");
+                Mod.Log.Trace($"  -- Phase icon is higher than {bounds[1]}, setting to P phase.");
                 ___PhaseIcons[0].AddIconTrackerToPhase(tracker);
             } else if (phaseAsInit < bounds[3]) {
-                Mod.Log.Info($"  -- Phase icon is higher than {bounds[3]}, setting to F phase.");
+                Mod.Log.Trace($"  -- Phase icon is higher than {bounds[3]}, setting to F phase.");
                 ___PhaseIcons[4].AddIconTrackerToPhase(tracker);
             } else {
                 for (int i = 0; i < 5; i++) {
                     if (bounds[i] == phaseAsInit) {
-                        Mod.Log.Info($"  -- Setting phase icon for phaseAsInit: {phaseAsInit} / bounds: {bounds[i]} at index {i}");
+                        Mod.Log.Trace($"  -- Setting phase icon for phaseAsInit: {phaseAsInit} / bounds: {bounds[i]} at index {i}");
                         ___PhaseIcons[i].AddIconTrackerToPhase(tracker);
                     }
                 }
