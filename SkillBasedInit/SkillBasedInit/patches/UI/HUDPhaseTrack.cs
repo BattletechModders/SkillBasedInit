@@ -126,12 +126,12 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(CombatHUDPhaseTrack), "SetTrackerPhase")]
     [HarmonyPatch(new Type[] { typeof(CombatHUDIconTracker), typeof(int) })]
     public static class CombatHUDPhaseTrack_SetTrackerPhase {
-        public static bool Prefix(CombatHUDPhaseTrack __instance, CombatHUDIconTracker tracker, int phase, List<CombatHUDPhaseIcons> ___PhaseIcons) {
+        public static bool Prefix(CombatHUDPhaseTrack __instance, CombatHUDIconTracker tracker, int phase, int ___currentPhase, List<CombatHUDPhaseIcons> ___PhaseIcons) {
             Mod.Log.Trace($"CHUDPT:STP - entered at phase: {phase}.");
 
-            int[] bounds = PhaseHelper.CalcPhaseIconBounds(phase);
+            int[] bounds = PhaseHelper.CalcPhaseIconBounds(___currentPhase);
             int phaseAsInit = (Mod.MaxPhase + 1) - phase;
-            Mod.Log.Info($"Phase {phase} is init {phaseAsInit} with bounds: {bounds[0]}-{bounds[4]}");
+            Mod.Log.Info($"Phase {phase} is init {phaseAsInit} within currentPhase: {___currentPhase} with bounds: {bounds[0]}-{bounds[4]}");
 
             if (phaseAsInit > bounds[1]) {
                 Mod.Log.Info($"  -- Phase icon is higher than {bounds[1]}, setting to P phase.");
@@ -147,18 +147,7 @@ namespace SkillBasedInit {
                     }
                 }
             }
-            //this.PhaseIcons[phase - 1].AddIconTrackerToPhase(tracker);
-            //tracker.CurrentlyDisplayedPhase = phase;
 
-            //if (phaseAsInit > bounds[0] || phaseAsInit < bounds[1]) {
-            //    Mod.Log.Info($" Phase outside of current bounds, skipping.");
-            //} else {
-            //    int iconIdx = bounds[0] - phaseAsInit;
-            //    Mod.Log.Info($"Phase inside bounds, icon index is: {iconIdx}");
-            //    ___PhaseIcons[iconIdx].AddIconTrackerToPhase(tracker);
-            //}
-
-            //tracker.CurrentlyDisplayedPhase = phase;
             return false;
         }
     }
