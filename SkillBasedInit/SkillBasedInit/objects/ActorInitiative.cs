@@ -1,4 +1,5 @@
 ﻿using BattleTech;
+using Localize;
 using SkillBasedInit.Helper;
 using System;
 using System.Collections.Generic;
@@ -79,7 +80,9 @@ namespace SkillBasedInit {
             int componentsMod = UnitHelper.GetNormalizedComponentModifier(actor);
 
             // Modifier from the engine
-            int engineMod = UnitHelper.GetEngineModifier(actor);
+            // TODO: FIX WHEN CC IS BACK?
+            //int engineMod = UnitHelper.GetEngineModifier(actor);
+            int engineMod = 0;
 
             // --- PILOT IMPACTS ---
             Pilot pilot = actor.GetPilot();
@@ -190,7 +193,6 @@ namespace SkillBasedInit {
             if (actor.IsShutDown) {
                 int rawMod = Mod.Config.ShutdownModifier + this.pilotingEffectMod;
                 Mod.Log.Debug($"  Shutdown Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has rawMod:{rawMod} = ({Mod.Config.ShutdownModifier} - {this.pilotingEffectMod})");
-
                 int penalty = Math.Min(0, rawMod);
                 roundInitiative += penalty;
                 Mod.Log.Info($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is shutdown! Subtracted {penalty} = roundInit:{roundInitiative}");                
@@ -234,7 +236,9 @@ namespace SkillBasedInit {
             }
 
             // Init is flipped... 1 acts in first phase, then 2, etc.
-            actor.Initiative = (Mod.MaxPhase + 1) - roundInitiative;
+            if (!actor.Combat.TurnDirector.IsInterleaved) { actor.Initiative = actor.Combat.TurnDirector.NonInterleavedPhase;  }
+            else { actor.Initiative = (Mod.MaxPhase + 1) - roundInitiative; }
+
             Mod.Log.Info($"== Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has init:({roundInitiative}) from base:{roundInitBase} - variance:{roundVariance} plus modifiers.");
         }
 
@@ -252,7 +256,9 @@ namespace SkillBasedInit {
             if (target.HasActivatedThisRound) {
                 Mod.Log.Info($"Melee impact will slow Actor:({target.DisplayName}_{target.GetPilot().Name}) by {impact} init on next activation!");
                 this.deferredMeleeMod += impact;
-                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID, $"CLANG! -{impact} INITIATIVE NEXT ROUND", FloatieMessage.MessageNature.Debuff));
+                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID, 
+                    new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_MELEE_IMPACT_LATER], new object[] { impact }).ToString(), 
+                    FloatieMessage.MessageNature.Debuff));
             } else {
                 Mod.Log.Info($"Melee impact immediately slows Actor:({target.DisplayName}_{target.GetPilot().Name}) by {impact} init!");
                 // Add to the target's initiative. Remember higher init -> higher phase
@@ -261,7 +267,8 @@ namespace SkillBasedInit {
                     target.Initiative = Mod.MaxPhase;
                 }
                 target.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(target.GUID));
-                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID, $"CLANG! -{impact} INITIATIVE", FloatieMessage.MessageNature.Debuff));
+                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID,
+                    new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_MELEE_IMPACT_NOW], new object[] { impact }).ToString(), FloatieMessage.MessageNature.Debuff));
             }
         }
 

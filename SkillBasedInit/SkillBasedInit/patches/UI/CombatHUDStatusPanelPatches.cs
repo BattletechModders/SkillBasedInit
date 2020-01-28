@@ -7,17 +7,11 @@ using SkillBasedInit.Helper;
 using SVGImporter;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 namespace SkillBasedInit.patches {
-    [HarmonyPatch()]
+    [HarmonyPatch(typeof(CombatHUDStatusPanel), "ShowActorStatuses")]
     public static class CombatHUDStatusPanel_ShowActorStatuses {
-
-        // Private method can't be patched by annotations, so use MethodInfo
-        public static MethodInfo TargetMethod() {
-            return AccessTools.Method(typeof(CombatHUDStatusPanel), "ShowActorStatuses", new Type[] { typeof(AbstractActor) });
-        }
 
         // Display the initiative modifiers for the current unit as a buff that folks can hover over for details.
         public static void Postfix(CombatHUDStatusPanel __instance) {
@@ -31,17 +25,13 @@ namespace SkillBasedInit.patches {
                     Type[] iconMethodParams = new Type[] { typeof(SVGAsset), typeof(Text), typeof(Text), typeof(Vector3), typeof(bool) };
                     Traverse showBuffIconMethod = Traverse.Create(__instance).Method("ShowBuff", iconMethodParams);
 
-                    Type[] stringMethodParams = new Type[] { typeof(string), typeof(Text), typeof(Text), typeof(Vector3), typeof(bool) };
-                    Traverse showBuffStringMethod = Traverse.Create(__instance).Method("ShowBuff", stringMethodParams);
-
-                    showBuffIconMethod.GetValue(new object[] {
-                            LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.StatusSensorLockIcon,
-                            new Text("INITIATIVE", new object[0]),
-                            new Text(BuildTooltipText(actor)),
-                            __instance.effectIconScale,
-                            false
-                        });
-
+                    Traverse svgAssetT = Traverse.Create(__instance.DisplayedCombatant.Combat.DataManager).Property("SVGCache");
+                    object svgCache = svgAssetT.GetValue();
+                    Traverse svgCacheT = Traverse.Create(svgCache).Method("GetAsset", new Type[] { typeof(string) });
+                    SVGAsset icon = svgCacheT.GetValue<SVGAsset>(new object[] { ModIcons.Stopwatch });
+                    showBuffIconMethod.GetValue(new object[]
+                        { icon, new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_TITLE]), new Text(BuildTooltipText(actor)), __instance.effectIconScale, false }
+                    );
                 }
 
             }
@@ -56,25 +46,19 @@ namespace SkillBasedInit.patches {
             Mech actorMech = actor as Mech;
             float tonnage = actorMech.MechDef.Chassis.Tonnage;
             int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
-            mechDetails.Add($"MECH => tonnage:{tonnageMod}");
+            mechDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_MECH_TONNAGE], new object[] { tonnageMod }).ToString());
             int expectedInitMax = tonnageMod;
 
             // Any modifiers that come from the chassis/mech/vehicle defs
             int componentsMod = UnitHelper.GetNormalizedComponentModifier(actor);
-            if (componentsMod > 0) {
-                mechDetails.Add($"<color=#00FF00>{componentsMod:+0} components</color>");
-            } else if (componentsMod < 0) {
-                mechDetails.Add($"<color=#FF0000>{componentsMod:0} components</color>");
-            }
+            string compColor = componentsMod >= 0 ? "00FF00" : "FF0000";
+            mechDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_COMPONENTS], new object[] { compColor, componentsMod }).ToString());
             expectedInitMax += componentsMod;
 
             // Modifier from the engine
             int engineMod = UnitHelper.GetEngineModifier(actor);
-            if (engineMod > 0) {
-                mechDetails.Add($"<color=#00FF00>{engineMod:+0} engine</color>");
-            } else if (engineMod < 0) {
-                mechDetails.Add($"<color=#FF0000>{engineMod:0} engine</color>");
-            }
+            string engineColor = engineMod >= 0 ? "00FF00" : "FF0000";
+            mechDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_ENGINES], new object[] { engineColor, engineMod }).ToString());
             expectedInitMax += engineMod;
 
             // Check for leg / side loss
@@ -82,7 +66,7 @@ namespace SkillBasedInit.patches {
             if (mech.IsLocationDestroyed(ChassisLocations.LeftLeg) || mech.IsLocationDestroyed(ChassisLocations.RightLeg)) {
                 int rawMod = Mod.Config.CrippledMovementModifier + actorInit.pilotingEffectMod;
                 int penalty = Math.Min(-1, rawMod);
-                mechDetails.Add($"<color=#FF0000>{penalty} Leg Destroyed</color>");
+                mechDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_LEG_DESTROYED], new object[] { penalty }).ToString());
                 expectedInitMax += penalty;
             }
 
@@ -90,7 +74,7 @@ namespace SkillBasedInit.patches {
             if (actor.IsProne) {
                 int rawMod = Mod.Config.ProneModifier + actorInit.pilotingEffectMod;
                 int penalty = Math.Min(-1, rawMod);
-                mechDetails.Add($"<color=#FF0000>{penalty} Prone</color>");
+                mechDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_PRONE], new object[] { penalty }).ToString());
                 expectedInitMax += penalty;
             }
 
@@ -98,22 +82,22 @@ namespace SkillBasedInit.patches {
             if (actor.IsShutDown) {
                 int rawMod = Mod.Config.ShutdownModifier + actorInit.pilotingEffectMod;
                 int penalty = Math.Min(-1, rawMod);
-                mechDetails.Add($"<color=#FF0000>{penalty} Shutdown</color>");
+                mechDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_SHUTDOWN], new object[] { penalty }).ToString());
                 expectedInitMax += penalty;
             }
 
             // Check for melee impacts        
             if (actorInit.lastRoundMeleeMod > 0) {
                 expectedInitMax -= actorInit.lastRoundMeleeMod;
-                mechDetails.Add($"<color=#FF0000>-{actorInit.lastRoundMeleeMod} Melee Impact</color>");
+                mechDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_MELEE_IMPACT], new object[] { actorInit.lastRoundMeleeMod }).ToString());
             }
 
             // --- PILOT ---
-            List<string> pilotDetails = new List<string>{};
+            List<string> pilotDetails = new List<string> { };
 
             Pilot selectedPilot = actor.GetPilot();
             int tacticsMod = PilotHelper.GetTacticsModifier(selectedPilot);
-            pilotDetails.Add($"PILOT => Tactics: <color=#00FF00>{tacticsMod:+0}</color>");
+            pilotDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_TACTICS], new object[] { tacticsMod }).ToString());
             expectedInitMax += tacticsMod;
 
             int pilotTagsMod = PilotHelper.GetTagsModifier(selectedPilot);
@@ -126,43 +110,44 @@ namespace SkillBasedInit.patches {
 
             // Check for inspired status                
             if (actor.IsMoraleInspired || actor.IsFuryInspired) {
-                pilotDetails.Add($"<color=#00FF00>+1 to +3 Inspired</color>");
+                pilotDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_INSPIRED]).ToString());
                 expectedInitRandMin += 1;
                 expectedInitRandMin += 3;
             }
 
             // Check for injuries. If there injuries on the previous round, apply them in full force. Otherwise, reduce them.
             if (actorInit.lastRoundInjuryMod != 0) {
-                pilotDetails.Add($"<color=#FF0000>-{actorInit.lastRoundInjuryMod} Fresh Injury</color>");
+                pilotDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_FRESH_INJURY], new object[] { actorInit.lastRoundInjuryMod }).ToString());
                 expectedInitMax -= actorInit.lastRoundInjuryMod;
             } else if (actor.GetPilot().Injuries != 0) {
                 // TODO: fold this in
                 int rawPenalty = actorInit.CalculateInjuryPenalty(0, actor.GetPilot().Injuries);
                 int penalty = (int)Math.Ceiling(rawPenalty / 2.0);
-                pilotDetails.Add($"<color=#FF0000>-{penalty} Painful Injury</color>");
+                pilotDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_PAINFUL_INJURY], new object[] { penalty }).ToString());
                 expectedInitMax -= penalty;
             }
 
             // Check for an overly cautious player
             if (actorInit.lastRoundHesitationPenalty > 0) {
                 expectedInitMax -= actorInit.lastRoundHesitationPenalty;
-                pilotDetails.Add($"<color=#FF0000>-{actorInit.lastRoundHesitationPenalty} Hesitation</color>");
+                pilotDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_HESITATION], new object[] { actorInit.lastRoundHesitationPenalty }).ToString());
             }
 
             // Check for called shot
             if (actorInit.lastRoundCalledShotMod > 0) {
                 expectedInitMax -= actorInit.lastRoundCalledShotMod;
-                pilotDetails.Add($"<color=#FF0000>-{actorInit.lastRoundCalledShotMod} Called Shot Target</color>");
+                pilotDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_CALLED_SHOT_TARG], new object[] { actorInit.lastRoundCalledShotMod }).ToString());
             }
 
             // Check for vigilance
             if (actorInit.lastRoundVigilanceMod > 0) {
                 expectedInitMax -= actorInit.lastRoundVigilanceMod;
-                pilotDetails.Add($"<color=#00FF00>-{actorInit.lastRoundVigilanceMod} Vigilance</color>");
+                pilotDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_VIGILANCE], new object[] { actorInit.lastRoundVigilanceMod }).ToString());
             }
 
             // Finally, randomness bounds
-            pilotDetails.Add($"\nRandom (tactics): <color=#FF0000>-{actorInit.randomnessBounds[0]} to -{actorInit.randomnessBounds[1]}</color>");
+            pilotDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_RANDOM], 
+                new object[] { actorInit.randomnessBounds[0], actorInit.randomnessBounds[1] }).ToString());
 
             int maxInit = Math.Max(expectedInitMax - expectedInitRandMin, Mod.MinPhase);
             int minInit = Math.Max(expectedInitMax - expectedInitRandMax, Mod.MinPhase);
@@ -170,8 +155,8 @@ namespace SkillBasedInit.patches {
             List<string> toolTipDetails = new List<string> { };
             toolTipDetails.Add(String.Join(", ", mechDetails.ToArray()));
             toolTipDetails.Add(String.Join(", ", pilotDetails.ToArray()));
-            toolTipDetails.Add($"Expected Phase: <b>{maxInit} to {minInit}</b>");
-            toolTipDetails.Add($"Hover over init in Mechlab/Deploy for details.");
+            toolTipDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_EXPECTED], new object[] { maxInit, minInit }).ToString());
+            toolTipDetails.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_HOVER], new object[] { }).ToString());
 
             string tooltipText = String.Join("\n", toolTipDetails.ToArray());
             return tooltipText;

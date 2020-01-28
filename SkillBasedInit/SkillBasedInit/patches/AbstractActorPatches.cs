@@ -3,13 +3,25 @@ using BattleTech.UI;
 using Harmony;
 using SkillBasedInit.Helper;
 using System;
+using us.frostraptor.modUtils;
 
 namespace SkillBasedInit {
+
+    [HarmonyPatch(typeof(Mech), "OnActivationEnd")]
+    public static class AbstractActor_OnActivationEnd {
+        public static void Prefix(Mech __instance, string sourceID, int stackItemID) {
+            Mod.Log.Trace($"M:OAE:pre - entered for '{CombatantUtils.Label(__instance)}' with sourceID: '{sourceID}' and stackItemId: '{stackItemID}'");
+        }
+        public static void Postfix(Mech __instance, string sourceID, int stackItemID) {
+            Mod.Log.Trace($"M:OAE:post - entered for '{CombatantUtils.Label(__instance)}' with sourceID: '{sourceID}' and stackItemId: '{stackItemID}'");
+        }
+    }
 
     [HarmonyPatch(typeof(AbstractActor), "OnNewRound")]
     public static class AbstractActor_OnNewRound {
         public static void Postfix(AbstractActor __instance, int round) {
-            //SkillBasedInit.Logger.Log($"AbstractActor: Starting new round {round}, recalculating initiative element for actor:{__instance.DisplayName}");
+            Mod.Log.Trace("AA:ONR - entered.");
+            Mod.Log.Debug($"  AbstractActor starting new round {round}, recalculating initiative element for actor:{__instance.DisplayName}");
             ActorInitiativeHolder.OnRoundBegin(__instance);
         }
     }
@@ -17,9 +29,9 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(AbstractActor), "DeferUnit")]
     public static class AbstractActor_DeferUnit {
         public static void Postfix(AbstractActor __instance) {
-            //SkillBasedInit.Logger.Log($"AbstractActor:DeferUnit:");
+            Mod.Log.Trace($"AA:DU - entered.");
             int reservePenalty = Mod.Random.Next(Mod.Config.ReservedPenaltyBounds[0], Mod.Config.ReservedPenaltyBounds[1]);
-            Mod.Log.Debug($"  Deferring Actor:({CombatantHelper.LogLabel(__instance)}) " +
+            Mod.Log.Debug($"  Deferring Actor:({CombatantUtils.Label(__instance)}) " +
                 $"initiative:{__instance.Initiative} by:{reservePenalty} to:{__instance.Initiative + reservePenalty}");
             __instance.Initiative += reservePenalty;
             if (__instance.Initiative > Mod.MaxPhase) {
@@ -29,7 +41,7 @@ namespace SkillBasedInit {
             // Save some part of the reserve surplus as a penalty for the next round
             ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
             actorInit.reservedCount++;
-            Mod.Log.Debug($"  Actor:({CombatantHelper.LogLabel(__instance)}) reservedCount incremented to:{actorInit.reservedCount}");
+            Mod.Log.Debug($"  Actor:({CombatantUtils.Label(__instance)}) reservedCount incremented to:{actorInit.reservedCount}");
         }
 
     }
@@ -37,6 +49,7 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(AbstractActor), "InitiativeToString")]
     public static class AbstractActor_InitiativeToString {
         public static void Postfix(AbstractActor __instance, ref string __result, int initiative) {
+            Mod.Log.Trace($"AA:ITS - entered for init:{initiative}.");
             switch (initiative) {
                 case 1:
                     __result = "30";
@@ -128,7 +141,7 @@ namespace SkillBasedInit {
                 case 30:
                     __result = "1";
                     break;
-                default:                    
+                default:
                     if (initiative > Mod.MaxPhase) {
                         // This looks weird, but it's the only place we can intercept a negative init that I've found.
                         if (__instance != null) { __instance.Initiative = Mod.MaxPhase; }
@@ -139,51 +152,54 @@ namespace SkillBasedInit {
                         if (__instance != null) { __instance.Initiative = Mod.MinPhase; }
                         Mod.Log.Info($"AbstractActor:InitiativeToString - ERROR - Bad initiative of {initiative} detected!");
                         __result = "30";
-                    }                    
+                    }
                     break;
             }
-            //SkillBasedInit.Logger.Log($"AbstractActor:InitiativeToString returning {__result} for {initiative}");
+            Mod.Log.Trace($" returning {__result} for initiative {initiative}");
         }
     }
 
+    // TODO: This is likely inlined and doesn't work- confirm
     [HarmonyPatch(typeof(AbstractActor))]
     [HarmonyPatch("HasValidInitiative", MethodType.Getter)]
     public static class AbstractActor_HasValidInitiative {
         public static void Postfix(AbstractActor __instance, bool __result) {
+            Mod.Log.Debug("AA:HVI - entered.");
             bool isValid = __instance.Initiative >= Mod.MinPhase && __instance.Initiative <= Mod.MaxPhase;
             if (!isValid) {
-                Mod.Log.Info($"Actor:{CombatantHelper.LogLabel(__instance)} has invalid initiative {__instance.Initiative}!");
+                Mod.Log.Info($"Actor:{CombatantUtils.Label(__instance)} has invalid initiative {__instance.Initiative}!");
             }
             __result = isValid;
             Mod.Log.Debug($"AbstractActor:HasValidInitiative returning {__result} for {__instance.Initiative}");
         }
     }
 
-    // TODO: This looks to be unused - can we confirm?
     [HarmonyPatch(typeof(AbstractActor))]
     [HarmonyPatch("BaseInitiative", MethodType.Getter)]
     public static class AbstractActor_BaseInitiative {
         public static void Postfix(AbstractActor __instance, ref int __result, StatCollection ___statCollection) {
-            CombatGameState ___Combat = (CombatGameState)Traverse.Create(__instance).Property("Combat").GetValue();
-            if (___Combat.TurnDirector.IsInterleaved) {
-                CombatHUD ___HUD = (CombatHUD)Traverse.Create(__instance).Property("HUD").GetValue();
+            Mod.Log.Trace("AA:BI - entered.");
 
+            if (__instance.Combat.TurnDirector.IsInterleaved) {
                 int baseInit = ___statCollection.GetValue<int>("BaseInitiative");
                 int phaseMod = ___statCollection.GetValue<int>("PhaseModifier");
                 int modifiedInit = baseInit + phaseMod;
-                //SkillBasedInit.Logger.LogIfDebug($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has stats BaseInit:{baseInit} / PhaseMod:{phaseMod}");
 
                 if (modifiedInit < Mod.MinPhase) {
-                    Mod.Log.Info($"Actor:({CombatantHelper.LogLabel(__instance)}) being set to {Mod.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    Mod.Log.Info($"Actor:({CombatantUtils.Label(__instance)}) being set to {Mod.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = Mod.MinPhase;
                 } else if (modifiedInit > Mod.MaxPhase) {
-                    Mod.Log.Info($"Actor:({CombatantHelper.LogLabel(__instance)}) being set to {Mod.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    Mod.Log.Info($"Actor:({CombatantUtils.Label(__instance)}) being set to {Mod.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = Mod.MaxPhase;
                 } else {
                     __result = modifiedInit;
-                    //SkillBasedInit.Logger.Log($"Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) has stats BaseInit:{baseInit} + PhaseMod:{phaseMod} = modifiedInit:{modifiedInit}.");
+                    Mod.Log.Info($"Actor:({CombatantUtils.Label(__instance)}) has stats BaseInit:{baseInit} + PhaseMod:{phaseMod} = modifiedInit:{modifiedInit}.");
                 }
-            }            
+            } else {
+                Mod.Log.Info($"Actor:({CombatantUtils.Label(__instance)}) is non-interleaved, returning phase: {Mod.MaxPhase}.");
+                __result = Mod.MaxPhase;
+            }
+
         }
     }
 

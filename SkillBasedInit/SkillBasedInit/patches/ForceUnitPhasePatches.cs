@@ -1,10 +1,11 @@
 ﻿using BattleTech;
 using Harmony;
+using Localize;
 using System;
 using System.Collections.Generic;
 
 namespace SkillBasedInit {
-   
+
     // --- FORCE UNIT PHASE DOWN EFECTS ---
     // Handle knockdowns
     [HarmonyPatch(typeof(Mech), "CompleteKnockdown")]
@@ -15,12 +16,14 @@ namespace SkillBasedInit {
         public static int KnockdownStackItemUID;
 
         public static void Prefix(Mech __instance, string sourceID, int stackItemUID) {
+            Mod.Log.Trace("M:CK:pre - entered.");
             KnockdownSourceID = sourceID;
             KnockdownStackItemUID = stackItemUID;
-            Mod.Log.Debug($"Mech:CompleteKnockdown:prefix - Recording sourceID:{sourceID} stackItemUID:{stackItemUID}");            
+            Mod.Log.Debug($"Mech:CompleteKnockdown:prefix - Recording sourceID:{sourceID} stackItemUID:{stackItemUID}");
         }
 
         public static void Postfix(Mech __instance) {
+            Mod.Log.Trace("M:CK:post - entered.");
             Mod.Log.Debug($"Mech:CompleteKnockdown:postfix - Removing sourceID:{KnockdownSourceID} stackItemUID:{KnockdownStackItemUID}.");
             KnockdownSourceID = null;
             KnockdownStackItemUID = -1;
@@ -31,13 +34,13 @@ namespace SkillBasedInit {
     [HarmonyPatch(typeof(AttackStackSequence), "OnAdded")]
     [HarmonyPatch(new Type[] { })]
     public static class AttackStackSequence_OnAdded {
-
         public static bool IsMoraleAttack = false;
-        public static int MoraleAttackMod = 0;       
+        public static int MoraleAttackMod = 0;
 
         public static Dictionary<string, int> AttackModifiers = new Dictionary<string, int>();
 
         public static void Prefix(AttackStackSequence __instance) {
+            Mod.Log.Trace("ASS:OA:pre - entered.");
             IsMoraleAttack = __instance.isMoraleAttack;
             Mod.Log.Debug($"AttackStackSequence:OnAdded:prefix - Recording IsMoraleAttack: {IsMoraleAttack}");
 
@@ -47,8 +50,9 @@ namespace SkillBasedInit {
         }
 
         public static void Postfix(AttackStackSequence __instance) {
+            Mod.Log.Trace("ASS:OA:post - entered.");
             IsMoraleAttack = false;
-            MoraleAttackMod = 0;            
+            MoraleAttackMod = 0;
             Mod.Log.Debug($"AttackStackSequence:OnAdded:prefix - Resetting IsMoraleAttack");
         }
     }
@@ -66,6 +70,8 @@ namespace SkillBasedInit {
         public static int PreInvokeInitiative;
 
         public static void Prefix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf) {
+            Mod.Log.Trace("AA:FUOPD:pre - entered.");
+
             Mod.Log.Info($"AbstractActor:ForceUnitOnePhaseDown:prefix - sourceID:{sourceID} vs actor: {__instance.GUID}");
             if (sourceID == Mech_CompleteKnockdown.KnockdownSourceID && stackItemUID == Mech_CompleteKnockdown.KnockdownStackItemUID) {
                 InvokeIsKnockdown = true;
@@ -86,21 +92,22 @@ namespace SkillBasedInit {
         }
 
         public static void Postfix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf) {
+            Mod.Log.Trace("AA:FUOPD:post - entered.");
             if (InvokeIsKnockdown || InvokeIsCalledShot) {
                 Mod.Log.Debug($"AbstractActor:ForceUnitOnePhaseDown:Postfix - executing custom logic.");
                 ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
 
                 int penalty = 0;
                 if (InvokeIsKnockdown) {
-                    penalty = Math.Max(0, (-1 * Mod.Config.ProneModifier) - actorInit.pilotingEffectMod);                    
+                    penalty = Math.Max(0, (-1 * Mod.Config.ProneModifier) - actorInit.pilotingEffectMod);
                 } else if (InvokeIsCalledShot) {
                     int randVal = Mod.Random.Next(0, 2);
                     penalty = Math.Max(0, AttackStackSequence_OnAdded.MoraleAttackMod + randVal - actorInit.pilotingEffectMod);
                     Mod.Log.Debug($"AbstractActor:ForceUnitOnePhaseDown:Postfix - moraleAttackMod:{AttackStackSequence_OnAdded.MoraleAttackMod} pilotingEffect:{actorInit.pilotingEffectMod}");
                 }
                 Mod.Log.Info($"AbstractActor:ForceUnitOnePhaseDown:Postfix modifying Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) " +
-                    $"initiative by {penalty} due to knockdown:{InvokeIsKnockdown} / calledShot:{InvokeIsCalledShot}!");                
-                
+                    $"initiative by {penalty} due to knockdown:{InvokeIsKnockdown} / calledShot:{InvokeIsCalledShot}!");
+
                 if (__instance.HasActivatedThisRound || __instance.Initiative >= Mod.MaxPhase) {
                     Mod.Log.Info($"Penalty {penalty} will apply to Actor:({__instance.DisplayName}_{__instance.GetPilot().Name}) on next activation!");
 
@@ -108,7 +115,9 @@ namespace SkillBasedInit {
                         actorInit.deferredCalledShotMod += penalty;
                     }
 
-                    string floatieMsg = InvokeIsKnockdown ? $"GOING DOWN! -{penalty} INITIATIVE NEXT ROUND" : $"CALLED SHOT! -{penalty} INITIATIVE NEXT ROUND";
+                    string floatieMsg = InvokeIsKnockdown ?
+                        new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_KNOCKDOWN_LATER], new object[] { penalty }).ToString() :
+                        new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_CALLED_SHOT_LATER], new object[] { penalty }).ToString();
                     __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, floatieMsg, FloatieMessage.MessageNature.Debuff));
 
                     // Reset their initiative on this round
@@ -122,7 +131,9 @@ namespace SkillBasedInit {
                         __instance.Initiative = Mod.MaxPhase;
                     }
                     __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
-                    string floatieMsg = InvokeIsKnockdown ? $"GOING DOWN! -{penalty} INITIATIVE" : $"CALLED SHOT! -{penalty} INITIATIVE";
+                    string floatieMsg = InvokeIsKnockdown ?
+                        new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_KNOCKDOWN_NOW], new object[] { penalty }).ToString() :
+                        new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_CALLED_SHOT_NOW], new object[] { penalty }).ToString();
                     __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, floatieMsg, FloatieMessage.MessageNature.Debuff));
                 }
             }
@@ -140,15 +151,18 @@ namespace SkillBasedInit {
         public static int MoraleDefendStackItemId;
 
         public static void Prefix(Mech __instance, string sourceID, int stackItemID) {
+            Mod.Log.Trace("M:AMDE:post - entered.");
+
             MoraleDefendSourceId = sourceID;
-            MoraleDefendStackItemId = stackItemID;            
+            MoraleDefendStackItemId = stackItemID;
             Mod.Log.Debug($"Mech:ApplyMoraleDefendEffects:prefix - Recording sourceID:{MoraleDefendSourceId} stackItemUID:{MoraleDefendStackItemId}");
         }
 
         public static void Postfix(Mech __instance) {
+            Mod.Log.Trace("M:AMDE:post - entered.");
             Mod.Log.Debug($"Mech:ApplyMoraleDefendEffects:postfix - Removing sourceID:{MoraleDefendSourceId} stackItemUID:{MoraleDefendStackItemId}.");
             MoraleDefendSourceId = null;
-            MoraleDefendStackItemId = -1;            
+            MoraleDefendStackItemId = -1;
         }
     }
 
@@ -162,6 +176,7 @@ namespace SkillBasedInit {
 
         // ForceUnitOnePhaseUp(string sourceID, int stackItemUID, bool addedBySelf)
         public static void Prefix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf) {
+            Mod.Log.Trace("AA:FUOPU:pre - entered.");
             Mod.Log.Info($"AbstractActor:ForceUnitOnePhaseUp:prefix - sourceID:{sourceID} vs actor: {__instance.GUID}");
             if (sourceID == Mech_ApplyMoraleDefendEffects.MoraleDefendSourceId && stackItemUID == Mech_ApplyMoraleDefendEffects.MoraleDefendStackItemId) {
                 InvokeIsVigilance = true;
@@ -173,13 +188,14 @@ namespace SkillBasedInit {
         }
 
         public static void Postfix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf) {
+            Mod.Log.Trace("AA:FUOPU:post - entered.");
             if (InvokeIsVigilance) {
                 Mod.Log.Debug($"AbstractActor:ForceUnitOnePhaseUp:Postfix - executing custom logic.");
                 ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
-               
+
                 actorInit.deferredVigilanceMod = actorInit.vigilianceMod + Mod.Random.Next(0, 2);
                 Mod.Log.Debug($"AbstractActor:ForceUnitOnePhaseUp:Postfix - actor {__instance.DisplayName}_{__instance.GetPilot().Name} will gain  {actorInit.deferredVigilanceMod} init next round.");
-                string floatieMsg = $"VIGILANCE! +{actorInit.vigilianceMod} INITIATIVE NEXT ROUND!";
+                string floatieMsg = new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_VIGILANCE], new object[] { actorInit.vigilianceMod }).ToString();
                 __instance.Combat.MessageCenter.PublishMessage(new FloatieMessage(__instance.GUID, __instance.GUID, floatieMsg, FloatieMessage.MessageNature.Debuff));
 
                 // TODO: Test that this eliminates the portrait remaining activated

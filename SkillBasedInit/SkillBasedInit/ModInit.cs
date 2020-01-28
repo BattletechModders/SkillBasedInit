@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using us.frostraptor.modUtils.logging;
 
 namespace SkillBasedInit {
     public class Mod {
@@ -10,7 +11,7 @@ namespace SkillBasedInit {
         public const string HarmonyPackage = "us.frostraptor.SkillBasedInit";
         public const string LogName = "skill_based_init";
 
-        public static Logger Log;
+        public static IntraModLogger Log;
         public static string ModDir;
         public static ModConfig Config;
 
@@ -31,7 +32,7 @@ namespace SkillBasedInit {
                 Config.InitializeColors();
             }
 
-            Log = new Logger(modDirectory, "skill_based_init");
+            Log = new IntraModLogger(modDirectory, "skill_based_init", Config.Debug, Config.Trace);
 
             Assembly asm = Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(asm.Location);
@@ -42,8 +43,7 @@ namespace SkillBasedInit {
             Mod.Config.LogConfig();
 
             var harmony = HarmonyInstance.Create(HarmonyPackage);
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
-            
+            harmony.PatchAll(Assembly.GetExecutingAssembly());            
         }
 
     }

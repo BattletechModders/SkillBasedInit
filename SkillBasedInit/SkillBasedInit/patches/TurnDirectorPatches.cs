@@ -3,23 +3,29 @@ using Harmony;
 using System;
 
 namespace SkillBasedInit.patches {
+
     [HarmonyPatch(typeof(TurnDirector), MethodType.Constructor)]
     [HarmonyPatch(new Type[] { typeof(CombatGameState) })]
     public static class TurnDirector_ctor {
         public static void Postfix(TurnDirector __instance) {
-            int ___FirstPhase = (int)Traverse.Create(__instance).Property("FirstPhase").GetValue();
-            int ___LastPhase = (int)Traverse.Create(__instance).Property("LastPhase").GetValue();
-            //SkillBasedInit.Logger.Log($"TurnDirector::ctor::post - was initialized with {___FirstPhase} / {___LastPhase}");
+            Mod.Log.Debug("TD:ctor:post - entered.");
+            Mod.Log.Debug($" TurnDirector init with phases: {__instance.FirstPhase} / {__instance.LastPhase}");
+            
+            Traverse firstT = Traverse.Create(__instance).Property("FirstPhase");
+            firstT.SetValue(1);
 
-            Traverse.Create(__instance).Property("FirstPhase").SetValue(1);
-            Traverse.Create(__instance).Property("LastPhase").SetValue(Mod.MaxPhase);
+            Traverse lastT = Traverse.Create(__instance).Property("LastPhase");
+            lastT.SetValue(30);
+
+            Mod.Log.Debug($" TurnDirector updated to phases: {__instance.FirstPhase} / {__instance.LastPhase}");
         }
     }
 
     [HarmonyPatch(typeof(TurnDirector), "OnCombatGameDestroyed")]
     public static class TurnDirector_OnCombatGameDestroyed {
         public static void Postfix(TurnDirector __instance) {
-            //SkillBasedInit.Logger.Log($"TurnDirector; Combat complete, destroying initiative map.");
+            Mod.Log.Trace("TD:OCGD:post - entered.");
+            Mod.Log.Debug($" TurnDirector - Combat complete, destroying initiative map.");
             ActorInitiativeHolder.OnCombatComplete();
         }
     }
