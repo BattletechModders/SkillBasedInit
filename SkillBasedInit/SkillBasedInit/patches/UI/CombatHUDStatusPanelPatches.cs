@@ -1,4 +1,5 @@
 ﻿using BattleTech;
+using BattleTech.Data;
 using BattleTech.UI;
 using Harmony;
 using HBS;
@@ -25,10 +26,8 @@ namespace SkillBasedInit.patches {
                     Type[] iconMethodParams = new Type[] { typeof(SVGAsset), typeof(Text), typeof(Text), typeof(Vector3), typeof(bool) };
                     Traverse showBuffIconMethod = Traverse.Create(__instance).Method("ShowBuff", iconMethodParams);
 
-                    Traverse svgAssetT = Traverse.Create(__instance.DisplayedCombatant.Combat.DataManager).Property("SVGCache");
-                    object svgCache = svgAssetT.GetValue();
-                    Traverse svgCacheT = Traverse.Create(svgCache).Method("GetAsset", new Type[] { typeof(string) });
-                    SVGAsset icon = svgCacheT.GetValue<SVGAsset>(new object[] { ModIcons.Stopwatch });
+                    DataManager dm = __instance.DisplayedCombatant.Combat.DataManager;
+                    SVGAsset icon = dm.GetObjectOfType<SVGAsset>(Mod.Config.Icons.Stopwatch, BattleTechResourceType.SVGAsset);
                     showBuffIconMethod.GetValue(new object[]
                         { icon, new Text(Mod.Config.LocalizedText[ModConfig.LT_TT_TITLE]), new Text(BuildTooltipText(actor)), __instance.effectIconScale, false }
                     );

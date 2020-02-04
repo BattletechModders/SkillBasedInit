@@ -3,10 +3,6 @@ using UnityEngine;
 
 namespace SkillBasedInit {
 
-    public static class ModIcons {
-        public const string Stopwatch = "@sbi_stopwatch";
-    }
-
     public static class ModStats {
 
     }
@@ -17,6 +13,11 @@ namespace SkillBasedInit {
 
         // If true, all the logs will be printed
         public bool Trace = false;
+
+        public class IconOpts {
+            public string Stopwatch = "sbi_stopwatch";
+        }
+        public IconOpts Icons = new IconOpts { };
 
         // The init malus when a unit starts the round prone (from a knockdown)
         public int ProneModifier = -9;

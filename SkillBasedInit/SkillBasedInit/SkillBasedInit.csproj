@@ -55,14 +55,14 @@
     </Reference>
     <Reference Include="CustomComponents, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\Steam\steamapps\common\BATTLETECH\Mods\CustomComponents\CustomComponents.dll</HintPath>
+      <HintPath>E:\steam\SteamApps\common\BATTLETECH\Mods\CustomComponents\CustomComponents.dll</HintPath>
     </Reference>
     <Reference Include="IRBTModUtils">
       <HintPath>..\..\..\IRBTModUtils\IRBTModUtils\IRBTModUtils\bin\Debug\IRBTModUtils.dll</HintPath>
     </Reference>
     <Reference Include="MechEngineer, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\Steam\steamapps\common\BATTLETECH\Mods\MechEngineer\MechEngineer.dll</HintPath>
+      <HintPath>E:\steam\SteamApps\common\BATTLETECH\Mods\MechEngineer\MechEngineer.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
