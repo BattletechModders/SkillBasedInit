@@ -93,7 +93,6 @@
     <Compile Include="Helper\PhaseHelper.cs" />
     <Compile Include="patches\AI\AIPatches.cs" />
     <Compile Include="patches\CombatGameStatePatches.cs" />
-    <Compile Include="patches\Mech.cs" />
     <Compile Include="patches\UI\CombatHUDStatusPanelPatches.cs" />
     <Compile Include="patches\UI\HUDPhaseTrack.cs" />
     <Compile Include="patches\TurnDirectorPatches.cs" />

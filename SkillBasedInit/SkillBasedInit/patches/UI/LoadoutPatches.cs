@@ -34,6 +34,14 @@ namespace SkillBasedInit {
                 float tonnage = ___selectedMech.Chassis.Tonnage;
                 int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
                 details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
+                
+                // Check tags
+                if (!___selectedMech.MechTags.Contains(ModStats.TAG_UNIT_MECH))
+                {
+                    Mod.Log.Debug($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
+                    string rocColor = Mod.Config.VehicleROCModifier >= 0 ? "00FF00" : "FF0000";
+                    details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_VEHICLE_ROC], new object[] { rocColor, Mod.Config.VehicleROCModifier }).ToString());
+                }
 
                 // Any modifiers that come from the chassis/mech/vehicle defs
                 int componentsMod = UnitHelper.GetNormalizedComponentModifier(___selectedMech);
@@ -93,7 +101,14 @@ namespace SkillBasedInit {
                 initValue += tonnageMod;
                 details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
 
-                // Any special modifiers by type - NA, Mech is the only type
+                // Check tags
+                if (!__instance.SelectedMech.MechDef.MechTags.Contains(ModStats.TAG_UNIT_MECH))
+                {
+                    Mod.Log.Debug($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
+                    initValue += Mod.Config.VehicleROCModifier;
+                    string rocColor = Mod.Config.VehicleROCModifier >= 0 ? "00FF00" : "FF0000";
+                    details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_VEHICLE_ROC], new object[] { rocColor, Mod.Config.VehicleROCModifier }).ToString());
+                }
 
                 // Any modifiers that come from the chassis/mech/vehicle defs
                 int componentsMod = UnitHelper.GetNormalizedComponentModifier(selectedMechDef);

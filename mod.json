@@ -1,7 +1,7 @@
 {
     "Name": "SkillBasedInit",
     "Enabled": true,
-    "Version": "1.0.0",
+    "Version": "1.1.0",
     "Description": "Changes the initiative system to be pilot-skill focused.",
     "Author": "IceRaptor",
     "Website": "https://github.com/IceRaptor/SkillBasedInit",
@@ -10,7 +10,7 @@
     "DependsOn" : [ "IRBTModUtils", "CustomComponents", "MechEngineer" ],
     "Manifest": [ { "Type": "SVGAsset", "Path": "icons/",} ],
     "Settings": {
-        "Debug" : true,
+        "Debug" : false,
         "Trace" : false,
         "Icons" : {
             "Stopwatch" : "sbi_stopwatch"
@@ -42,9 +42,10 @@
         },
         "LocalizedText" : {
             "TOOLTIP_TITLE_INITIATIVE" : "INITIATIVE",
-            "TOOLTIP_MECH_TONNAGE" : "MECH => tonnage: {0}",
-            "TOOLTIP_COMPONENTS" : "<color=#{0}>{1:+0} components</color>",
-            "TOOLTIP_ENGINES" : "<color=#{0}>{1:+0} engine</color>",
+            "TOOLTIP_MECH_TONNAGE" : "CHASSIS => tonnage: {0}",
+            "TOOLTIP_VEHICLE_RULE_OF_COOL" : "<color=#{0}>{1:+0;-#} vehicle</color>",
+            "TOOLTIP_COMPONENTS" : "<color=#{0}>{1:+0;-#} components</color>",
+            "TOOLTIP_ENGINES" : "<color=#{0}>{1:+0;-#} engine</color>",
             "TOOLTIP_LEG_DESTROYED" : "<color=#FF0000>{0} Leg Destroyed</color>",
             "TOOLTIP_PRONE" : "<color=#FF0000>{0} Prone</color>",
             "TOOLTIP_SHUTDOWN" : "<color=#FF0000>{0} Shutdown</color>",
@@ -73,6 +74,7 @@
 
             // Mech Bay
             "MECHBAY_TONNAGE" : "<b>BASE</b>: {0} (<i>from tonnage</i>)",
+            "MECHBAY_VEHICLE_RULE_OF_COOL" : "<space=2em><color=#{0}>{1:+0;-#} vehicle</color>",
             "MECHBAY_COMPONENTS" : "<space=2em><color=#{0}>{1:+0;-#} components</color>",
             "MECHBAY_ENGINES" : "<space=2em><color=#{0}>{1:+0;-#} engine</color>",
             "MECHBAY_LANCE" : "<space=2em><color=#{0}>{1:+0;-#} lance</color>",

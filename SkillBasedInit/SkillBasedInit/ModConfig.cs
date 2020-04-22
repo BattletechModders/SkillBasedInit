@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SkillBasedInit {
 
     public static class ModStats {
-
+        public const string TAG_UNIT_MECH = "unit_mech";
     }
 
     public class ModConfig {
@@ -69,6 +69,7 @@ namespace SkillBasedInit {
 
         public const string LT_TT_TITLE = "TOOLTIP_TITLE_INITIATIVE";
         public const string LT_TT_MECH_TONNAGE = "TOOLTIP_MECH_TONNAGE";
+        public const string LT_TT_VEHICLE_ROC = "TOOLTIP_VEHICLE_RULE_OF_COOL";
         public const string LT_TT_COMPONENTS = "TOOLTIP_COMPONENTS";
         public const string LT_TT_ENGINES = "TOOLTIP_ENGINES";
         public const string LT_TT_LEG_DESTROYED = "TOOLTIP_LEG_DESTROYED";
@@ -99,6 +100,7 @@ namespace SkillBasedInit {
 
         // Mech Bay
         public const string LT_MB_TONNAGE = "MECHBAY_TONNAGE";
+        public const string LT_MB_VEHICLE_ROC = "MECHBAY_VEHICLE_RULE_OF_COOL";
         public const string LT_MB_COMPONENTS = "MECHBAY_COMPONENTS";
         public const string LT_MB_ENGINES = "MECHBAY_ENGINES";
         public const string LT_MB_LANCE = "MECHBAY_LANCE";
@@ -111,9 +113,10 @@ namespace SkillBasedInit {
         public Dictionary<string, string> LocalizedText = new Dictionary<string, string>() {
             // Tooltip
             { LT_TT_TITLE, "INITIATIVE" },
-            { LT_TT_MECH_TONNAGE, "MECH => tonnage: {0}" },
-            { LT_TT_COMPONENTS, "<color=#{0}>{1:+0} components</color>" },
-            { LT_TT_ENGINES, "<color=#{0}>{1:+0} engine</color>" },
+            { LT_TT_MECH_TONNAGE, "CHASSIS => tonnage: {0}" },
+            { LT_TT_VEHICLE_ROC, "<color=#{0}>{1:+0;-#} vehicle</color>" },
+            { LT_TT_COMPONENTS, "<color=#{0}>{1:+0;-#} components</color>" },
+            { LT_TT_ENGINES, "<color=#{0}>{1:+0;-#} engine</color>" },
             { LT_TT_LEG_DESTROYED, "<color=#FF0000>{0} Leg Destroyed</color>" },
             { LT_TT_PRONE, "<color=#FF0000>{0} Prone</color>" },
             { LT_TT_SHUTDOWN, "<color=#FF0000>{0} Shutdown</color>" },
@@ -142,6 +145,7 @@ namespace SkillBasedInit {
 
             // Mech Bay
             { LT_MB_TONNAGE, "<b>BASE</b>: {0} (<i>from tonnage</i>)" },
+            { LT_MB_VEHICLE_ROC, "<space=2em><color=#{0}>{1:+0;-#} vehicle</color>" },
             { LT_MB_COMPONENTS, "<space=2em><color=#{0}>{1:+0;-#} components</color>" },
             { LT_MB_ENGINES, "<space=2em><color=#{0}>{1:+0;-#} engine</color>" },
             { LT_MB_LANCE, "<space=2em><color=#{0}>{1:+0;-#} lance</color>" },
