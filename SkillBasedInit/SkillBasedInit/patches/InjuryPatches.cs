@@ -11,17 +11,17 @@ namespace SkillBasedInit {
     public static class Pilot_InjurePilot {
 
         public static void Prefix(Pilot __instance, ref int __state) {
-            Mod.Log.Trace("P:IP:pre - entered.");
+            Mod.Log.Trace?.Write("P:IP:pre - entered.");
             __state = 0;
             if (__instance.StatCollection.GetStatistic("BonusHeath") != null) {
                 __state = __instance.StatCollection.GetStatistic("BonusHeath").Value<int>();
             }
-            Mod.Log.Info($"Pilot:InjurePilot:pre - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) injured with bonusHealth:{__state}");
+            Mod.Log.Info?.Write($"Pilot:InjurePilot:pre - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) injured with bonusHealth:{__state}");
         }
 
         public static void Postfix(Pilot __instance, int __state, string sourceID, int stackItemUID, int dmg, DamageType damageType, Weapon sourceWeapon, AbstractActor sourceActor) {
-            Mod.Log.Trace("P:IP:post - entered.");
-            Mod.Log.Info($"Pilot:InjurePilot:post - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) injured with initial bonusHealth:{__state}");
+            Mod.Log.Trace?.Write("P:IP:post - entered.");
+            Mod.Log.Info?.Write($"Pilot:InjurePilot:post - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) injured with initial bonusHealth:{__state}");
 
             int currentBonus = 0;
             if (__instance.StatCollection.GetStatistic("BonusHeath") != null) {
@@ -29,7 +29,7 @@ namespace SkillBasedInit {
             }
             int bonusDelta = __state - currentBonus;
             int damageTaken = dmg - bonusDelta;
-            Mod.Log.Debug($"Pilot:InjurePilot:post - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) lost bonusHealth:{bonusDelta}, while results in damage:{damageTaken} from the attack.");
+            Mod.Log.Debug?.Write($"Pilot:InjurePilot:post - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) lost bonusHealth:{bonusDelta}, while results in damage:{damageTaken} from the attack.");
 
             // If the attacker took any damage, apply it
             if (damageTaken > 0) {

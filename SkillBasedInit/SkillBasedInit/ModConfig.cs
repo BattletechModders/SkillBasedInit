@@ -216,30 +216,30 @@ namespace SkillBasedInit {
         }
 
         public void LogConfig() {
-            Mod.Log.Info("=== MOD CONFIG BEGIN ===");
-            Mod.Log.Info($"  DEBUG:{this.Debug} Trace:{this.Trace}");
+            Mod.Log.Info?.Write("=== MOD CONFIG BEGIN ===");
+            Mod.Log.Info?.Write($"  DEBUG:{this.Debug} Trace:{this.Trace}");
 
-            Mod.Log.Info($"  ProneMod:{ProneModifier} ShutdownMod:{ShutdownModifier} CrippledMovementMod:{CrippledMovementModifier} ");
-            Mod.Log.Info($"  MeleeTonnageMalus:{MeleeTonnageMalus} VehicleROCMod:{VehicleROCModifier} TurretROCMod:{TurretROCModifier} ");
-            Mod.Log.Info($"  ReservedPenaltyBounds:{ReservedPenaltyBounds[0]}-{ReservedPenaltyBounds[1]} HestitationPenaltyBounds:{HesitationPenaltyBounds[0]}-{HesitationPenaltyBounds[1]} ");
-            Mod.Log.Info($"  Turret Tonnage -> Light:{TurretTonnageTagUnitLight} Medium:{TurretTonnageTagUnitMedium} Heavy:{TurretTonnageTagUnitHeavy} None:{TurretTonnageTagUnitNone}");
+            Mod.Log.Info?.Write($"  ProneMod:{ProneModifier} ShutdownMod:{ShutdownModifier} CrippledMovementMod:{CrippledMovementModifier} ");
+            Mod.Log.Info?.Write($"  MeleeTonnageMalus:{MeleeTonnageMalus} VehicleROCMod:{VehicleROCModifier} TurretROCMod:{TurretROCModifier} ");
+            Mod.Log.Info?.Write($"  ReservedPenaltyBounds:{ReservedPenaltyBounds[0]}-{ReservedPenaltyBounds[1]} HestitationPenaltyBounds:{HesitationPenaltyBounds[0]}-{HesitationPenaltyBounds[1]} ");
+            Mod.Log.Info?.Write($"  Turret Tonnage -> Light:{TurretTonnageTagUnitLight} Medium:{TurretTonnageTagUnitMedium} Heavy:{TurretTonnageTagUnitHeavy} None:{TurretTonnageTagUnitNone}");
 
-            Mod.Log.Info($"  == Pilot Tag Modifiers");
+            Mod.Log.Info?.Write($"  == Pilot Tag Modifiers");
             foreach (KeyValuePair<string,int> kvp in PilotTagModifiers) {
-                Mod.Log.Info($"    tag:{kvp.Key} modifier:{kvp.Value}");
+                Mod.Log.Info?.Write($"    tag:{kvp.Key} modifier:{kvp.Value}");
             }
 
-            Mod.Log.Info($"  == Pilot Melee Multipliers");
+            Mod.Log.Info?.Write($"  == Pilot Melee Multipliers");
             foreach (KeyValuePair<string, float[]> kvp in PilotTagMeleeMultipliers) {
-                Mod.Log.Info($"    tag:{kvp.Key} attack:{kvp.Value[0]} defense:{kvp.Value[1]}");
+                Mod.Log.Info?.Write($"    tag:{kvp.Key} attack:{kvp.Value[0]} defense:{kvp.Value[1]}");
             }
 
-            Mod.Log.Info($"  == Pilot Special Tags");
+            Mod.Log.Info?.Write($"  == Pilot Special Tags");
             foreach (KeyValuePair<string, string> kvp in PilotSpecialTagsDetails) {
-                Mod.Log.Info($"    tag:{kvp.Key} detail:{kvp.Value}");
+                Mod.Log.Info?.Write($"    tag:{kvp.Key} detail:{kvp.Value}");
             }
 
-            Mod.Log.Info("=== MOD CONFIG END ===");
+            Mod.Log.Info?.Write("=== MOD CONFIG END ===");
         }
     }
 }

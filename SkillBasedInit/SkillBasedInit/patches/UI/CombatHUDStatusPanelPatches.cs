@@ -17,7 +17,7 @@ namespace SkillBasedInit.patches {
 
         // Display the initiative modifiers for the current unit as a buff that folks can hover over for details.
         public static void Postfix(CombatHUDStatusPanel __instance) {
-            Mod.Log.Trace("___ CombatHUDStatusPanel:ShowActorStatuses:post - entered.");
+            Mod.Log.Trace?.Write("___ CombatHUDStatusPanel:ShowActorStatuses:post - entered.");
 
             if (__instance.DisplayedCombatant != null) {
 
@@ -44,7 +44,7 @@ namespace SkillBasedInit.patches {
 
             Mech actorMech = actor as Mech;
             Vehicle actorVehicle = actor as Vehicle;
-            Mod.Log.Debug($"Building tooltip for {CombatantUtils.Label(actor)} - isMech: {actorMech != null} / isVehicle: {actorVehicle != null}");
+            Mod.Log.Debug?.Write($"Building tooltip for {CombatantUtils.Label(actor)} - isMech: {actorMech != null} / isVehicle: {actorVehicle != null}");
 
             List<string> chassisDetails = new List<string> { };
 

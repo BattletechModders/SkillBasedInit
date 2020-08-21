@@ -17,7 +17,7 @@ namespace SkillBasedInit {
     public static class MechBayMechInfoWidget_SetInitiative {
         public static void Postfix(MechBayMechInfoWidget __instance, MechDef ___selectedMech,
             GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText, HBSTooltip ___initiativeTooltip) {
-            Mod.Log.Trace("MBMIW:SI:post - entered.");
+            Mod.Log.Trace?.Write("MBMIW:SI:post - entered.");
 
             if (___initiativeObj == null || ___initiativeText == null) {
                 return;
@@ -38,7 +38,7 @@ namespace SkillBasedInit {
                 // Check tags
                 if (!___selectedMech.MechTags.Contains(ModStats.TAG_UNIT_MECH))
                 {
-                    Mod.Log.Debug($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
+                    Mod.Log.Debug?.Write($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
                     string rocColor = Mod.Config.VehicleROCModifier >= 0 ? "00FF00" : "FF0000";
                     details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_VEHICLE_ROC], new object[] { rocColor, Mod.Config.VehicleROCModifier }).ToString());
                 }
@@ -77,7 +77,7 @@ namespace SkillBasedInit {
     public static class LanceLoadoutSlot_RefreshInitiativeData {
         public static void Postfix(LanceLoadoutSlot __instance, GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText,
             UIColorRefTracker ___initiativeColor, HBSTooltip ___initiativeTooltip, LanceConfiguratorPanel ___LC) {
-            Mod.Log.Trace("LLS:RID:post - entered.");
+            Mod.Log.Trace?.Write("LLS:RID:post - entered.");
 
             if (___initiativeObj == null || ___initiativeText == null || ___initiativeColor == null || ___initiativeTooltip == null) {
                 return;
@@ -104,7 +104,7 @@ namespace SkillBasedInit {
                 // Check tags
                 if (!__instance.SelectedMech.MechDef.MechTags.Contains(ModStats.TAG_UNIT_MECH))
                 {
-                    Mod.Log.Debug($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
+                    Mod.Log.Debug?.Write($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
                     initValue += Mod.Config.VehicleROCModifier;
                     string rocColor = Mod.Config.VehicleROCModifier >= 0 ? "00FF00" : "FF0000";
                     details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_VEHICLE_ROC], new object[] { rocColor, Mod.Config.VehicleROCModifier }).ToString());
