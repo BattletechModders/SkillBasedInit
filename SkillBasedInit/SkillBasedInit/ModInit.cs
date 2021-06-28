@@ -25,20 +25,19 @@ namespace SkillBasedInit {
         public static void Init(string modDirectory, string settingsJSON) {
             ModDir = modDirectory;
 
-            Log.Debug?.Write($"ModDir is:{modDirectory}");
-            Log.Debug?.Write($"mod.json settings are:({settingsJSON})");
-
             Exception configE;
             try {
-                Config = JsonConvert.DeserializeObject<ModConfig>(settingsJSON);
+                Mod.Config = JsonConvert.DeserializeObject<ModConfig>(settingsJSON);
             } catch (Exception e) {
                 configE = e;
-                Config = new ModConfig();
+                Mod.Config = new ModConfig();
             } finally {
-                Config.Init();
+                Mod.Config.Init();
             }
 
-            Log = new DeferringLogger(modDirectory, "skill_based_init", Config.Debug, Config.Trace);
+            Log = new DeferringLogger(modDir: modDirectory, logFilename: Mod.LogName, logLabel: Mod.LogLabel, isDebug: Config.Debug, isTrace: Config.Trace);
+            Log.Debug?.Write($"ModDir is:{modDirectory}");
+            Log.Debug?.Write($"mod.json settings are:({settingsJSON})");
             Mod.Config.LogConfig();
 
             // Read localization
@@ -57,7 +56,6 @@ namespace SkillBasedInit {
             Assembly asm = Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(asm.Location);
             Log.Info?.Write($"Assembly version: {fvi.ProductVersion}");
-
 
             var harmony = HarmonyInstance.Create(HarmonyPackage);
             harmony.PatchAll(Assembly.GetExecutingAssembly());            
