@@ -33,25 +33,25 @@ namespace SkillBasedInit {
                 // Static initiative from tonnage
                 float tonnage = ___selectedMech.Chassis.Tonnage;
                 int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
                 
                 // Check tags
                 if (!___selectedMech.MechTags.Contains(ModStats.TAG_UNIT_MECH))
                 {
                     Mod.Log.Debug?.Write($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
                     string rocColor = Mod.Config.VehicleROCModifier >= 0 ? "00FF00" : "FF0000";
-                    details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_VEHICLE_ROC], new object[] { rocColor, Mod.Config.VehicleROCModifier }).ToString());
+                    details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_VEHICLE_ROC], new object[] { rocColor, Mod.Config.VehicleROCModifier }).ToString());
                 }
 
                 // Any modifiers that come from the chassis/mech/vehicle defs
                 int componentsMod = UnitHelper.GetNormalizedComponentModifier(___selectedMech);
                 string compsColor = componentsMod >= 0 ? "00FF00" : "FF0000";
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_COMPONENTS], new object[] { compsColor, componentsMod }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_COMPONENTS], new object[] { compsColor, componentsMod }).ToString());
 
                 // Modifier from the engine
                 int engineMod = UnitHelper.GetEngineModifier(___selectedMech);
                 string engineColor = engineMod >= 0 ? "00FF00" : "FF0000";
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_ENGINES], new object[] { engineColor, engineMod }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_ENGINES], new object[] { engineColor, engineMod }).ToString());
 
                 // --- Badge ---
                 ___initiativeObj.SetActive(true);
@@ -59,7 +59,7 @@ namespace SkillBasedInit {
 
                 // --- Tooltip ---
                 int maxInit = Math.Max(tonnageMod + componentsMod + engineMod, Mod.MinPhase);
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_EXPECTED_NO_PILOT], new object[] { maxInit }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_EXPECTED_NO_PILOT], new object[] { maxInit }).ToString());
 
                 string tooltipTitle = $"{___selectedMech.Name}";
                 string tooltipText = String.Join("\n", details.ToArray());
@@ -99,7 +99,7 @@ namespace SkillBasedInit {
                 float tonnage = __instance.SelectedMech.MechDef.Chassis.Tonnage;
                 int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
                 initValue += tonnageMod;
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
 
                 // Check tags
                 if (!__instance.SelectedMech.MechDef.MechTags.Contains(ModStats.TAG_UNIT_MECH))
@@ -107,26 +107,26 @@ namespace SkillBasedInit {
                     Mod.Log.Debug?.Write($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
                     initValue += Mod.Config.VehicleROCModifier;
                     string rocColor = Mod.Config.VehicleROCModifier >= 0 ? "00FF00" : "FF0000";
-                    details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_VEHICLE_ROC], new object[] { rocColor, Mod.Config.VehicleROCModifier }).ToString());
+                    details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_VEHICLE_ROC], new object[] { rocColor, Mod.Config.VehicleROCModifier }).ToString());
                 }
 
                 // Any modifiers that come from the chassis/mech/vehicle defs
                 int componentsMod = UnitHelper.GetNormalizedComponentModifier(selectedMechDef);
                 initValue += componentsMod;
                 string compsColor = componentsMod >= 0 ? "00FF00" : "FF0000";
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_COMPONENTS], new object[] { compsColor, componentsMod }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_COMPONENTS], new object[] { compsColor, componentsMod }).ToString());
 
                 // Modifier from the engine
                 int engineMod = UnitHelper.GetEngineModifier(selectedMechDef);
                 initValue += engineMod;
                 string engineColor = engineMod >= 0 ? "00FF00" : "FF0000";
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_ENGINES], new object[] { engineColor, engineMod }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_ENGINES], new object[] { engineColor, engineMod }).ToString());
 
                 // --- PILOT ---
                 Pilot selectedPilot = __instance.SelectedPilot.Pilot;
 
                 int tacticsMod = PilotHelper.GetTacticsModifier(selectedPilot);
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_TACTICS], new object[] { tacticsMod }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TACTICS], new object[] { tacticsMod }).ToString());
                 initValue += tacticsMod;
 
                 int pilotTagsMod = PilotHelper.GetTagsModifier(selectedPilot);
@@ -139,7 +139,7 @@ namespace SkillBasedInit {
                 if (___LC != null) {
                     initValue += ___LC.lanceInitiativeModifier;
                     string lanceColor = ___LC.lanceInitiativeModifier >= 0 ? "00FF00" : "FF0000";
-                    details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_LANCE], new object[] { lanceColor, ___LC.lanceInitiativeModifier }).ToString());
+                    details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_LANCE], new object[] { lanceColor, ___LC.lanceInitiativeModifier }).ToString());
                 }
 
                 // --- Tooltip ---
@@ -153,9 +153,9 @@ namespace SkillBasedInit {
                 ___initiativeText.color = Color.black;
                 ___initiativeColor.SetUIColor(UIColor.White);
 
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_TOTAL], new object[] { initValue }).ToString());
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_RANDOM], new object[] { randomnessBounds[0], randomnessBounds[1] }).ToString());
-                details.Add(new Text(Mod.Config.LocalizedText[ModConfig.LT_MB_EXPECTED], new object[] { maxInit, minInit }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TOTAL], new object[] { initValue }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_RANDOM], new object[] { randomnessBounds[0], randomnessBounds[1] }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_EXPECTED], new object[] { maxInit, minInit }).ToString());
 
                 string tooltipTitle = $"{selectedMechDef.Name}: {selectedPilot.Name}";
                 string tooltipText = String.Join("\n", details.ToArray());

@@ -21,8 +21,6 @@ namespace SkillBasedInit {
         readonly public int pilotingEffectMod;
         readonly public int tacticsEffectMod;
 
-        readonly public int meleeAttackMod;
-        readonly public int meleeDefenseMod;
         readonly public int calledShotMod;
         readonly public int vigilianceMod;
 
@@ -44,14 +42,12 @@ namespace SkillBasedInit {
 
         // Values carried over from a previous round
         public int deferredInjuryMod = 0;
-        public int deferredMeleeMod = 0;
         public int deferredCalledShotMod = 0;
         public int deferredVigilanceMod = 0;
         public int reservedCount = 0;
 
         // Values preserved for UI display
         public int lastRoundInjuryMod = 0;
-        public int lastRoundMeleeMod = 0;
         public int lastRoundCalledShotMod = 0;
         public int lastRoundVigilanceMod = 0;
         public int lastRoundHesitationPenalty = 0;
@@ -103,11 +99,6 @@ namespace SkillBasedInit {
             this.vigilianceMod = PilotHelper.GetVigilanceModifier(pilot);
 
             // --- COMBO IMPACTS --
-            // Determine the melee modifier
-            int[] meleeMods = PilotHelper.GetMeleeModifiers(pilot, tonnage);
-            this.meleeAttackMod = meleeMods[0];
-            this.meleeDefenseMod = meleeMods[1];
-            Mod.Log.Debug?.Write($"Actor:{actor.DisplayName}_{pilot.Name} has meleeAttackMod:{meleeAttackMod} meleeDefenseMod:{meleeDefenseMod}");
 
             // Log the full view for testing
             roundInitBase = tonnageMod;
@@ -196,12 +187,6 @@ namespace SkillBasedInit {
                 Mod.Log.Info?.Write($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) is shutdown! Subtracted {penalty} = roundInit:{roundInitiative}");                
             }
 
-            // Check for melee impacts        
-            if (this.deferredMeleeMod > 0) {
-                roundInitiative -= deferredMeleeMod;
-                Mod.Log.Info?.Write($"  Actor:({actor.DisplayName}_{actor.GetPilot().Name}) was meleed after activation! Subtracted {this.deferredMeleeMod} = roundInit:{roundInitiative}");
-            }
-
             // Check for an overly cautious player
             if (this.reservedCount > 0) {
                 int reserveRand = Mod.Random.Next(Mod.Config.HesitationPenaltyBounds[0], Mod.Config.HesitationPenaltyBounds[1]);
@@ -240,36 +225,6 @@ namespace SkillBasedInit {
             Mod.Log.Info?.Write($"== Actor:({actor.DisplayName}_{actor.GetPilot().Name}) has init:({roundInitiative}) from base:{roundInitBase} - variance:{roundVariance} plus modifiers.");
         }
 
-        public static int CalculateMeleeDelta(ActorInitiative attacker, ActorInitiative target) {
-            // Always return 1 or more
-            int rawDelta = Math.Max(1, attacker.meleeAttackMod - target.meleeDefenseMod);
-            Mod.Log.Debug?.Write($"Melee rawDelta:{rawDelta} = (attackerMod:{attacker.meleeAttackMod} - targetMod:{target.meleeDefenseMod})");
-            int modifiedDelta = Math.Max(1, rawDelta - target.gutsEffectMod);
-            Mod.Log.Debug?.Write($"MeleeMod reduced to modifiedDelta:{modifiedDelta} = (rawDelta:{rawDelta} - gutsEffectMod:{target.gutsEffectMod})");
-            return modifiedDelta;
-        }
-
-        public void ResolveMeleeImpact(AbstractActor target, int impact) {
-        
-            if (target.HasActivatedThisRound) {
-                Mod.Log.Info?.Write($"Melee impact will slow Actor:({target.DisplayName}_{target.GetPilot().Name}) by {impact} init on next activation!");
-                this.deferredMeleeMod += impact;
-                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID, 
-                    new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_MELEE_IMPACT_LATER], new object[] { impact }).ToString(), 
-                    FloatieMessage.MessageNature.Debuff));
-            } else {
-                Mod.Log.Info?.Write($"Melee impact immediately slows Actor:({target.DisplayName}_{target.GetPilot().Name}) by {impact} init!");
-                // Add to the target's initiative. Remember higher init -> higher phase
-                target.Initiative += impact;
-                if (target.Initiative > Mod.MaxPhase) {
-                    target.Initiative = Mod.MaxPhase;
-                }
-                target.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(target.GUID));
-                target.Combat.MessageCenter.PublishMessage(new FloatieMessage(target.GUID, target.GUID,
-                    new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_MELEE_IMPACT_NOW], new object[] { impact }).ToString(), FloatieMessage.MessageNature.Debuff));
-            }
-        }
-
         public int CalculateInjuryPenalty(int damageTaken, int existingInjuries) {
             int injuryMax = this.injuryBounds[1] + existingInjuries + damageTaken;
             int injuryMin = this.injuryBounds[0] + existingInjuries;
@@ -301,13 +256,11 @@ namespace SkillBasedInit {
 
                 // These must occur after calc, or they are lost (duh)
                 actorInit.lastRoundInjuryMod = actorInit.deferredInjuryMod;
-                actorInit.lastRoundMeleeMod = actorInit.deferredMeleeMod;
                 actorInit.lastRoundReservedCount = actorInit.reservedCount;
                 actorInit.lastRoundCalledShotMod = actorInit.deferredCalledShotMod;
                 actorInit.lastRoundVigilanceMod = actorInit.deferredVigilanceMod;
 
                 actorInit.deferredInjuryMod = 0;
-                actorInit.deferredMeleeMod = 0;
                 actorInit.deferredCalledShotMod = 0;
                 actorInit.deferredVigilanceMod = 0;
                 actorInit.reservedCount = 0;

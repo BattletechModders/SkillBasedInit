@@ -90,21 +90,6 @@ namespace SkillBasedInit.Helper {
             return details;
         }
 
-        // Generates tooltip details for tags that have a non-modifier effect.
-        //  This would be for things like juggernaught ability, drunk, etc
-        public static List<string> GetPilotSpecialsDetails(Pilot pilot, int space=2) {
-            List<string> details = new List<string>();
-
-            foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (Mod.Config.PilotSpecialTagsDetails.ContainsKey(tag)) {
-                    string tagEffect = Mod.Config.PilotSpecialTagsDetails[tag];
-                    details.Add($"<space={space}em>{tag}: <i>{tagEffect}</i>");
-                }
-            }
-
-            return details;
-        }
-
         public static int GetGunneryModifier(Pilot pilot) {
             return GetModifier(pilot, pilot.Gunnery, "AbilityDefG5", "AbilityDefG8");
         }
@@ -145,20 +130,6 @@ namespace SkillBasedInit.Helper {
             return mod;
         }
 
-        public static int[] GetMeleeModifiers(Pilot pilot, float tonnage) {
-            float[] meleeMultiplier = PilotHelper.GetMeleeMultipliers(pilot);
-            float attackTonnage = tonnage * meleeMultiplier[0];
-            float defenseTonnage = tonnage * meleeMultiplier[1];
-            //Mod.Log.Debug?.Write($"Pilot:{pilot.Name} with tonnage:{tonnage} counts as attack:{attackTonnage} defense:{defenseTonnage}");
-
-            int gutsMod = GetGutsModifier(pilot);
-            int attackTonnageMod = (int)Math.Ceiling(attackTonnage / 5.0);
-            int defenseTonnageMod = (int)Math.Ceiling(defenseTonnage / 5.0);
-            //Mod.Log.Debug?.Write($"Pilot:{pilot.Name} has attackMod:{attackTonnageMod} + {gutsMod} defenseMod:{defenseTonnageMod} + {gutsMod}");
-
-            return new int[] { attackTonnageMod + gutsMod, defenseTonnageMod + gutsMod};
-        }
-
         public static int GetCalledShotModifier(Pilot pilot) {
             int gunneryMod = GetGunneryModifier(pilot);
             int tacticsMod = GetTacticsModifier(pilot);
@@ -171,21 +142,6 @@ namespace SkillBasedInit.Helper {
             int tacticsMod = GetTacticsModifier(pilot);
             int average = (int)Math.Floor((gutsMod + tacticsMod) / 2.0);
             return average;
-        }
-
-        // Returns a multiplier for unit tonnage for attacker / defense cases
-        private static float[] GetMeleeMultipliers(Pilot pilot) {
-            float[] multipliers = new float[] { 1.0f, 1.0f };
-
-            foreach (string tag in pilot.pilotDef.PilotTags.Distinct()) {
-                if (Mod.Config.PilotTagMeleeMultipliers.ContainsKey(tag)) {
-                    float[] tagMultis = Mod.Config.PilotTagMeleeMultipliers[tag];
-                    //Mod.Log.Debug?.Write($"Pilot {pilot.Name} has tag:{tag}, applying melee multipliers attack:{tagMultis[0]} defense:{tagMultis[1]}");
-                    multipliers[0] += tagMultis[0];
-                    multipliers[1] += tagMultis[1];
-                }
-            }
-            return multipliers;
         }
 
         public static int[] GetInjuryBounds(Pilot pilot) {

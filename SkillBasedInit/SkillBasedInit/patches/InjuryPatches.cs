@@ -48,7 +48,7 @@ namespace SkillBasedInit {
                 } else {
                     // Injuries are cumulative
                     target.deferredInjuryMod += injuryPenalty;
-                    floatieText = new Text(Mod.Config.LocalizedText[ModConfig.LT_FT_INJURY_LATER], new object[] { injuryPenalty }).ToString();
+                    floatieText = new Text(Mod.LocalizedText.Floaties[ModText.LT_FT_INJURY_LATER], new object[] { injuryPenalty }).ToString();
                 }
                 parent.Combat.MessageCenter.PublishMessage(new FloatieMessage(parent.GUID, parent.GUID, floatieText, FloatieMessage.MessageNature.Debuff));
 
