@@ -3,10 +3,6 @@ using UnityEngine;
 
 namespace SkillBasedInit {
 
-    public static class ModStats {
-        public const string TAG_UNIT_MECH = "unit_mech";
-    }
-
     public class ModConfig {
         // If true, extra logging will be printed
         public bool Debug = false;

@@ -89,6 +89,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ModConstants.cs" />
     <Compile Include="ModText.cs" />
     <Compile Include="objects\ActorInitiative.cs" />
     <Compile Include="Helper\PhaseHelper.cs" />

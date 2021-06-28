@@ -36,7 +36,7 @@ namespace SkillBasedInit {
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
                 
                 // Check tags
-                if (!___selectedMech.MechTags.Contains(ModStats.TAG_UNIT_MECH))
+                if (!___selectedMech.MechTags.Contains(ModTags.TAG_UNIT_MECH))
                 {
                     Mod.Log.Debug?.Write($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
                     string rocColor = Mod.Config.VehicleROCModifier >= 0 ? "00FF00" : "FF0000";
@@ -102,7 +102,7 @@ namespace SkillBasedInit {
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
 
                 // Check tags
-                if (!__instance.SelectedMech.MechDef.MechTags.Contains(ModStats.TAG_UNIT_MECH))
+                if (!__instance.SelectedMech.MechDef.MechTags.Contains(ModTags.TAG_UNIT_MECH))
                 {
                     Mod.Log.Debug?.Write($" Unit is a vehicle, applying ROC modifier: {Mod.Config.VehicleROCModifier}");
                     initValue += Mod.Config.VehicleROCModifier;

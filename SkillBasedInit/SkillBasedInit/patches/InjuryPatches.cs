@@ -13,8 +13,8 @@ namespace SkillBasedInit {
         public static void Prefix(Pilot __instance, ref int __state) {
             Mod.Log.Trace?.Write("P:IP:pre - entered.");
             __state = 0;
-            if (__instance.StatCollection.GetStatistic("BonusHeath") != null) {
-                __state = __instance.StatCollection.GetStatistic("BonusHeath").Value<int>();
+            if (__instance.StatCollection.GetStatistic(ModStats.HBS_BONUS_HEALTH) != null) {
+                __state = __instance.StatCollection.GetStatistic(ModStats.HBS_BONUS_HEALTH).Value<int>();
             }
             Mod.Log.Info?.Write($"Pilot:InjurePilot:pre - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) injured with bonusHealth:{__state}");
         }
@@ -24,8 +24,8 @@ namespace SkillBasedInit {
             Mod.Log.Info?.Write($"Pilot:InjurePilot:post - Actor:({__instance.ParentActor.DisplayName}_{__instance.Name}) injured with initial bonusHealth:{__state}");
 
             int currentBonus = 0;
-            if (__instance.StatCollection.GetStatistic("BonusHeath") != null) {
-                currentBonus = __instance.StatCollection.GetStatistic("BonusHeath").Value<int>();
+            if (__instance.StatCollection.GetStatistic(ModStats.HBS_BONUS_HEALTH) != null) {
+                currentBonus = __instance.StatCollection.GetStatistic(ModStats.HBS_BONUS_HEALTH).Value<int>();
             }
             int bonusDelta = __state - currentBonus;
             int damageTaken = dmg - bonusDelta;
