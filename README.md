@@ -33,7 +33,6 @@ Certain effects impact your phase number during the course of battle. These effe
 * **Equipment** - Any chassis or component that modifies the *BaseInititiative* statistic of the unit is honored. In RogueTech, most cockpits provide a small initiative bonus.
 * **Inspired** - Pilots that are inspired by high Morale (or Fury) randomly gain between +1 and +3 when a new round begins. **Inspired!** modifiers are from morale or fury.
 * **Spirit** - Pilots *High Spirits* tag gain a +2 initiative bonus. Pilots with the *Low Spirits* tag suffer a -2 initiative penalty.
-* **Melee Impact** - Units that are successfully attacked in melee suffer a small initiative penalty on the current round, or the subsequent round if they have already activated. This penalty is increased when the attacker weighs more than the target, and attackers with the *Juggernaught* skill increase this effect further. This penalty is applied *on every successful attack* so light units that are repeatedly attacked may find themselves acting at the very end of the following round! **Clang!** modifiers are from melee impacts.
 * **Reserve** Units that reserve drop between 2 to 7 phases. This drop is carried over to the next round as penalty, reflecting the hesitation of the unit. **Hesitation!** modifiers are this carry-over penalty.
 
 
@@ -195,6 +194,7 @@ Tonnage | 05 | 10-15 | 20-25 | 30-35 | 40-45 | 50-55 | 60-65 | 70-75 | 80-85 | 9
 This mod breaks units down into 10-ton ranges, such as 20-25 tons, 30-35 tons, etc. Within each range, there is a sweet-spot for engine ratings where a unit is considered to have a typical engine for its class. Units with engine ratings less than this midpoint suffer an initiative penalty from -6 to -2, while units with engine ratings above this midpoint gain a bonus between +2 to +6.
 
 For a given midpoint, the modifier bounds are defined below.
+
 
 Modifier | -6 | -4 | -2 | +0 | +2 | +4 | +6
 -- | -- | -- | -- | -- | -- | -- | --
