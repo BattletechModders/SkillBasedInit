@@ -1,19 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace SkillBasedInit {
+namespace SkillBasedInit
+{
 
-    public class ModConfig {
-        // If true, extra logging will be printed
-        public bool Debug = false;
-
-        // If true, all the logs will be printed
-        public bool Trace = false;
-
-        public class IconOpts {
-            public string Stopwatch = "sbi_stopwatch";
-        }
-        public IconOpts Icons = new IconOpts { };
+    public class MechOpts
+    {
+        public int TypeMod = 0;
 
         // The init malus when a unit starts the round prone (from a knockdown)
         public int ProneModifier = -9;
@@ -23,24 +16,71 @@ namespace SkillBasedInit {
 
         // The init malus when a unit has lost a leg (mechs) or side (vehicles)
         public int CrippledMovementModifier = -13;
+    }
 
-        // Modifier applied to make vehicles slower
-        public int VehicleROCModifier = -2;
+    public class TrooperOpts
+    {
+        public int TypeMod = +2;
 
-        // Modifier applied to make turrets slower
-        public int TurretROCModifier = -4;
+    }
+
+    public class NavalOpts
+    {
+        public int TypeMod = -2;
+
+        // The init malus when a unit has lost a leg (mechs) or side (vehicles)
+        public int CrippledMovementModifier = -13;
+    }
+
+    public class VehicleOpts
+    {
+        public int TypeMod = -2;
+
+        // The init malus when a unit has lost a leg (mechs) or side (vehicles)
+        public int CrippledMovementModifier = -13;
+    }
+
+    public class TurretOpts
+    {
+        public int TypeMod = -4;
+
+        // Turrets don't have tonnage; supply a tonnage based upon unit tags
+        public float LightTonnage = 60.0f;
+        public float MediumTonnage = 80.0f;
+        public float HeavyTonnage = 100.0f;
+        public float DefaultTonnage = 120.0f;
+    }
+
+    public class PilotOpts
+    {
+
+    }
+
+    public class ModConfig
+    {
+        // If true, extra logging will be printed
+        public bool Debug = false;
+
+        // If true, all the logs will be printed
+        public bool Trace = false;
+
+        public MechOpts Mech = new MechOpts();
+        public TrooperOpts Troopers = new TrooperOpts();
+        public NavalOpts Naval = new NavalOpts();
+        public VehicleOpts Vehicles = new VehicleOpts();
+        public TurretOpts Turrets = new TurretOpts();
+
+        public class IconOpts
+        {
+            public string Stopwatch = "sbi_stopwatch";
+        }
+        public IconOpts Icons = new IconOpts();
 
         // How many phases to reduce the init of a deferred actor on each deferral
         public int[] ReservedPenaltyBounds = new int[] { 3, 9 };
 
         // How many phases to reduce the init of an actor that deferred last round
         public int[] HesitationPenaltyBounds = new int[] { 2, 7 };
-
-        // Turrets don't have tonnage; supply a tonnage based upon unit tags
-        public float TurretTonnageTagUnitLight = 60.0f;
-        public float TurretTonnageTagUnitMedium = 80.0f;
-        public float TurretTonnageTagUnitHeavy = 100.0f;
-        public float TurretTonnageTagUnitNone = 120.0f;
 
         // Definition of any tags that should result in a flat initiative modifier
         public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
@@ -98,7 +138,8 @@ namespace SkillBasedInit {
             InitializeColors();
         }
 
-        private void InitializeColors() {
+        private void InitializeColors()
+        {
             FriendlyUnactivated = new Color(ColorFriendlyUnactivated[0], ColorFriendlyUnactivated[1], ColorFriendlyUnactivated[2], ColorFriendlyUnactivated[3]);
             FriendlyAlreadyActivated = new Color(ColorFriendlyAlreadyActivated[0], ColorFriendlyAlreadyActivated[1], ColorFriendlyAlreadyActivated[2], ColorFriendlyAlreadyActivated[3]);
 
@@ -112,20 +153,40 @@ namespace SkillBasedInit {
             EnemyAlreadyActivated = new Color(ColorEnemyAlreadyActivated[0], ColorEnemyAlreadyActivated[1], ColorEnemyAlreadyActivated[2], ColorEnemyAlreadyActivated[3]);
         }
 
-        public void LogConfig() {
+        public void LogConfig()
+        {
             Mod.Log.Info?.Write("=== MOD CONFIG BEGIN ===");
             Mod.Log.Info?.Write($"  DEBUG:{this.Debug} Trace:{this.Trace}");
 
-            Mod.Log.Info?.Write($"  ProneMod:{ProneModifier} ShutdownMod:{ShutdownModifier} CrippledMovementMod:{CrippledMovementModifier} ");
-            Mod.Log.Info?.Write($"  VehicleROCMod:{VehicleROCModifier} TurretROCMod:{TurretROCModifier} ");
             Mod.Log.Info?.Write($"  ReservedPenaltyBounds:{ReservedPenaltyBounds[0]}-{ReservedPenaltyBounds[1]} HestitationPenaltyBounds:{HesitationPenaltyBounds[0]}-{HesitationPenaltyBounds[1]} ");
-            Mod.Log.Info?.Write($"  Turret Tonnage -> Light:{TurretTonnageTagUnitLight} Medium:{TurretTonnageTagUnitMedium} Heavy:{TurretTonnageTagUnitHeavy} None:{TurretTonnageTagUnitNone}");
-
             Mod.Log.Info?.Write($"  == Pilot Tag Modifiers");
-            foreach (KeyValuePair<string,int> kvp in PilotTagModifiers) {
+            foreach (KeyValuePair<string, int> kvp in PilotTagModifiers)
+            {
                 Mod.Log.Info?.Write($"    tag:{kvp.Key} modifier:{kvp.Value}");
             }
+            Mod.Log.Info?.Write("");
 
+            Mod.Log.Info?.Write($"  == MECH ==");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Mech.TypeMod}  ProneMod:{this.Mech.ProneModifier}  ShutdownMod:{this.Mech.ShutdownModifier}  CrippledMovementMod:{this.Mech.CrippledMovementModifier}");
+            Mod.Log.Info?.Write("");
+
+            Mod.Log.Info?.Write($"  == TROOPER ==");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Troopers.TypeMod}");
+            Mod.Log.Info?.Write(""); 
+
+            Mod.Log.Info?.Write($"  == VEHICLE ==");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Vehicles.TypeMod}  CrippledMovementMod:{this.Vehicles.CrippledMovementModifier} ");
+            Mod.Log.Info?.Write("");
+
+            Mod.Log.Info?.Write($"  == NAVAL ==");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Naval.TypeMod}  CrippledMovementMod:{this.Naval.CrippledMovementModifier} ");
+            Mod.Log.Info?.Write("");
+
+            Mod.Log.Info?.Write($"  == TURRET ==");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Turrets.TypeMod}  Tonnages =>  Light:{this.Turrets.LightTonnage}  Medium:{this.Turrets.MediumTonnage}  Heavy:{this.Turrets.HeavyTonnage}  Default:{this.Turrets.DefaultTonnage}");
+            Mod.Log.Info?.Write("");
+
+            
             Mod.Log.Info?.Write("=== MOD CONFIG END ===");
         }
     }
