@@ -2,19 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using BattleTech;
+using CustAmmoCategories;
 using CustomComponents;
-//using CustomComponents;
+using CustomUnits;
 using HBS.Collections;
+using IRBTModUtils.Extension;
+#if NO_ME
+#else
 using MechEngineer.Features.Engines;
-//using MechEngineer.Features.Engines;
+#endif
 
-namespace SkillBasedInit.Helper {
-    public class UnitHelper {
-
+namespace SkillBasedInit.Helper
+{
+    public class UnitHelper
+    {
         // Const values 
-        private const float TurretTonnage = 100.0f;
+        public const float TurretTonnage = 100.0f;
         public const int DefaultTonnage = 100;
-        private const int SuperHeavyTonnage = 11;
+        public const int SuperHeavyTonnage = 11;
 
         private static readonly Dictionary<int, int> InitBaseByTonnage = new Dictionary<int, int> {
             {  0, 22 }, // 0-5
@@ -30,6 +35,7 @@ namespace SkillBasedInit.Helper {
             { 10, 12 }, // 100
             { SuperHeavyTonnage, 9 }, // 105+
         };
+
         private static readonly Dictionary<int, int> EngineMidpointByTonnage = new Dictionary<int, int> {
             {  0, 10 }, // 0-5
             {  1, 9 }, // 10-15
@@ -42,42 +48,89 @@ namespace SkillBasedInit.Helper {
             {  8, 3 }, // 80-85
             {  9, 3 }, // 90-95
             { 10, 3 }, // 100
-            { SuperHeavyTonnage, 2 }, // 105+        
+            { UnitHelper.SuperHeavyTonnage, 2 }, // 105+        
         };
 
-        public static float GetUnitTonnage(AbstractActor actor) {
-            float tonnage = DefaultTonnage;
+        public static float GetUnitTonnage(AbstractActor actor)
+        {
 
-            if (actor.GetType() == typeof(Mech)) {
-                tonnage = ((Mech)actor).tonnage;
-            } else if (actor.GetType() == typeof(Vehicle)) {
-                tonnage = ((Vehicle)actor).tonnage;
-            } else {
-                tonnage = TurretTonnage;
-
+            Mod.Log.Debug?.Write($"Calculating unit tonnage for actor: {actor.DistinctId()}");
+            float tonnage;
+            if (actor is Turret)
+            {
                 TagSet actorTags = actor.GetTags();
-                if (actorTags != null && actorTags.Contains("unit_light")) {
-                    tonnage = Mod.Config.TurretTonnageTagUnitLight;
-                } else if (actorTags != null && actorTags.Contains("unit_medium")) {
-                    tonnage = Mod.Config.TurretTonnageTagUnitMedium;
-                } else if (actorTags != null && actorTags.Contains("unit_heavy")) {
-                    tonnage = Mod.Config.TurretTonnageTagUnitHeavy;
-                } else {
-                    tonnage = Mod.Config.TurretTonnageTagUnitNone;
+                if (actorTags != null && actorTags.Contains("unit_light"))
+                {
+                    tonnage = Mod.Config.Turrets.LightTonnage;
+                    Mod.Log.Debug?.Write($" -- unit is a unit_light turret, using tonnage: {tonnage}");
+                }
+                else if (actorTags != null && actorTags.Contains("unit_medium"))
+                {
+                    tonnage = Mod.Config.Turrets.MediumTonnage;
+                    Mod.Log.Debug?.Write($" -- unit is unit_medium turret, using tonnage: {tonnage}");
+                }
+                else if (actorTags != null && actorTags.Contains("unit_heavy"))
+                {
+                    tonnage = Mod.Config.Turrets.HeavyTonnage;
+                    Mod.Log.Debug?.Write($" -- unit is a unit_heavy turret, using tonnage: {tonnage}");
+                }
+                else
+                {
+                    tonnage = Mod.Config.Turrets.DefaultTonnage;
+                    Mod.Log.Debug?.Write($" -- unit is tagless turret, using tonnage: {tonnage}");
                 }
             }
+            else if (actor is Vehicle vehicle)
+            {
+                tonnage = vehicle.tonnage;
+                Mod.Log.Debug?.Write($" -- unit is a vehicle, using tonnage: {tonnage}");
+            }
+            else if (actor is Mech mech)
+            {
+                if (mech.FakeVehicle())
+                {
+                    tonnage = mech.tonnage;
+                    Mod.Log.Debug?.Write($" -- unit is a fake vehicle, using tonnage: {tonnage}");
+                }
+                else if (mech.NavalUnit())
+                {
+                    tonnage = mech.tonnage;
+                    Mod.Log.Debug?.Write($" -- unit is a naval unit, using tonnage: {tonnage}");
+                }
+                else if (mech.TrooperSquad())
+                {
+                    TrooperSquad squad = mech as TrooperSquad;
+                    tonnage = (float)Math.Ceiling(squad.tonnage / squad.info.SquadInfo.Troopers);
+                    Mod.Log.Debug?.Write($" -- unit is a trooper squad, using tonnage: {tonnage}");
+                }
+                else
+                {
+                    tonnage = mech.tonnage;
+                    Mod.Log.Debug?.Write($" -- unit is a mech, using tonnage: {tonnage}");
+                }
+
+            }
+            else
+            {
+                tonnage = DefaultTonnage;
+                Mod.Log.Debug?.Write($" -- unit type is unknown, using tonnage: {tonnage}");
+            }
+
             return tonnage;
         }
 
         // Any modifier from the unit's tonnage
-        public static int GetTonnageModifier(float tonnage) {
+        public static int GetTonnageModifier(float tonnage)
+        {
             int tonnageRange = GetTonnageRange(tonnage);
             return InitBaseByTonnage[tonnageRange];
         }
 
-        private static int GetTonnageRange(float tonnage) {
+        private static int GetTonnageRange(float tonnage)
+        {
             int tonnageRange = (int)Math.Floor(tonnage / 10.0);
-            if (tonnageRange > 10) {
+            if (tonnageRange > 10)
+            {
                 tonnageRange = SuperHeavyTonnage;
             }
             Mod.Log.Debug?.Write($"for raw tonnage {tonnage} returning tonnageRange:{tonnageRange}");
@@ -90,25 +143,37 @@ namespace SkillBasedInit.Helper {
          *  then invert the value. Because HBS defines bonuses as negative modifiers,
          *  invert this value to have it make sense elsewhere in the code.        
          */
-         // TODO: Should this use the MechDef call below? 
-        public static int GetNormalizedComponentModifier(AbstractActor actor) {
+        // TODO: Should this use the MechDef call below? 
+        public static int GetNormalizedComponentModifier(AbstractActor actor)
+        {
             int unitInit = 0;
 
             WeightClass weightClass;
-            if (actor.GetType() == typeof(Mech)) {
-                weightClass = ((Mech)actor).weightClass;
-            } else if (actor.GetType() == typeof(Vehicle)) {
-                var vehicle = (Vehicle)actor;
-                weightClass = ((Vehicle)actor).weightClass;
-            } else { // turret
+            if (actor is Mech mech)
+            {
+                weightClass = mech.weightClass;
+            }
+            else if (actor is Vehicle vehicle)
+            {
+                weightClass = vehicle.weightClass;
+            }
+            else
+            { // turret
                 TagSet actorTags = actor.GetTags();
-                if (actorTags != null && actorTags.Contains("unit_light")) {
+                if (actorTags != null && actorTags.Contains("unit_light"))
+                {
                     weightClass = WeightClass.LIGHT;
-                } else if (actorTags != null && actorTags.Contains("unit_medium")) {
+                }
+                else if (actorTags != null && actorTags.Contains("unit_medium"))
+                {
                     weightClass = WeightClass.MEDIUM;
-                } else if (actorTags != null && actorTags.Contains("unit_heavy")) {
+                }
+                else if (actorTags != null && actorTags.Contains("unit_heavy"))
+                {
                     weightClass = WeightClass.HEAVY;
-                } else {
+                }
+                else
+                {
                     weightClass = WeightClass.ASSAULT;
                 }
             }
@@ -147,13 +212,15 @@ namespace SkillBasedInit.Helper {
                 "PhaseAssaultTurret": 5
            */
 
-            if (actor.StatCollection != null && actor.StatCollection.ContainsStatistic("BaseInitiative")) {
+            if (actor.StatCollection != null && actor.StatCollection.ContainsStatistic("BaseInitiative"))
+            {
                 int baseMod = actor.StatCollection.GetValue<int>("BaseInitiative");
 
                 // Normalize the value
                 // TODO: These should come from CombatGameDef.PhaseConstantsDef, but I can't find a reference to pull 
                 //   those values. May have to load at mod start and cache them.
-                switch (weightClass) {
+                switch (weightClass)
+                {
                     case WeightClass.LIGHT:
                         baseMod -= 2;
                         break;
@@ -183,15 +250,22 @@ namespace SkillBasedInit.Helper {
 
         // Calculate the initiative modifiers from all components based upon a MechDef. For whatever reason they 
         //  reverse the modifier right out of the gate, such that these values are positives automatically
-        public static int GetNormalizedComponentModifier(MechDef mechDef) {
+        public static int GetNormalizedComponentModifier(MechDef mechDef)
+
+        {
             int unitInit = 0;
-            if (mechDef.Inventory != null) {
+            if (mechDef.Inventory != null)
+            {
                 MechComponentRef[] inventory = mechDef.Inventory;
-                foreach (MechComponentRef mechComponentRef in inventory) {
-                    if (mechComponentRef.Def != null && mechComponentRef.Def.statusEffects != null) {
+                foreach (MechComponentRef mechComponentRef in inventory)
+                {
+                    if (mechComponentRef.Def != null && mechComponentRef.Def.statusEffects != null)
+                    {
                         EffectData[] statusEffects = mechComponentRef.Def.statusEffects;
-                        foreach (EffectData effect in statusEffects) {
-                            if (MechStatisticsRules.GetInitiativeModifierFromEffectData(effect, true, null) == 0) {
+                        foreach (EffectData effect in statusEffects)
+                        {
+                            if (MechStatisticsRules.GetInitiativeModifierFromEffectData(effect, true, null) == 0)
+                            {
                                 unitInit += MechStatisticsRules.GetInitiativeModifierFromEffectData(effect, false, null);
                             }
                         }
@@ -203,93 +277,164 @@ namespace SkillBasedInit.Helper {
             return unitInit;
         }
 
-        public static int GetEngineModifier(AbstractActor actor) {
+        public static int GetTypeModifier(AbstractActor actor)
+        {
+            int typeMod;
+            if (actor is Turret)
+            {
+                typeMod = Mod.Config.Turrets.TypeMod;
+                Mod.Log.Debug?.Write($" -- unit is type turret, using typeMod: {typeMod}");
+            }
+            else if (actor is Vehicle)
+            {
+                typeMod = Mod.Config.Vehicles.TypeMod;
+                Mod.Log.Debug?.Write($" -- unit is type vehicle, using typeMod: {typeMod}");
+            }
+            else if (actor is Mech mech)
+            {
+                if (mech.FakeVehicle())
+                {
+                    typeMod = Mod.Config.Vehicles.TypeMod;
+                    Mod.Log.Debug?.Write($" -- unit is type vehicle, using typeMod: {typeMod}");
+                }
+                else if (mech.NavalUnit())
+                {
+                    typeMod = Mod.Config.Naval.TypeMod;
+                    Mod.Log.Debug?.Write($" -- unit is type naval, using typeMod: {typeMod}");
+
+                }
+                else if (mech.TrooperSquad())
+                {
+                    typeMod = Mod.Config.Troopers.TypeMod;
+                    Mod.Log.Debug?.Write($" -- unit is type troopers, using typeMod: {typeMod}");
+                }
+                else
+                {
+                    typeMod = Mod.Config.Mech.TypeMod;
+                    Mod.Log.Debug?.Write($" -- unit is type mech, using typeMod: {typeMod}");
+                }
+            }
+            else
+            {
+                typeMod = 0;
+                Mod.Log.Debug?.Write(" -- unit is unknown type, using 0 typeMod.");
+            }
+
+            return typeMod;
+        }
+
+        public static int GetEngineModifier(AbstractActor actor)
+        {
+#if NO_ME
+            return 0;
+#else
             int engineMod = 0;
-            if (actor.GetTags().Contains("unit_powerarmor")) {
+            if (actor.GetTags().Contains("unit_powerarmor"))
+            {
                 Mod.Log.Debug?.Write($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} is PowerArmor, skipping engine bonus.");
-            } else {
+            }
+            else
+            {
                 MechComponent mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
-                if (mainEngineComponent != null) {
+                if (mainEngineComponent != null)
+                {
                     EngineCoreDef engine = mainEngineComponent?.componentDef?.GetComponent<EngineCoreDef>();
-                    float tonnage = GetUnitTonnage(actor);
+                    float tonnage = UnitHelper.GetUnitTonnage(actor);
                     engineMod = CalculateEngineModifier(tonnage, engine.Rating);
                     Mod.Log.Debug?.Write($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} with engine rating: {engine?.Rating} has engineMod:{engineMod}");
-                } else {
+                }
+                else
+                {
                     Mod.Log.Info?.Write($"  Actor:{actor.DisplayName}_{actor.GetPilot().Name} has no engine - is this expected?");
                 }
             }
 
             return engineMod;
+#endif
         }
 
-        public static int GetEngineModifier(MechDef mechDef) {
+        public static int GetEngineModifier(MechDef mechDef)
+        {
+#if NO_ME
+            return 0;
+#else
             int engineMod = 0;
 
             // var mainEngineComponent = actor?.allComponents?.FirstOrDefault(c => c?.componentDef?.GetComponent<EngineCoreDef>() != null);
             MechComponentRef engineRef = mechDef.Inventory.FirstOrDefault(mcr => mcr?.GetComponent<EngineCoreDef>() != null);
             Mod.Log.Debug?.Write($"MechDef:{mechDef.Name} has engineComponent:{engineRef}?");
-            if (engineRef != null) {
+            if (engineRef != null)
+            {
                 EngineCoreDef engine = engineRef.Def.GetComponent<EngineCoreDef>();
                 float tonnage = mechDef.Chassis.Tonnage;
                 engineMod = CalculateEngineModifier(tonnage, engine.Rating);
             }
 
             return engineMod;
+#endif
         }
 
-        private static int CalculateEngineModifier(float tonnage, int rating) {
+        private static int CalculateEngineModifier(float tonnage, int rating)
+        {
             int engineMod = 0;
 
             float engineRatio = rating / tonnage;
             int tonnageRange = GetTonnageRange(tonnage);
             int ratioMidpoint = EngineMidpointByTonnage[tonnageRange];
             Mod.Log.Debug?.Write($"Comparing engineRatio:{engineRatio} from rating:{rating} / tonnage:{tonnage} vs midpoint:{ratioMidpoint}");
-            if (engineRatio > ratioMidpoint) {
+            if (engineRatio > ratioMidpoint)
+            {
                 int oneSigma = (int)Math.Ceiling(ratioMidpoint * 1.2);
                 int twoSigma = (int)Math.Ceiling(ratioMidpoint * 1.4);
                 int threeSigma = (int)Math.Ceiling(ratioMidpoint * 1.7);
-                if (engineRatio < oneSigma) {
+                if (engineRatio < oneSigma)
+                {
                     engineMod = 0;
-                } else if (engineRatio < twoSigma) {
+                }
+                else if (engineRatio < twoSigma)
+                {
                     engineMod = 2;
-                } else if (engineRatio < threeSigma) {
+                }
+                else if (engineRatio < threeSigma)
+                {
                     engineMod = 4;
-                } else {
+                }
+                else
+                {
                     engineMod = 6;
                 }
                 Mod.Log.Debug?.Write($"Oversized engine, returning bonus engineMod:{engineMod}");
-            } else if (engineRatio < ratioMidpoint) {
+            }
+            else if (engineRatio < ratioMidpoint)
+            {
                 int oneSigma = (int)Math.Floor(ratioMidpoint * 0.8);
                 int twoSigma = (int)Math.Floor(ratioMidpoint * 0.6);
                 int threeSigma = (int)Math.Floor(ratioMidpoint * 0.3);
-                if (engineRatio > oneSigma) {
+                if (engineRatio > oneSigma)
+                {
                     engineMod = 0;
-                } else if (engineRatio > twoSigma) {
+                }
+                else if (engineRatio > twoSigma)
+                {
                     engineMod = -2;
-                } else if (engineRatio > threeSigma) {
+                }
+                else if (engineRatio > threeSigma)
+                {
                     engineMod = -4;
-                } else {
+                }
+                else
+                {
                     engineMod = -6;
                 }
                 Mod.Log.Debug?.Write($"Undersized engine, returning penalty engineMod:{engineMod}");
-            } else {
+            }
+            else
+            {
                 Mod.Log.Debug?.Write("Balanced engine, returning engineMod:0");
                 engineMod = 0;
             }
 
             return engineMod;
-        }
-
-        public static int GetTypeModifier(AbstractActor actor) {
-            int typeMod;
-            if (actor.GetType() == typeof(Mech)) {
-                typeMod = 0;
-            } else if (actor.GetType() == typeof(Vehicle)) {
-                typeMod = Mod.Config.VehicleROCModifier;
-            } else {
-                typeMod = Mod.Config.TurretROCModifier;
-            }
-            return typeMod;
         }
     }
 }
