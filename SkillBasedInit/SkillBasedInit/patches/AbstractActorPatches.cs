@@ -1,21 +1,12 @@
 ﻿using BattleTech;
 using BattleTech.UI;
 using Harmony;
+using IRBTModUtils.Extension;
 using SkillBasedInit.Helper;
 using System;
 using us.frostraptor.modUtils;
 
 namespace SkillBasedInit {
-
-    [HarmonyPatch(typeof(Mech), "OnActivationEnd")]
-    public static class AbstractActor_OnActivationEnd {
-        public static void Prefix(Mech __instance, string sourceID, int stackItemID) {
-            Mod.Log.Trace?.Write($"M:OAE:pre - entered for '{CombatantUtils.Label(__instance)}' with sourceID: '{sourceID}' and stackItemId: '{stackItemID}'");
-        }
-        public static void Postfix(Mech __instance, string sourceID, int stackItemID) {
-            Mod.Log.Trace?.Write($"M:OAE:post - entered for '{CombatantUtils.Label(__instance)}' with sourceID: '{sourceID}' and stackItemId: '{stackItemID}'");
-        }
-    }
 
     [HarmonyPatch(typeof(AbstractActor), "OnNewRound")]
     public static class AbstractActor_OnNewRound {
@@ -31,7 +22,7 @@ namespace SkillBasedInit {
         public static void Postfix(AbstractActor __instance) {
             Mod.Log.Trace?.Write($"AA:DU - entered.");
             int reservePenalty = Mod.Random.Next(Mod.Config.ReservedPenaltyBounds[0], Mod.Config.ReservedPenaltyBounds[1]);
-            Mod.Log.Debug?.Write($"  Deferring Actor:({CombatantUtils.Label(__instance)}) " +
+            Mod.Log.Debug?.Write($"  Deferring Actor:({__instance.DistinctId()}) " +
                 $"initiative:{__instance.Initiative} by:{reservePenalty} to:{__instance.Initiative + reservePenalty}");
             __instance.Initiative += reservePenalty;
             if (__instance.Initiative > Mod.MaxPhase) {
@@ -41,7 +32,7 @@ namespace SkillBasedInit {
             // Save some part of the reserve surplus as a penalty for the next round
             ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
             actorInit.reservedCount++;
-            Mod.Log.Debug?.Write($"  Actor:({CombatantUtils.Label(__instance)}) reservedCount incremented to:{actorInit.reservedCount}");
+            Mod.Log.Debug?.Write($"  Actor:({__instance.DistinctId()}) reservedCount incremented to:{actorInit.reservedCount}");
         }
 
     }
@@ -167,7 +158,7 @@ namespace SkillBasedInit {
             Mod.Log.Debug?.Write("AA:HVI - entered.");
             bool isValid = __instance.Initiative >= Mod.MinPhase && __instance.Initiative <= Mod.MaxPhase;
             if (!isValid) {
-                Mod.Log.Info?.Write($"Actor:{CombatantUtils.Label(__instance)} has invalid initiative {__instance.Initiative}!");
+                Mod.Log.Info?.Write($"Actor:{__instance.DistinctId()} has invalid initiative {__instance.Initiative}!");
             }
             __result = isValid;
             Mod.Log.Debug?.Write($"AbstractActor:HasValidInitiative returning {__result} for {__instance.Initiative}");
@@ -186,21 +177,72 @@ namespace SkillBasedInit {
                 int modifiedInit = baseInit + phaseMod;
 
                 if (modifiedInit < Mod.MinPhase) {
-                    Mod.Log.Info?.Write($"Actor:({CombatantUtils.Label(__instance)}) being set to {Mod.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    Mod.Log.Info?.Write($"Actor:({__instance.DistinctId()}) being set to {Mod.MinPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = Mod.MinPhase;
                 } else if (modifiedInit > Mod.MaxPhase) {
-                    Mod.Log.Info?.Write($"Actor:({CombatantUtils.Label(__instance)}) being set to {Mod.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
+                    Mod.Log.Info?.Write($"Actor:({__instance.DistinctId()}) being set to {Mod.MaxPhase} due to BaseInit:{baseInit} + PhaseMod:{phaseMod}");
                     __result = Mod.MaxPhase;
                 } else {
                     __result = modifiedInit;
-                    Mod.Log.Info?.Write($"Actor:({CombatantUtils.Label(__instance)}) has stats BaseInit:{baseInit} + PhaseMod:{phaseMod} = modifiedInit:{modifiedInit}.");
+                    Mod.Log.Info?.Write($"Actor:({__instance.DistinctId()}) has stats BaseInit:{baseInit} + PhaseMod:{phaseMod} = modifiedInit:{modifiedInit}.");
                 }
             } else {
-                Mod.Log.Info?.Write($"Actor:({CombatantUtils.Label(__instance)}) is non-interleaved, returning phase: {Mod.MaxPhase}.");
+                Mod.Log.Info?.Write($"Actor:({__instance.DistinctId()}) is non-interleaved, returning phase: {Mod.MaxPhase}.");
                 __result = Mod.MaxPhase;
             }
 
         }
     }
 
+    // Initializes any custom status effects. Without this, they won't be read.
+    [HarmonyPatch(typeof(AbstractActor), "InitEffectStats")]
+    static class AbstractActor_InitEffectStats
+    {
+        static void Postfix(AbstractActor __instance)
+        {
+            Mod.Log.Trace?.Write("AA:IES entered");
+
+            Mod.Log.Info?.Write($"Initializing statistics for actor: {__instance.DistinctId()}");
+            // Static init values
+            float tonnage = UnitHelper.GetUnitTonnage(__instance);
+            int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
+            Mod.Log.Info?.Write($"  -- tonnageMod: {tonnageMod}");
+            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_TONNAGE, tonnageMod);
+
+            int typeMod = UnitHelper.GetTypeModifier(__instance);
+            Mod.Log.Info?.Write($"  -- typeMod: {typeMod}");
+            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_UNIT_TYPE, typeMod);
+
+            // Modifier from the engine
+            int engineMod = UnitHelper.GetEngineModifier(__instance);
+            Mod.Log.Info?.Write($"  -- engineMod: {engineMod}");
+            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_ENGINE, engineMod);
+
+            Pilot pilot = __instance.GetPilot();
+            int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
+            Mod.Log.Info?.Write($"  -- pilotTagsMod: {pilotTagsMod}");
+            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_PILOT_TAGS, pilotTagsMod);
+
+            int roundBase = tonnageMod + typeMod + engineMod + pilotTagsMod;
+            Mod.Log.Info?.Write($"  -- roundBase: {roundBase}");
+            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_ROUND_BASE, roundBase);
+
+            // Dynamic init values
+            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_MISC, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_CALLED_SHOT, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_VIGILANCE, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_HESITATION, 0);
+
+            // Skills can be impacted by effects
+            __instance.StatCollection.AddStatistic<int>(ModStats.SKILL_MOD_GUTS, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.SKILL_MOD_PILOT, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.SKILL_MOD_TACTICS, 0);
+
+            __instance.StatCollection.AddStatistic<int>(ModStats.INJURY_BOUNDS_MIN, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.INJURY_BOUNDS_MAX, 0);
+
+            __instance.StatCollection.AddStatistic<int>(ModStats.RANDOM_BOUNDS_MIN, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.RANDOM_BOUNDS_MAX, 0);
+        }
+    }
 }
