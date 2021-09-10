@@ -275,20 +275,91 @@ namespace SkillBasedInit.Helper
         // Prone only applies to mechs and quads
         public static int ProneInitModifier(this AbstractActor actor)
         {
+            if (!(actor is Mech)) return 0;
 
+            Mech mech = actor as Mech;
+            if (!mech.IsProne) return 0;
+
+            UnitCustomInfo customInfo = mech.GetCustomInfo();
+            if (customInfo != null && (customInfo.Naval || customInfo.FakeVehicle)) return 0;
+            if (customInfo != null && customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1) return 0;
+
+            int boundsMin = Mod.Config.Mech.ProneModifierMin;
+            int boundsMax = Mod.Config.Mech.ProneModifierMax;
+            Mod.Log.Debug?.Write($"Unit: {mech.DistinctId()} is prone, raw bounds => min: {boundsMin} to max: {boundsMax}");
+
+            Pilot pilot = actor.GetPilot();
+            int pilotMod = pilot.CurrentSkillMod(pilot.Piloting, ModStats.MOD_SKILL_PILOT);
+            int adjustedMax = boundsMax - pilotMod;
+
+            int finalMod = adjustedMax;
+            if (adjustedMax <= boundsMin)
+            {
+                finalMod = boundsMin;
+                Mod.Log.Debug?.Write($"  adjustedMax < boundsMin, returning {boundsMin}");
+            }
+
+            Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
+            return finalMod;
         }
 
         // Crippled applies to mechs, quads, vehicles, naval
         public static int CrippledInitModifier(this AbstractActor actor)
         {
+            if (!((actor is Vehicle) || (actor is Mech))) return 0;
 
+            int boundsMin, boundsMax;
+            if (actor is Vehicle vehicle &&
+                (vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right))
+                )
+            {
+                boundsMin = Mod.Config.Vehicle.CrippledModifierMin;
+                boundsMax = Mod.Config.Vehicle.CrippledModifierMax;
+            }
+            else if (actor is Mech mech)
+            {
+                UnitCustomInfo customInfo = mech.GetCustomInfo();
+                if (customInfo != null && customInfo.FakeVehicle)
+                {
+
+                }
+                else if (customInfo != null && customInfo.Naval)
+                {
+
+                }
+                else if (customInfo.SquadInfo == null || customInfo.SquadInfo.Troopers < 1)
+                {
+
+                }
+                else if (customInfo == null)
+                {
+
+                }
+
+            }
+
+
+            UnitCustomInfo customInfo = mech.GetCustomInfo();
+            if (customInfo != null && (customInfo.Naval || customInfo.FakeVehicle)) return 0;
+
+            int boundsMin;
+            int boundsMax;
+            if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
+            {
+                boundsMin = Mod.Config.Trooper.ShutdownModifierMin;
+                boundsMax = Mod.Config.Trooper.ShutdownModifierMax;
+            }
+            else
+            {
+                boundsMin = Mod.Config.Mech.ShutdownModifierMin;
+                boundsMax = Mod.Config.Mech.ShutdownModifierMax;
+            }
         }
 
 
         // Shutdown only applies to mechs, quads, and troopers
         public static int ShutdownInitModifier(this AbstractActor actor)
         {
-            if (actor is Turret || actor is Vehicle) return 0;
             if (!(actor is Mech)) return 0;
             
             Mech mech = actor as Mech;
@@ -297,37 +368,32 @@ namespace SkillBasedInit.Helper
             UnitCustomInfo customInfo = mech.GetCustomInfo();
             if (customInfo != null && (customInfo.Naval || customInfo.FakeVehicle)) return 0;
 
-            int shutdownMin;
-            int shutdownMax;
+            int boundsMin, boundsMax;
             if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
             {
-                shutdownMin = Mod.Config.Trooper.ShutdownModifierMin;
-                shutdownMax = Mod.Config.Trooper.ShutdownModifierMax;
+                boundsMin = Mod.Config.Trooper.ShutdownModifierMin;
+                boundsMax = Mod.Config.Trooper.ShutdownModifierMax;
             }
             else
             {
-                shutdownMin = Mod.Config.Mech.ShutdownModifierMin;
-                shutdownMax = Mod.Config.Mech.ShutdownModifierMax;
+                boundsMin = Mod.Config.Mech.ShutdownModifierMin;
+                boundsMax = Mod.Config.Mech.ShutdownModifierMax;
             }
-            Mod.Log.Debug?.Write($"Unit: {mech.DistinctId()} is shutdown, raw bounds => min: {shutdownMin} to max: {shutdownMax}");
+            Mod.Log.Debug?.Write($"Unit: {mech.DistinctId()} is shutdown, raw bounds => min: {boundsMin} to max: {boundsMax}");
 
             Pilot pilot = actor.GetPilot();
             int pilotMod = pilot.CurrentSkillMod(pilot.Piloting, ModStats.MOD_SKILL_PILOT);
-            int adjustedMax = shutdownMax - pilotMod;
-            Mod.Log.Debug?.Write($"  adjustedMax: {adjustedMax} = max: {shutdownMax} - pilotMod: {pilotMod}");
+            int adjustedMax = boundsMax - pilotMod;
+            Mod.Log.Debug?.Write($"  adjustedMax: {adjustedMax} = max: {boundsMax} - pilotMod: {pilotMod}");
 
-            int finalMod;
-            if (adjustedMax <= shutdownMin)
+            int finalMod = adjustedMax;
+            if (adjustedMax <= boundsMin)
             {
-                finalMod = shutdownMin;
-                Mod.Log.Debug?.Write($"  adjustedMax < shutdownMin, returning {shutdownMin}");
-            }
-            else
-            {
-                finalMod = Mod.Random.Next(shutdownMin, shutdownMax);
-                Mod.Log.Debug?.Write($"  finalMod: {finalMod} = Math.Rand({shutdownMin}, {shutdownMax})");
+                finalMod = boundsMin;
+                Mod.Log.Debug?.Write($"  adjustedMax < boundsMin, returning {boundsMin}");
             }
 
+            Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
             return finalMod;
         }
      

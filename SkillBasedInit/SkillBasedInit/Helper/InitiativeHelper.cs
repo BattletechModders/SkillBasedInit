@@ -99,63 +99,9 @@ namespace SkillBasedInit.Helper
                 Mod.Log.Info?.Write($"  Actor: {actor.DistinctId()} has crippled movement! Subtracted {penalty} = roundInit:{roundInitiative}");
             }
 
-            // Check for prone -> mechs
-            if (actor.IsProne)
-            {
-                int rawMod = Mod.Config.ProneModifier + this.pilotingEffectMod;
-                Mod.Log.Debug?.Write($"  Prone Actor: {actor.DistinctId()} has rawMod:{rawMod} = ({Mod.Config.ProneModifier} - {this.pilotingEffectMod})");
-
-                int penalty = Math.Min(0, rawMod);
-                roundInitiative += penalty;
-                Mod.Log.Info?.Write($"  Actor: {actor.DistinctId()} is prone! Subtracted {penalty} = roundInit:{roundInitiative}");
-            }
-
-            // Check for shutdown - mechs, battlearmor
-            if (actor is Mech mech)
-            {
-                UnitCustomInfo customInfo = mech.GetCustomInfo();
-                if (customInfo != null && customInfo.ArmsCountedAsLegs)
-                {
-                    // Quad - check shutdown, prone, crippled movement
-                }
-                else if (customInfo != null && customInfo?.SquadInfo?.Troopers > 1)
-                {
-                    // BattleArmor - check shutdown
-                }
-                else if (customInfo != null && customInfo.Naval)
-                {
-                    // Naval asset
-                }
-                else if (customInfo != null && customInfo.FakeVehicle)
-                {
-                    // Fake vehicle
-                }
-                else
-                {
-                    // base game Mech - check shutdown, prone, crippled movement
-
-                }
-            }
-            else if (actor is Vehicle vehicle)
-            {
-
-            }
-            else if (actor is Turret turret)
-            {
-                // No special processing
-            }
-
+            roundInitiative += actor.ProneInitModifier();
+            roundInitiative += actor.CrippledInitModifier();
             roundInitiative += actor.ShutdownInitModifier();
-
-            if (actor.IsShutDown)
-            {
-                int rawMod = Mod.Config.ShutdownModifier + this.pilotingEffectMod;
-                Mod.Log.Debug?.Write($"  Shutdown Actor: {actor.DistinctId()} has rawMod:{rawMod} = ({Mod.Config.ShutdownModifier} - {this.pilotingEffectMod})");
-                int penalty = Math.Min(0, rawMod);
-                roundInitiative += penalty;
-                Mod.Log.Info?.Write($"  Actor: {actor.DistinctId()} is shutdown! Subtracted {penalty} = roundInit:{roundInitiative}");
-            }
-
 
             // Normalize values
             if (roundInitiative <= 0)
