@@ -4,6 +4,7 @@ using Harmony;
 using IRBTModUtils.Extension;
 using SkillBasedInit.Helper;
 using System;
+using System.Collections.Generic;
 using us.frostraptor.modUtils;
 
 namespace SkillBasedInit {
@@ -187,7 +188,7 @@ namespace SkillBasedInit {
                     Mod.Log.Info?.Write($"Actor:({__instance.DistinctId()}) has stats BaseInit:{baseInit} + PhaseMod:{phaseMod} = modifiedInit:{modifiedInit}.");
                 }
             } else {
-                Mod.Log.Info?.Write($"Actor:({__instance.DistinctId()}) is non-interleaved, returning phase: {Mod.MaxPhase}.");
+                Mod.Log.Debug?.Write($"Actor:({__instance.DistinctId()}) is non-interleaved, returning phase: {Mod.MaxPhase}.");
                 __result = Mod.MaxPhase;
             }
 
@@ -200,49 +201,51 @@ namespace SkillBasedInit {
     {
         static void Postfix(AbstractActor __instance)
         {
-            Mod.Log.Trace?.Write("AA:IES entered");
-
             Mod.Log.Info?.Write($"Initializing statistics for actor: {__instance.DistinctId()}");
-            // Static init values
-            float tonnage = UnitHelper.GetUnitTonnage(__instance);
-            int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
+            
+            // Static init values that default to a specific value
+            int tonnageMod = UnitHelper.GetTonnageModifier(__instance);
             Mod.Log.Info?.Write($"  -- tonnageMod: {tonnageMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_TONNAGE, tonnageMod);
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_TONNAGE, tonnageMod);
 
             int typeMod = UnitHelper.GetTypeModifier(__instance);
             Mod.Log.Info?.Write($"  -- typeMod: {typeMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_UNIT_TYPE, typeMod);
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_UNIT_TYPE, typeMod);
 
-            // Modifier from the engine
-            int engineMod = UnitHelper.GetEngineModifier(__instance);
-            Mod.Log.Info?.Write($"  -- engineMod: {engineMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_ENGINE, engineMod);
-
+            // Pilot related values
             Pilot pilot = __instance.GetPilot();
+
             int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
             Mod.Log.Info?.Write($"  -- pilotTagsMod: {pilotTagsMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_PILOT_TAGS, pilotTagsMod);
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_PILOT_TAGS, pilotTagsMod);
 
-            int roundBase = tonnageMod + typeMod + engineMod + pilotTagsMod;
-            Mod.Log.Info?.Write($"  -- roundBase: {roundBase}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_ROUND_BASE, roundBase);
+            Dictionary<int, int> emptySkillMods = new Dictionary<int, int>();
+            List<string> emptyDefIds = new List<string>();
 
-            // Dynamic init values
-            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_MISC, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_CALLED_SHOT, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_VIGILANCE, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.INIT_MOD_HESITATION, 0);
+            int gutsMod = SkillUtils.GetModifier(pilot, pilot != null ? pilot.Guts : 0, emptySkillMods, emptyDefIds);
+            Mod.Log.Info?.Write($"  -- initial gutsMod: {gutsMod}");
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_SKILL_GUTS, gutsMod);
 
-            // Skills can be impacted by effects
-            __instance.StatCollection.AddStatistic<int>(ModStats.SKILL_MOD_GUTS, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.SKILL_MOD_PILOT, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.SKILL_MOD_TACTICS, 0);
+            int pilotMod = SkillUtils.GetModifier(pilot, pilot != null ? pilot.Piloting : 0, emptySkillMods, emptyDefIds);
+            Mod.Log.Info?.Write($"  -- initial pilotMod: {gutsMod}");
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_SKILL_PILOT, pilotMod);
 
-            __instance.StatCollection.AddStatistic<int>(ModStats.INJURY_BOUNDS_MIN, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.INJURY_BOUNDS_MAX, 0);
+            int tacticsMod = SkillUtils.GetModifier(pilot, pilot != null ? pilot.Tactics : 0, emptySkillMods, emptyDefIds);
+            Mod.Log.Info?.Write($"  -- initial tacticsMod: {gutsMod}");
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_SKILL_TACTICS, tacticsMod);
 
-            __instance.StatCollection.AddStatistic<int>(ModStats.RANDOM_BOUNDS_MIN, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.RANDOM_BOUNDS_MAX, 0);
+            // Dynamic modifiers that default to 0
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_MISC, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_CALLED_SHOT, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_VIGILANCE, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_HESITATION, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_INJURY, 0);
+
+            // Bounds modifiers
+            __instance.StatCollection.AddStatistic<int>(ModStats.BOUNDS_MOD_INSPIRED, 0);
+            
+            // TODO: Modify randomness by pilot 
+            __instance.StatCollection.AddStatistic<int>(ModStats.BOUNDS_MOD_RANDOMNESS, 0);
         }
     }
 }

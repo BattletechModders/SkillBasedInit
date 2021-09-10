@@ -125,6 +125,8 @@ namespace SkillBasedInit {
                 // --- PILOT ---
                 Pilot selectedPilot = __instance.SelectedPilot.Pilot;
 
+                // TODO: Iterate abilities, look for SBI stats, and apply that logic to the tooltip display
+
                 int tacticsMod = PilotHelper.GetTacticsModifier(selectedPilot);
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TACTICS], new object[] { tacticsMod }).ToString());
                 initValue += tacticsMod;

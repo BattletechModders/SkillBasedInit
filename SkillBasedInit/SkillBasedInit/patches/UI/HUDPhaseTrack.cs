@@ -17,7 +17,7 @@ namespace SkillBasedInit {
             // TODO: FIX HARDCODED VALUE
             // Reconcile phase (from 1 - X) with display (X to 1)
             int initNum = (Mod.MaxPhase + 1) - ___currentPhase;
-            int[] phaseBounds = PhaseHelper.CalcPhaseIconBounds(___currentPhase);
+            int[] phaseBounds = InitiativeHelper.CalcPhaseIconBounds(___currentPhase);
             Mod.Log.Debug?.Write($" For currentPhase: {___currentPhase}  phaseBounds are: [ {phaseBounds[0]} {phaseBounds[1]} {phaseBounds[2]} {phaseBounds[3]} {phaseBounds[4]} ]");
 
             for (int i = 0; i < 5; i++) {
@@ -127,7 +127,7 @@ namespace SkillBasedInit {
         public static bool Prefix(CombatHUDPhaseTrack __instance, CombatHUDIconTracker tracker, int phase, int ___currentPhase, List<CombatHUDPhaseIcons> ___PhaseIcons) {
             Mod.Log.Trace?.Write($"CHUDPT:STP - entered at phase: {phase}.");
 
-            int[] bounds = PhaseHelper.CalcPhaseIconBounds(___currentPhase);
+            int[] bounds = InitiativeHelper.CalcPhaseIconBounds(___currentPhase);
             int phaseAsInit = (Mod.MaxPhase + 1) - phase;
             Mod.Log.Trace?.Write($"Phase {phase} is init {phaseAsInit} within currentPhase: {___currentPhase} with bounds: {bounds[0]}-{bounds[4]}");
 

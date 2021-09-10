@@ -2,6 +2,7 @@
 using BattleTech.Data;
 using BattleTech.UI;
 using Harmony;
+using IRBTModUtils.Extension;
 using Localize;
 using SkillBasedInit.Helper;
 using SVGImporter;
@@ -43,12 +44,12 @@ namespace SkillBasedInit.patches {
 
             Mech actorMech = actor as Mech;
             Vehicle actorVehicle = actor as Vehicle;
-            Mod.Log.Debug?.Write($"Building tooltip for {CombatantUtils.Label(actor)} - isMech: {actorMech != null} / isVehicle: {actorVehicle != null}");
+            Mod.Log.Debug?.Write($"Building tooltip for {actor.DistinctId()} - isMech: {actorMech != null} / isVehicle: {actorVehicle != null}");
 
             List<string> chassisDetails = new List<string> { };
 
             // Tonnage
-            float tonnage = actorMech != null ? actorMech.MechDef.Chassis.Tonnage : actorVehicle.VehicleDef.Chassis.Tonnage;
+            float tonnage = UnitHelper.GetUnitTonnage(actor);
             int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
             chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_MECH_TONNAGE], new object[] { tonnageMod }).ToString());
             int expectedInitMax = tonnageMod;

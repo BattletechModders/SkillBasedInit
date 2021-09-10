@@ -64,10 +64,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>E:\steam\SteamApps\common\BATTLETECH\Mods\CustomAmmoCategories\CustomAmmoCategories.dll</HintPath>
     </Reference>
-    <Reference Include="CustomComponents, Version=8.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>E:\steam\SteamApps\common\BATTLETECH\Mods\CustomComponents\CustomComponents.dll</HintPath>
-    </Reference>
     <Reference Include="CustomUnits, Version=0.0.0.78, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>E:\steam\SteamApps\common\BATTLETECH\Mods\CustomUnits\CustomUnits.dll</HintPath>
@@ -105,7 +101,7 @@
     <Compile Include="ModConstants.cs" />
     <Compile Include="ModText.cs" />
     <Compile Include="objects\ActorInitiative.cs" />
-    <Compile Include="Helper\PhaseHelper.cs" />
+    <Compile Include="Helper\InitiativeHelper.cs" />
     <Compile Include="patches\AI\AIPatches.cs" />
     <Compile Include="patches\CombatGameStatePatches.cs" />
     <Compile Include="patches\UI\CombatHUDStatusPanelPatches.cs" />

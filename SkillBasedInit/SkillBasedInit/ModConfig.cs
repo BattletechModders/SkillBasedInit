@@ -4,90 +4,83 @@ using UnityEngine;
 namespace SkillBasedInit
 {
 
-    public class MechOpts
+    public class UnitCfg
     {
-        public int TypeMod = 0;
+        public const int DEFAULT_TYPE_MOD = -99;
 
-        // The init malus when a unit starts the round prone (from a knockdown)
-        public int ProneModifier = -9;
+        public int TypeMod = DEFAULT_TYPE_MOD;
 
-        // The init malus when a unit starts the round shutdown
-        public int ShutdownModifier = -6;
+        // The maximum value used for randomness, from 0 to this value. Offset by piloting mod.
+        public int RandomnessBoundsMaximum = 10;
+        public int RandomnessBoundsMinimum = 2;
 
-        // The init malus when a unit has lost a leg (mechs) or side (vehicles)
-        public int CrippledMovementModifier = -13;
+        public int HesitationBoundsMaximum = 6;
+        public int HesitationBoundsMinimum = 2;
+
+        public float DefaultTonnage = 120f;
+
+        public Dictionary<int, int> InitBaseByTonnage = new Dictionary<int, int>();
     }
 
-    public class TrooperOpts
+    public class MechCfg : UnitCfg
     {
-        public int TypeMod = +2;
+        // The init malus when a unit starts the round prone
+        public int ProneModifierMin = -2;
+        public int ProneModifierMax = -9;
 
+        // The malus for a unit that starts the round shutdown
+        public int ShutdownModifierMin = -2;
+        public int ShutdownModifierMax = -8;
+
+        // The init malus when a unit has lost a movement system
+        public int CrippledModifierMin = -6;
+        public int CrippledModifierMax = -13;
     }
 
-    public class NavalOpts
+    public class TrooperCfg : UnitCfg
     {
-        public int TypeMod = -2;
-
-        // The init malus when a unit has lost a leg (mechs) or side (vehicles)
-        public int CrippledMovementModifier = -13;
+        // The malus for a unit that starts the round shutdown
+        public int ShutdownModifierMin = -2;
+        public int ShutdownModifierMax = -8;
     }
 
-    public class VehicleOpts
+    public class NavalCfg : UnitCfg
     {
-        public int TypeMod = -2;
-
-        // The init malus when a unit has lost a leg (mechs) or side (vehicles)
-        public int CrippledMovementModifier = -13;
+        // The init malus when a unit has lost a movement system
+        public int CrippledModifierMin = -13;
+        public int CrippledModifierMax = -13;
     }
 
-    public class TurretOpts
+    public class TurretCfg : UnitCfg
     {
-        public int TypeMod = -4;
-
         // Turrets don't have tonnage; supply a tonnage based upon unit tags
         public float LightTonnage = 60.0f;
         public float MediumTonnage = 80.0f;
         public float HeavyTonnage = 100.0f;
-        public float DefaultTonnage = 120.0f;
     }
 
-    public class PilotOpts
+    public class VehicleCfg : UnitCfg
     {
+        // The init malus when a unit has lost a movement system
+        public int CrippledModifierMin = -6;
+        public int CrippledModifierMax = -13;
+    }
+
+
+    public class PilotCfg
+    {
+        public int InspirationBoundsMaximum = 4;
+        public int InspirationBoundsMinimum = 1;
 
     }
 
-    public class ModConfig
+    public class IconCfg
     {
-        // If true, extra logging will be printed
-        public bool Debug = false;
+        public string Stopwatch = "sbi_stopwatch";
+    }
 
-        // If true, all the logs will be printed
-        public bool Trace = false;
-
-        public MechOpts Mech = new MechOpts();
-        public TrooperOpts Troopers = new TrooperOpts();
-        public NavalOpts Naval = new NavalOpts();
-        public VehicleOpts Vehicles = new VehicleOpts();
-        public TurretOpts Turrets = new TurretOpts();
-
-        public class IconOpts
-        {
-            public string Stopwatch = "sbi_stopwatch";
-        }
-        public IconOpts Icons = new IconOpts();
-
-        // How many phases to reduce the init of a deferred actor on each deferral
-        public int[] ReservedPenaltyBounds = new int[] { 3, 9 };
-
-        // How many phases to reduce the init of an actor that deferred last round
-        public int[] HesitationPenaltyBounds = new int[] { 2, 7 };
-
-        // Definition of any tags that should result in a flat initiative modifier
-        public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
-            { "pilot_morale_high", 2 },
-            { "pilot_morale_low", -2 }
-        };
-
+    public class ColorCfg
+    {
         // Colors for the UI elements
         /* No affiliation
          default color is: UILookAndColorConstants.PhaseCurrentFill.color
@@ -132,10 +125,86 @@ namespace SkillBasedInit
         public float[] ColorEnemyAlreadyActivated = new float[] { 0.486f, 0.039f, 0.007f, 1.0f };
         public Color EnemyUnactivated;
         public Color EnemyAlreadyActivated;
+    }
+
+    public class ModConfig
+    {
+        public bool Debug = false;
+        public bool Trace = false;
+
+        public MechCfg Mech = new MechCfg();
+        public TrooperCfg Trooper = new TrooperCfg();
+        public NavalCfg Naval = new NavalCfg();
+        public VehicleCfg Vehicle = new VehicleCfg();
+        public TurretCfg Turret = new TurretCfg();
+
+        public PilotCfg Pilot = new PilotCfg();
+
+        public IconCfg Icons = new IconCfg();
+
+        // How many phases to reduce the init of a deferred actor on each deferral
+        public int[] ReservedPenaltyBounds = new int[] { 3, 9 };
+
+        // How many phases to reduce the init of an actor that deferred last round
+        public int[] HesitationPenaltyBounds = new int[] { 2, 7 };
+
+        // Definition of any tags that should result in a flat initiative modifier
+        public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
+            { "pilot_morale_high", 2 },
+            { "pilot_morale_low", -2 }
+        };
+
+
 
         public void Init()
         {
+            InitTypeDefaults();
             InitializeColors();
+        }
+
+        private void InitTypeDefaults()
+        {
+            Dictionary<int, int> DefaultInitBaseByTonnage = new Dictionary<int, int>
+            {
+                {  0, 22 }, // 0-5
+                {  1, 21 }, // 10-15
+                {  2, 20 }, // 20-25
+                {  3, 19 }, // 30-35
+                {  4, 18 }, // 40-45
+                {  5, 17 }, // 50-55
+                {  6, 16 }, // 60-65
+                {  7, 15 }, // 70-75
+                {  8, 14 }, // 80-85
+                {  9, 13 }, // 90-95
+                { 10, 12 }, // 100
+                { 999, 9 } // 105+
+            };
+
+            if (Mod.Config.Mech.InitBaseByTonnage.Count == 0)
+                Mod.Config.Mech.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
+            if (Mod.Config.Mech.TypeMod == UnitCfg.DEFAULT_TYPE_MOD)
+                Mod.Config.Mech.TypeMod = 0;
+
+            if (Mod.Config.Naval.InitBaseByTonnage.Count == 0)
+                Mod.Config.Naval.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
+            if (Mod.Config.Naval.TypeMod == UnitCfg.DEFAULT_TYPE_MOD)
+                Mod.Config.Naval.TypeMod = -2;
+
+            if (Mod.Config.Trooper.InitBaseByTonnage.Count == 0)
+                Mod.Config.Trooper.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
+            if (Mod.Config.Trooper.TypeMod == UnitCfg.DEFAULT_TYPE_MOD)
+                Mod.Config.Trooper.TypeMod = +2;
+
+            if (Mod.Config.Turret.InitBaseByTonnage.Count == 0)
+                Mod.Config.Turret.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
+            if (Mod.Config.Turret.TypeMod == UnitCfg.DEFAULT_TYPE_MOD)
+                Mod.Config.Turret.TypeMod = -4;
+
+            if (Mod.Config.Vehicle.InitBaseByTonnage.Count == 0)
+                Mod.Config.Vehicle.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
+            if (Mod.Config.Vehicle.TypeMod == UnitCfg.DEFAULT_TYPE_MOD)
+                Mod.Config.Vehicle.TypeMod = -2;
+
         }
 
         private void InitializeColors()
@@ -171,11 +240,11 @@ namespace SkillBasedInit
             Mod.Log.Info?.Write("");
 
             Mod.Log.Info?.Write($"  == TROOPER ==");
-            Mod.Log.Info?.Write($"  TypeMod: {this.Troopers.TypeMod}");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Trooper.TypeMod}");
             Mod.Log.Info?.Write(""); 
 
             Mod.Log.Info?.Write($"  == VEHICLE ==");
-            Mod.Log.Info?.Write($"  TypeMod: {this.Vehicles.TypeMod}  CrippledMovementMod:{this.Vehicles.CrippledMovementModifier} ");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Vehicle.TypeMod}  CrippledMovementMod:{this.Vehicle.CrippledMovementModifier} ");
             Mod.Log.Info?.Write("");
 
             Mod.Log.Info?.Write($"  == NAVAL ==");
@@ -183,10 +252,9 @@ namespace SkillBasedInit
             Mod.Log.Info?.Write("");
 
             Mod.Log.Info?.Write($"  == TURRET ==");
-            Mod.Log.Info?.Write($"  TypeMod: {this.Turrets.TypeMod}  Tonnages =>  Light:{this.Turrets.LightTonnage}  Medium:{this.Turrets.MediumTonnage}  Heavy:{this.Turrets.HeavyTonnage}  Default:{this.Turrets.DefaultTonnage}");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Turret.TypeMod}  Tonnages =>  Light:{this.Turret.LightTonnage}  Medium:{this.Turret.MediumTonnage}  Heavy:{this.Turret.HeavyTonnage}  Default:{this.Turret.DefaultTonnage}");
             Mod.Log.Info?.Write("");
 
-            
             Mod.Log.Info?.Write("=== MOD CONFIG END ===");
         }
     }
