@@ -75,30 +75,6 @@ namespace SkillBasedInit.Helper
             roundInitiative += pilot.RandomnessModifier(unitConfig);
             roundInitiative += pilot.InspiredModifier(unitConfig);
 
-            // Check for leg / side loss
-            var isMovementCrippled = false;
-            if (this.type == ActorType.Mech)
-            {
-                var mech = (Mech)actor;
-                isMovementCrippled = mech.IsLocationDestroyed(ChassisLocations.LeftLeg) || mech.IsLocationDestroyed(ChassisLocations.RightLeg) ? true : false;
-            }
-            else if (this.type == ActorType.Vehicle)
-            {
-                // TODO: This is pretty unlikely; vehicles rarely get crippled before they are destroyed. Find another solution?
-                var vehicle = (Vehicle)actor;
-                isMovementCrippled = vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right) ? true : false;
-            }
-
-            if (isMovementCrippled) //  mechs, vehicles
-            {
-                int rawMod = Mod.Config.CrippledMovementModifier + this.pilotingEffectMod;
-                Mod.Log.Debug?.Write($"  Crippled Actor: {actor.DistinctId()} has rawMod:{rawMod} = ({Mod.Config.CrippledMovementModifier} - {this.pilotingEffectMod})");
-
-                int penalty = Math.Min(-1, rawMod);
-                roundInitiative += penalty;
-                Mod.Log.Info?.Write($"  Actor: {actor.DistinctId()} has crippled movement! Subtracted {penalty} = roundInit:{roundInitiative}");
-            }
-
             roundInitiative += actor.ProneInitModifier();
             roundInitiative += actor.CrippledInitModifier();
             roundInitiative += actor.ShutdownInitModifier();
@@ -125,7 +101,7 @@ namespace SkillBasedInit.Helper
                 actor.Initiative = (Mod.MaxPhase + 1) - roundInitiative;
             }
 
-            Mod.Log.Info?.Write($"== Actor: {actor.DistinctId()} has init:({roundInitiative}) from base:{roundInitBase} - variance:{roundVariance} plus modifiers.");
+            Mod.Log.Info?.Write($"  using phase: {actor.Initiative} for actor.");
         }
 
 

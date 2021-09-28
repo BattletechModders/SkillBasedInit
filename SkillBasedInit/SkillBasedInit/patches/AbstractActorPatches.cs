@@ -224,15 +224,15 @@ namespace SkillBasedInit {
 
             int gutsMod = SkillUtils.GetModifier(pilot, pilot != null ? pilot.Guts : 0, emptySkillMods, emptyDefIds);
             Mod.Log.Info?.Write($"  -- initial gutsMod: {gutsMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_SKILL_GUTS, gutsMod);
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_GUTS, gutsMod);
 
             int pilotMod = SkillUtils.GetModifier(pilot, pilot != null ? pilot.Piloting : 0, emptySkillMods, emptyDefIds);
             Mod.Log.Info?.Write($"  -- initial pilotMod: {gutsMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_SKILL_PILOT, pilotMod);
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_PILOT, pilotMod);
 
             int tacticsMod = SkillUtils.GetModifier(pilot, pilot != null ? pilot.Tactics : 0, emptySkillMods, emptyDefIds);
             Mod.Log.Info?.Write($"  -- initial tacticsMod: {gutsMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_SKILL_TACTICS, tacticsMod);
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_TACTICS, tacticsMod);
 
             // Dynamic modifiers that default to 0
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_MISC, 0);

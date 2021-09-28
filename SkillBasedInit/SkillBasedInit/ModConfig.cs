@@ -142,6 +142,8 @@ namespace SkillBasedInit
 
         public IconCfg Icons = new IconCfg();
 
+        public ColorCfg Colors = new ColorCfg();
+
         // How many phases to reduce the init of a deferred actor on each deferral
         public int[] ReservedPenaltyBounds = new int[] { 3, 9 };
 
@@ -209,17 +211,25 @@ namespace SkillBasedInit
 
         private void InitializeColors()
         {
-            FriendlyUnactivated = new Color(ColorFriendlyUnactivated[0], ColorFriendlyUnactivated[1], ColorFriendlyUnactivated[2], ColorFriendlyUnactivated[3]);
-            FriendlyAlreadyActivated = new Color(ColorFriendlyAlreadyActivated[0], ColorFriendlyAlreadyActivated[1], ColorFriendlyAlreadyActivated[2], ColorFriendlyAlreadyActivated[3]);
+            this.Colors.FriendlyUnactivated = new Color(this.Colors.ColorFriendlyUnactivated[0], this.Colors.ColorFriendlyUnactivated[1], 
+                this.Colors.ColorFriendlyUnactivated[2], this.Colors.ColorFriendlyUnactivated[3]);
+            this.Colors.FriendlyAlreadyActivated = new Color(this.Colors.ColorFriendlyAlreadyActivated[0], this.Colors.ColorFriendlyAlreadyActivated[1], 
+                this.Colors.ColorFriendlyAlreadyActivated[2], this.Colors.ColorFriendlyAlreadyActivated[3]);
 
-            AlliedUnactivated = new Color(ColorAlliedUnactivated[0], ColorAlliedUnactivated[1], ColorAlliedUnactivated[2], ColorAlliedUnactivated[3]);
-            AlliedAlreadyActivated = new Color(ColorAlliedAlreadyActivated[0], ColorAlliedAlreadyActivated[1], ColorAlliedAlreadyActivated[2], ColorAlliedAlreadyActivated[3]);
+            this.Colors.AlliedUnactivated = new Color(this.Colors.ColorAlliedUnactivated[0], this.Colors.ColorAlliedUnactivated[1], 
+                this.Colors.ColorAlliedUnactivated[2], this.Colors.ColorAlliedUnactivated[3]);
+            this.Colors.AlliedAlreadyActivated = new Color(this.Colors.ColorAlliedAlreadyActivated[0], this.Colors.ColorAlliedAlreadyActivated[1], 
+                this.Colors.ColorAlliedAlreadyActivated[2], this.Colors.ColorAlliedAlreadyActivated[3]);
 
-            NeutralUnactivated = new Color(ColorNeutralUnactivated[0], ColorNeutralUnactivated[1], ColorNeutralUnactivated[2], ColorNeutralUnactivated[3]);
-            NeutralAlreadyActivated = new Color(ColorNeutralAlreadyActivated[0], ColorNeutralAlreadyActivated[1], ColorNeutralAlreadyActivated[2], ColorNeutralAlreadyActivated[3]);
+            this.Colors.NeutralUnactivated = new Color(this.Colors.ColorNeutralUnactivated[0], this.Colors.ColorNeutralUnactivated[1], 
+                this.Colors.ColorNeutralUnactivated[2], this.Colors.ColorNeutralUnactivated[3]);
+            this.Colors.NeutralAlreadyActivated = new Color(this.Colors.ColorNeutralAlreadyActivated[0], this.Colors.ColorNeutralAlreadyActivated[1],
+                this.Colors.ColorNeutralAlreadyActivated[2], this.Colors.ColorNeutralAlreadyActivated[3]);
 
-            EnemyUnactivated = new Color(ColorEnemyUnactivated[0], ColorEnemyUnactivated[1], ColorEnemyUnactivated[2], ColorEnemyUnactivated[3]);
-            EnemyAlreadyActivated = new Color(ColorEnemyAlreadyActivated[0], ColorEnemyAlreadyActivated[1], ColorEnemyAlreadyActivated[2], ColorEnemyAlreadyActivated[3]);
+            this.Colors.EnemyUnactivated = new Color(this.Colors.ColorEnemyUnactivated[0], this.Colors.ColorEnemyUnactivated[1],
+                this.Colors.ColorEnemyUnactivated[2], this.Colors.ColorEnemyUnactivated[3]);
+            this.Colors.EnemyAlreadyActivated = new Color(this.Colors.ColorEnemyAlreadyActivated[0], this.Colors.ColorEnemyAlreadyActivated[1],
+                this.Colors.ColorEnemyAlreadyActivated[2], this.Colors.ColorEnemyAlreadyActivated[3]);
         }
 
         public void LogConfig()
@@ -236,7 +246,12 @@ namespace SkillBasedInit
             Mod.Log.Info?.Write("");
 
             Mod.Log.Info?.Write($"  == MECH ==");
-            Mod.Log.Info?.Write($"  TypeMod: {this.Mech.TypeMod}  ProneMod:{this.Mech.ProneModifier}  ShutdownMod:{this.Mech.ShutdownModifier}  CrippledMovementMod:{this.Mech.CrippledMovementModifier}");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Mech.TypeMod} DefaultTonnage: {this.Mech.DefaultTonnage}" +
+                $" CrippledMod (max: {this.Mech.CrippledModifierMax} min: {this.Mech.CrippledModifierMin})" +
+                $" Hesitation: (max: {this.Mech.HesitationBoundsMaximum} min: {this.Mech.HesitationBoundsMinimum}) " +
+                $" Prone: (max: {this.Mech.ProneModifierMax} min: {this.Mech.ProneModifierMin}) " +
+                $" Randomness: (max: {this.Mech.RandomnessBoundsMaximum} min: {this.Mech.RandomnessBoundsMinimum}) " +
+                $" Shutdown: (max: {this.Mech.ShutdownModifierMax} min: {this.Mech.ShutdownModifierMin})");
             Mod.Log.Info?.Write("");
 
             Mod.Log.Info?.Write($"  == TROOPER ==");
@@ -244,15 +259,21 @@ namespace SkillBasedInit
             Mod.Log.Info?.Write(""); 
 
             Mod.Log.Info?.Write($"  == VEHICLE ==");
-            Mod.Log.Info?.Write($"  TypeMod: {this.Vehicle.TypeMod}  CrippledMovementMod:{this.Vehicle.CrippledMovementModifier} ");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Vehicle.TypeMod}" +
+                $" CrippledMod (max: {this.Mech.CrippledModifierMax} min: {this.Mech.CrippledModifierMin})"
+                );
+
             Mod.Log.Info?.Write("");
 
             Mod.Log.Info?.Write($"  == NAVAL ==");
-            Mod.Log.Info?.Write($"  TypeMod: {this.Naval.TypeMod}  CrippledMovementMod:{this.Naval.CrippledMovementModifier} ");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Vehicle.TypeMod}" +
+                $" CrippledMod (max: {this.Mech.CrippledModifierMax} min: {this.Mech.CrippledModifierMin})"
+                );
             Mod.Log.Info?.Write("");
 
             Mod.Log.Info?.Write($"  == TURRET ==");
-            Mod.Log.Info?.Write($"  TypeMod: {this.Turret.TypeMod}  Tonnages =>  Light:{this.Turret.LightTonnage}  Medium:{this.Turret.MediumTonnage}  Heavy:{this.Turret.HeavyTonnage}  Default:{this.Turret.DefaultTonnage}");
+            Mod.Log.Info?.Write($"  TypeMod: {this.Turret.TypeMod}  " +
+                $"Tonnages (Light:{this.Turret.LightTonnage}  Medium:{this.Turret.MediumTonnage}  Heavy:{this.Turret.HeavyTonnage}  Default:{this.Turret.DefaultTonnage}) ");
             Mod.Log.Info?.Write("");
 
             Mod.Log.Info?.Write("=== MOD CONFIG END ===");

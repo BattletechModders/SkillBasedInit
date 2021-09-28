@@ -308,7 +308,7 @@ namespace SkillBasedInit.Helper
         {
             if (!((actor is Vehicle) || (actor is Mech))) return 0;
 
-            int boundsMin, boundsMax;
+            int boundsMin = 0, boundsMax = 0;
             if (actor is Vehicle vehicle &&
                 (vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right))
                 )
@@ -321,39 +321,52 @@ namespace SkillBasedInit.Helper
                 UnitCustomInfo customInfo = mech.GetCustomInfo();
                 if (customInfo != null && customInfo.FakeVehicle)
                 {
+                    // CU treats legs as vehicle sides. 
+                    if (mech.IsLegged)
+                    {
+                        boundsMin = Mod.Config.Vehicle.CrippledModifierMin;
+                        boundsMax = Mod.Config.Vehicle.CrippledModifierMax;
+                    }
 
                 }
                 else if (customInfo != null && customInfo.Naval)
                 {
-
+                    // CU treats legs as vehicle sides. 
+                    if (mech.IsLegged)
+                    {
+                        boundsMin = Mod.Config.Naval.CrippledModifierMin;
+                        boundsMax = Mod.Config.Naval.CrippledModifierMax;
+                    }
                 }
                 else if (customInfo.SquadInfo == null || customInfo.SquadInfo.Troopers < 1)
                 {
-
+                    // Cannot be crippled, do nothing
+                    boundsMin = 0;
+                    boundsMax = 0;
                 }
-                else if (customInfo == null)
+                // Should be a mech, or a CU that is mech-like
+                else if (mech.IsLegged)
                 {
-
+                    boundsMin = Mod.Config.Mech.CrippledModifierMin;
+                    boundsMax = Mod.Config.Mech.CrippledModifierMax;
                 }
-
             }
 
+            if (boundsMax == 0) return 0;
 
-            UnitCustomInfo customInfo = mech.GetCustomInfo();
-            if (customInfo != null && (customInfo.Naval || customInfo.FakeVehicle)) return 0;
+            Pilot pilot = actor.GetPilot();
+            int pilotMod = pilot.CurrentSkillMod(pilot.Piloting, ModStats.MOD_SKILL_PILOT);
+            int adjustedMax = boundsMax - pilotMod;
 
-            int boundsMin;
-            int boundsMax;
-            if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
+            int finalMod = adjustedMax;
+            if (adjustedMax <= boundsMin)
             {
-                boundsMin = Mod.Config.Trooper.ShutdownModifierMin;
-                boundsMax = Mod.Config.Trooper.ShutdownModifierMax;
+                finalMod = boundsMin;
+                Mod.Log.Debug?.Write($"  adjustedMax < boundsMin, returning {boundsMin}");
             }
-            else
-            {
-                boundsMin = Mod.Config.Mech.ShutdownModifierMin;
-                boundsMax = Mod.Config.Mech.ShutdownModifierMax;
-            }
+
+            Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
+            return finalMod;
         }
 
 
