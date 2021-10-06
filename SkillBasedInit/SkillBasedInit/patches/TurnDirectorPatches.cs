@@ -21,12 +21,4 @@ namespace SkillBasedInit.patches {
         }
     }
 
-    [HarmonyPatch(typeof(TurnDirector), "OnCombatGameDestroyed")]
-    public static class TurnDirector_OnCombatGameDestroyed {
-        public static void Postfix(TurnDirector __instance) {
-            Mod.Log.Trace?.Write("TD:OCGD:post - entered.");
-            Mod.Log.Debug?.Write($" TurnDirector - Combat complete, destroying initiative map.");
-            ActorInitiativeHolder.OnCombatComplete();
-        }
-    }
 }

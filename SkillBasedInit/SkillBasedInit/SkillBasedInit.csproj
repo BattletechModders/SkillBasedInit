@@ -100,7 +100,6 @@
   <ItemGroup>
     <Compile Include="ModConstants.cs" />
     <Compile Include="ModText.cs" />
-    <Compile Include="objects\ActorInitiative.cs" />
     <Compile Include="Helper\InitiativeHelper.cs" />
     <Compile Include="patches\AI\AIPatches.cs" />
     <Compile Include="patches\CombatGameStatePatches.cs" />
@@ -111,7 +110,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ModConfig.cs" />
     <Compile Include="patches\AbstractActorPatches.cs" />
-    <Compile Include="patches\InjuryPatches.cs" />
     <Compile Include="patches\UI\HUDPatches.cs" />
     <Compile Include="patches\UI\LoadoutPatches.cs" />
     <Compile Include="patches\ForceUnitPhasePatches.cs" />
