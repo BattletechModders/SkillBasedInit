@@ -144,19 +144,11 @@ namespace SkillBasedInit
 
         public ColorCfg Colors = new ColorCfg();
 
-        // How many phases to reduce the init of a deferred actor on each deferral
-        public int[] ReservedPenaltyBounds = new int[] { 3, 9 };
-
-        // How many phases to reduce the init of an actor that deferred last round
-        public int[] HesitationPenaltyBounds = new int[] { 2, 7 };
-
         // Definition of any tags that should result in a flat initiative modifier
         public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
             { "pilot_morale_high", 2 },
             { "pilot_morale_low", -2 }
         };
-
-
 
         public void Init()
         {
@@ -237,7 +229,6 @@ namespace SkillBasedInit
             Mod.Log.Info?.Write("=== MOD CONFIG BEGIN ===");
             Mod.Log.Info?.Write($"  DEBUG:{this.Debug} Trace:{this.Trace}");
 
-            Mod.Log.Info?.Write($"  ReservedPenaltyBounds:{ReservedPenaltyBounds[0]}-{ReservedPenaltyBounds[1]} HestitationPenaltyBounds:{HesitationPenaltyBounds[0]}-{HesitationPenaltyBounds[1]} ");
             Mod.Log.Info?.Write($"  == Pilot Tag Modifiers");
             foreach (KeyValuePair<string, int> kvp in PilotTagModifiers)
             {

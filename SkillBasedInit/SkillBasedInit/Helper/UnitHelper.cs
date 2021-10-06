@@ -338,7 +338,7 @@ namespace SkillBasedInit.Helper
                         boundsMax = Mod.Config.Naval.CrippledModifierMax;
                     }
                 }
-                else if (customInfo.SquadInfo == null || customInfo.SquadInfo.Troopers < 1)
+                else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
                 {
                     // Cannot be crippled, do nothing
                     boundsMin = 0;
@@ -353,6 +353,7 @@ namespace SkillBasedInit.Helper
             }
 
             if (boundsMax == 0) return 0;
+            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} is crippled, raw bounds => min: {boundsMin} to max: {boundsMax}");
 
             Pilot pilot = actor.GetPilot();
             int pilotMod = pilot.CurrentSkillMod(pilot.Piloting, ModStats.MOD_SKILL_PILOT);
@@ -381,7 +382,7 @@ namespace SkillBasedInit.Helper
             UnitCustomInfo customInfo = mech.GetCustomInfo();
             if (customInfo != null && (customInfo.Naval || customInfo.FakeVehicle)) return 0;
 
-            int boundsMin, boundsMax;
+            int boundsMin = 0, boundsMax = 0;
             if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
             {
                 boundsMin = Mod.Config.Trooper.ShutdownModifierMin;
@@ -409,6 +410,73 @@ namespace SkillBasedInit.Helper
             Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
             return finalMod;
         }
+
+        public static int GetHesitationPenalty(this AbstractActor actor)
+        {
+            if (actor == null) return 0;
+
+            int boundsMin = 0, boundsMax = 0;
+            if (actor is Turret)
+            {
+                boundsMax = Mod.Config.Turret.HesitationBoundsMaximum;
+                boundsMin = Mod.Config.Turret.HesitationBoundsMinimum;
+            }
+            else if (actor is Vehicle)
+            {
+                boundsMax = Mod.Config.Vehicle.HesitationBoundsMaximum;
+                boundsMin = Mod.Config.Vehicle.HesitationBoundsMinimum;
+            }
+            else if (actor is Mech mech)
+            {
+
+                UnitCustomInfo customInfo = mech.GetCustomInfo();
+                if (customInfo.FakeVehicle)
+                {
+                    boundsMax = Mod.Config.Vehicle.HesitationBoundsMaximum;
+                    boundsMin = Mod.Config.Vehicle.HesitationBoundsMinimum;
+                }
+                else if (customInfo.Naval)
+                {
+                    boundsMax = Mod.Config.Naval.HesitationBoundsMaximum;
+                    boundsMin = Mod.Config.Naval.HesitationBoundsMinimum;
+                }
+                else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
+                {
+                    // Cannot be crippled, do nothing
+                    boundsMax = Mod.Config.Trooper.HesitationBoundsMaximum;
+                    boundsMin = Mod.Config.Trooper.HesitationBoundsMinimum;
+                }
+                else
+                {
+                    boundsMax = Mod.Config.Mech.HesitationBoundsMaximum;
+                    boundsMin = Mod.Config.Mech.HesitationBoundsMinimum;
+                }
+            }
+            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} hestiation raw bounds => min: {boundsMin} to max: {boundsMax}");
+            
+            int rawMod = Mod.Random.Next(boundsMin, boundsMax);
+            int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION);
+            int finalMod = rawMod + actorMod;
+
+            if (finalMod < 0)
+            {
+                Mod.Log.Info?.Write($"Removing negative hestitation: {finalMod} to 0");
+                finalMod = 0;
+            }
+
+            Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
+            return finalMod;
+        }
      
+        public static int GetCalledShotModifier(this AbstractActor attacker)
+        {
+
+        }
+
+        public static int GetVigilanceModifier(this AbstractActor actor)
+        {
+
+        }
+
     }
 }

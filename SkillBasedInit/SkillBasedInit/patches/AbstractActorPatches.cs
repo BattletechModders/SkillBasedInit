@@ -14,7 +14,7 @@ namespace SkillBasedInit {
         public static void Postfix(AbstractActor __instance, int round) {
             Mod.Log.Trace?.Write("AA:ONR - entered.");
             Mod.Log.Debug?.Write($"  AbstractActor starting new round {round}, recalculating initiative element for actor:{__instance.DisplayName}");
-            ActorInitiativeHolder.OnRoundBegin(__instance);
+            InitiativeHelper.UpdateInitiative(__instance);
         }
     }
 
@@ -22,18 +22,25 @@ namespace SkillBasedInit {
     public static class AbstractActor_DeferUnit {
         public static void Postfix(AbstractActor __instance) {
             Mod.Log.Trace?.Write($"AA:DU - entered.");
-            int reservePenalty = Mod.Random.Next(Mod.Config.ReservedPenaltyBounds[0], Mod.Config.ReservedPenaltyBounds[1]);
-            Mod.Log.Debug?.Write($"  Deferring Actor:({__instance.DistinctId()}) " +
-                $"initiative:{__instance.Initiative} by:{reservePenalty} to:{__instance.Initiative + reservePenalty}");
-            __instance.Initiative += reservePenalty;
-            if (__instance.Initiative > Mod.MaxPhase) {
-                __instance.Initiative = Mod.MaxPhase;
+
+            int penalty = __instance.GetHesitationPenalty();
+            int newInit = __instance.Initiative + penalty;
+            if (newInit > Mod.MaxPhase) newInit = Mod.MaxPhase;
+
+            Mod.Log.Debug?.Write($"  Deferring Actor:({__instance.DistinctId()}) initiative:{__instance.Initiative} by:{penalty} to:{newInit}");
+            __instance.Initiative = newInit;
+
+            // Save the penalty to the actor for next round
+            try
+            {
+                __instance.StatCollection.ModifyStat<int>(__instance.GUID, -1, ModStats.STATE_HESITATION, StatCollection.StatOperation.Int_Add, penalty);
+                Mod.Log.Info?.Write($"Hesitation increased to {__instance.StatCollection.GetValue<int>(ModStats.STATE_HESITATION)} for actor: {__instance.DistinctId()}");
+            }
+            catch (Exception e)
+            {
+                Mod.Log.Error?.Write(e, $"Failed to update init for actor: {__instance.DistinctId()} to {newInit}");
             }
 
-            // Save some part of the reserve surplus as a penalty for the next round
-            ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(__instance);
-            actorInit.reservedCount++;
-            Mod.Log.Debug?.Write($"  Actor:({__instance.DistinctId()}) reservedCount incremented to:{actorInit.reservedCount}");
         }
 
     }

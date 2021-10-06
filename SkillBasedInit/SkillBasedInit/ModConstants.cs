@@ -20,14 +20,14 @@ namespace SkillBasedInit
         public const string MOD_MISC = "SBI_MOD_MISC";
 
         // Assumed to be provided by status effects, consumed on recalculation
-        public const string MOD_CALLED_SHOT = "SBI_MOD_CALLED_SHOT";
-        public const string STATE_CALLED_SHOT = "SBI_STATE_CALLED_SHOT";
+        public const string MOD_CALLED_SHOT = "SBI_MOD_CALLED_SHOT"; // modifies generated called shot
+        public const string STATE_CALLED_SHOT = "SBI_STATE_CALLED_SHOT"; //  current called shot penalty
 
-        public const string MOD_VIGILANCE = "SBI_MOD_VIGILANCE";
-        public const string STATE_VIGILIANCE = "SBI_STATE_VIGILANCE";
+        public const string MOD_VIGILANCE = "SBI_MOD_VIGILANCE"; // modifies generated vigilance
+        public const string STATE_VIGILIANCE = "SBI_STATE_VIGILANCE"; // current vigilant bonus
 
-        public const string MOD_HESITATION = "SBI_MOD_HESITATION";
-        public const string STATE_HESITATION = "SBI_STATE_HESITATION";
+        public const string MOD_HESITATION = "SBI_MOD_HESITATION"; // modifies generated hesitation
+        public const string STATE_HESITATION = "SBI_STATE_HESITATION"; // current hesitation penalty
 
         // Morale or Fury inspired state 
         public const string BOUNDS_MOD_INSPIRED = "SBI_BOUNDS_MOD_INSPIRED";

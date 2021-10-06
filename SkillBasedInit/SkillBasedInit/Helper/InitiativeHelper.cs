@@ -50,26 +50,31 @@ namespace SkillBasedInit.Helper
             if (actor.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT) != 0)
             {
                 // Actor was hit by a called shot sometime after its turn, apply the penalty
-                roundInitiative = actor.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT);
+                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT);
                 Mod.Log.Info?.Write($"  calledShotMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT)}");
                 actor.StatCollection.Set<int>(ModStats.MOD_CALLED_SHOT, 0);
             }
 
             if (actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE) != 0)
             {
-                roundInitiative = actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE);
+                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE);
                 Mod.Log.Info?.Write($"  vigilanceMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE)}");
                 actor.StatCollection.Set<int>(ModStats.MOD_VIGILANCE, 0);
             }
 
+            Pilot pilot = actor.GetPilot();
+
             if (actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION) != 0)
             {
-                roundInitiative = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION);
-                Mod.Log.Info?.Write($"  hesitationMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION)}");
-                actor.StatCollection.Set<int>(ModStats.MOD_HESITATION, 0);
-            }
+                // Reduce by pilot's tactics modifier
+                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION);
+                int tacticsMod = pilot.CurrentSkillMod(pilot.Tactics, ModStats.MOD_SKILL_TACTICS);
+                int updatedMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION) - tacticsMod;
+                if (updatedMod < 0) updatedMod = 0;
+                Mod.Log.Info?.Write($"  hesitationMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION)} - tacticsMod: {tacticsMod} => {updatedMod}");
 
-            Pilot pilot = actor.GetPilot();
+                actor.StatCollection.Set<int>(ModStats.MOD_HESITATION, updatedMod);
+            }
 
             // Generate the random element
             roundInitiative += pilot.RandomnessModifier(unitConfig);
@@ -103,7 +108,6 @@ namespace SkillBasedInit.Helper
 
             Mod.Log.Info?.Write($"  using phase: {actor.Initiative} for actor.");
         }
-
 
         // Calculate the left and right phase boundaries *as initiative* 
         //   Will calculate 
