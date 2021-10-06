@@ -1,6 +1,8 @@
 ﻿using BattleTech;
 using BattleTech.UI;
 using Harmony;
+using IRBTModUtils;
+using SkillBasedInit.Helper;
 using System;
 using System.Collections.Generic;
 
@@ -12,7 +14,7 @@ namespace SkillBasedInit {
             Mod.Log.Debug?.Write("CHUDPT::RPC - entered.");
 
             if (__instance == null || ___phaseBars == null) { return true; }
-            if (!ModState.Combat.TurnDirector.IsInterleaved) { return true; }
+            if (!SharedState.Combat.TurnDirector.IsInterleaved) { return true; }
 
             // TODO: FIX HARDCODED VALUE
             // Reconcile phase (from 1 - X) with display (X to 1)
