@@ -173,19 +173,6 @@ In the `mod.json` file the property `PilotTagModifiers` defines a dictionary key
 * **pilot_morale_high** : +2
 * **pilot_morale_low**: -2
 
-#### Melee Modifiers
-
-In the `mod.json` file the property `PilotTagMeleeMultipliers` defines a dictionary keyed by `pilot tag` with a value of an array with two values. The first value defines a bonus or penalty to the melee tonnage multiplier as a percentage. The second value defines the bonus or penalty used when defending. These values are floats, and are added to a base of 1.0. For an array value of `[ 0.25, 0.50 ]` the model would multiply it's tonnage by 1.25 when determining the melee attack modifier, and 0.50 when defending against a melee attack. A 50 ton mech would count as 62.5 tons (rounded down), for attacking, and 75 tons for defending. Currently the tags with these modifiers are:
-
-* **pilot_drunk** : 0.0, 0.5
-* **pilot_gladiator** : 0.25, 0.25
-* **pilot_assassin** : 0.5, 0.0
-
-#### Special bonuses
-
-Some tags will provide unique bonuses that aren't easily modifable. The tweaks are:
-
-* **pilot_reckless** (PLANNED) - the unit cannot reserve
 
 ### Tonnage Impact
 The tonnage of a unit determines a multiplier applied to the lower (3) and upper (5) bounds of the phase calculation. After multiplication, the lower bound is rounded down, while the upper bound is rounded up.
@@ -194,49 +181,6 @@ Tonnage | 05 | 10-15 | 20-25 | 30-35 | 40-45 | 50-55 | 60-65 | 70-75 | 80-85 | 9
 -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
 *Base Initiative* | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 9
 
-### Engine Impact
-This mod breaks units down into 10-ton ranges, such as 20-25 tons, 30-35 tons, etc. Within each range, there is a sweet-spot for engine ratings where a unit is considered to have a typical engine for its class. Units with engine ratings less than this midpoint suffer an initiative penalty from -6 to -2, while units with engine ratings above this midpoint gain a bonus between +2 to +6.
-
-For a given midpoint, the modifier bounds are defined below.
-
-
-Modifier | -6 | -4 | -2 | +0 | +2 | +4 | +6
--- | -- | -- | -- | -- | -- | -- | --
-Midpoint Multiplier | 0.3 | 0.6 | 0.8 | 1.0 | 1.2 | 1.4 | 1.7
-Example | 2	| 4 | 6	| 8	| 10 | 12	| 14
-
-Each unit's engine rating is divided by its tonnage to define an **engine ratio**. Ratios above the midpoint are are rounded up to the nearest integer, while ratios below the midpoint are rounded down. These are then compared against the bounds to determine the modifier that will be applied.
-
-The breakpoints by tonnage and rating are defined below:
-
-Tons / Mod | -6 | -4 | -2 | +0 | +2 | +4 | +6
--- | -- | -- | -- | -- | -- | -- | --
-5 | 15| 30 | 40 | 55 | 70 | 80 | 95
-10 | 30 | 60 | 80 | 100 | 120 | 140 | 170
-15 | 30 | 75 | 105 | 135 | 165 | 195 | 240
-20 | 40 | 80 | 120 | 160 | 200 | 240 | 280
-25 | 50 | 100 | 150 | 200 | 250 | 300 | 350
-30 | 60 | 120 | 150 | 210 | 270 | 300 | 360
-35 | 70 | 140 | 175 | 245 | 315 | 350 | 420
-40 | 40 | 120 | 160 | 240 | 320 | 360 | NA
-45 | 45 | 135 | 180 | 270 | 360 | 405 | NA
-50 | 50 | 150 | 200 | 250 | 300 | 350 | NA
-55 | 55 | 165 | 220 | 275 | 330 | 385 | NA
-60 | 60 | 120 | 180 | 240 | 300 | 360 | NA
-65 | 65 | 130 | 195 | 260 | 325 | 390 | NA
-70 | 70 | 140 | 210 | 280 | 350 | 420 | NA
-75 | 75 | 150 | 225 | 300 | 375 | 450 | NA
-80 | NA | 80 | 160 | 240 | 320 | 400 | NA
-85 | NA | 85 | 170 | 255 | 340 | 425 | NA
-90 | NA | 90 | 180 | 270 | 360 | NA | NA
-95 | NA | 95 | 190 | 285 | 380 | NA | NA
-100 | NA | 100 | 200 | 300 | 400 | NA | NA
-150 | NA | 150 | 150 | 300 | NA | NA | NA
-200 | NA | 200 | 200 | 400 | NA | NA | NA
-
-Units with the `unit_powerarmor` tag have neither a bonus nor penalty.
-
-This feature depends on the [MechEngineer](https://github.com/BattletechModders/MechEngineer/) mod, which depends on [CustomComponents](http://github.com/denadan/CustomComponents/). As such both mods are required for this check.
 
 ### Miscellaneous
 

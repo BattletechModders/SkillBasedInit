@@ -228,7 +228,7 @@ namespace SkillBasedInit.Helper
             int initBase = 0;
             foreach (KeyValuePair<int, int> kvp in opts.InitBaseByTonnage)
             {
-                if (kvp.Key > unitTonnage)
+                if (unitTonnage >= kvp.Key)
                 {
                     initBase = kvp.Value;
                 }
@@ -249,7 +249,7 @@ namespace SkillBasedInit.Helper
             int initBase = 0;
             foreach (KeyValuePair<int, int> kvp in opts.InitBaseByTonnage)
             {
-                if (kvp.Key > unitTonnage)
+                if (unitTonnage >= kvp.Key)
                 {
                     initBase = kvp.Value;
                 }
@@ -259,7 +259,7 @@ namespace SkillBasedInit.Helper
                 }
             }
 
-            Mod.Log.Debug?.Write($"Using tonnageMod: {initBase} for actor: {mechDef.Name} with tonnage: {unitTonnage}");
+            Mod.Log.Debug?.Write($"Using tonnageMod: {initBase} for mechDef: {mechDef.Name} with tonnage: {unitTonnage}");
             return initBase;
 
         }
@@ -317,12 +317,29 @@ namespace SkillBasedInit.Helper
             Mod.Log.Debug?.Write($"Calculating type modifier for mechDef: {mechDef.Name}");
 
             UnitCustomInfo customInfo = mechDef.GetCustomInfo();
-            if (customInfo == null) return Mod.Config.Mech.TypeMod;
+            if (customInfo == null)
+            {
+                Mod.Log.Debug?.Write("Mechdef has no customInfo, using Mech config.");
+                return Mod.Config.Mech.TypeMod;
+            }
 
-            if (customInfo.FakeVehicle) return Mod.Config.Vehicle.TypeMod;
-            else if (customInfo.Naval) return Mod.Config.Naval.TypeMod;
-            else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1) return Mod.Config.Trooper.TypeMod;
+            if (customInfo.FakeVehicle)
+            {
+                Mod.Log.Debug?.Write("Mechdef GetTypeMod returning vehicle typeMod.");
+                return Mod.Config.Vehicle.TypeMod;
+            }
+            else if (customInfo.Naval)
+            {
+                Mod.Log.Debug?.Write("Mechdef GetTypeMod returning naval typeMod.");
+                return Mod.Config.Naval.TypeMod;
+            }
+            else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
+            {
+                Mod.Log.Debug?.Write("Mechdef GetTypeMod returning trooper typeMod.");
+                return Mod.Config.Trooper.TypeMod;
+            }
 
+            Mod.Log.Debug?.Write("Mechdef GetTypeMod fallthrough, returning mech typeMod.");
             return Mod.Config.Mech.TypeMod;
         }
     }
@@ -330,9 +347,6 @@ namespace SkillBasedInit.Helper
     public static class UnitHelper
     {
         
-
-
-
         // Prone only applies to mechs and quads
         public static int ProneInitModifier(this AbstractActor actor)
         {

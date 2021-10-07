@@ -37,7 +37,7 @@ namespace SkillBasedInit.Patches {
                 // Type modifier
                 int typeMod = ___selectedMech.GetTypeModifier();
                 // TODO:        string rocColor = Mod.Config.VehicleROCModifier >= 0 ? "00FF00" : "FF0000";
-                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_TT_UNIT_TYPE], new object[] { typeMod }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_UNIT_TYPE], new object[] { typeMod }).ToString());
 
                 // Any modifiers that come from the chassis/mech/vehicle defs
                 //int componentsMod = UnitHelper.GetNormalizedComponentModifier(___selectedMech);
@@ -54,7 +54,7 @@ namespace SkillBasedInit.Patches {
                 ___initiativeText.SetText($"{tonnageMod + typeMod}");
 
                 // --- Tooltip ---
-                int maxInit = Math.Max(tonnageMod + typeMod + typeMod, Mod.MinPhase);
+                int maxInit = Math.Max(tonnageMod + typeMod, Mod.MinPhase);
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_EXPECTED_NO_PILOT], new object[] { maxInit }).ToString());
 
                 string tooltipTitle = $"{___selectedMech.Name}";

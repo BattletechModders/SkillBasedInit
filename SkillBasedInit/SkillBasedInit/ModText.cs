@@ -33,7 +33,7 @@ namespace SkillBasedInit
 
         // Mech Bay
         public const string LT_MB_TONNAGE = "MECHBAY_TONNAGE";
-        public const string LT_MB_TYPE_MOD = "MECHBAY_VEHICLE_RULE_OF_COOL";
+        public const string LT_MB_UNIT_TYPE = "MECHBAY_VEHICLE_RULE_OF_COOL";
         public const string LT_MB_LANCE = "MECHBAY_LANCE";
         public const string LT_MB_TACTICS = "MECHBAY_TACTICS";
         public const string LT_MB_TOTAL = "MECHBAY_TOTAL";
@@ -58,7 +58,7 @@ namespace SkillBasedInit
         {
             // Mech Bay
             { LT_MB_TONNAGE, "<b>BASE</b>: {0} (<i>from tonnage</i>)" },
-            { LT_MB_TYPE_MOD, "<space=2em><color=#{0}>{1:+0;-#} type</color>" },
+            { LT_MB_UNIT_TYPE, "<space=2em><color=#{0}>{1:+0;-#} unit type</color>" },
             { LT_MB_LANCE, "<space=2em><color=#{0}>{1:+0;-#} lance</color>" },
             { LT_MB_TACTICS, "<space=2em>{0:+0;-#} tactics" },
             { LT_MB_TOTAL, "<b>TOTAL</b>: {0}" },
