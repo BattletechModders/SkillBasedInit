@@ -8,13 +8,12 @@ namespace SkillBasedInit.Helper
 {
     public static class PilotExtensions
     {
-        public static int RandomnessModifier(this Pilot pilot, UnitCfg config)
+        public static int[] RandomnessBounds(this Pilot pilot, UnitCfg config)
         {
-            if (pilot == null) return 0;
+            if (pilot == null) return new int[]{ 0, 0 };
 
-            Mod.Log.Debug?.Write($"Calculating randomness modifier for pilot: {pilot.Name}");
-
-            // Randomness is reduced by piloting
+            Mod.Log.Debug?.Write($"Calculating randomness bounds for pilot: {pilot.Name}");
+            
             int skillMod = CurrentSkillMod(pilot, pilot.Piloting, ModStats.MOD_SKILL_PILOT);
             int boundsMod = pilot.StatCollection.GetValue<int>(ModStats.BOUNDS_MOD_RANDOMNESS);
             int totalBoundsMod = skillMod + boundsMod;
@@ -25,11 +24,22 @@ namespace SkillBasedInit.Helper
             if (adjustedBound < config.RandomnessMin)
                 adjustedBound = config.RandomnessMin;
 
-            int modifier = Mod.Random.Next(0, adjustedBound);
-            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand(0, {adjustedBound}");
+            return new int[] { config.RandomnessMin, config.RandomnessMax };
+        }
+
+
+        public static int RandomnessModifier(this Pilot pilot, UnitCfg config)
+        {
+            if (pilot == null) return 0;
+
+            Mod.Log.Debug?.Write($"Calculating randomness modifier for pilot: {pilot.Name}");
+
+            int[] bounds = RandomnessBounds(pilot, config);
+
+            int modifier = Mod.Random.Next(bounds[0], bounds[1]);
+            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({bounds[0]}, {bounds[1]}");
 
             return modifier;
-            ;
         }
 
         public static int InspiredModifier(this Pilot pilot, UnitCfg config)
@@ -97,6 +107,7 @@ namespace SkillBasedInit.Helper
                     );
             }
         }
+
     }
 
     public class PilotHelper
@@ -143,6 +154,8 @@ namespace SkillBasedInit.Helper
 
             return details;
         }
+
+        
     }
 
 

@@ -39,127 +39,102 @@ namespace SkillBasedInit.patches {
         }
 
         private static string BuildTooltipText(AbstractActor actor) {
-
-            ActorInitiative actorInit = ActorInitiativeHolder.GetOrCreate(actor);
-
-            Mech actorMech = actor as Mech;
-            Vehicle actorVehicle = actor as Vehicle;
-            Mod.Log.Debug?.Write($"Building tooltip for {actor.DistinctId()} - isMech: {actorMech != null} / isVehicle: {actorVehicle != null}");
+            
+            Mod.Log.Debug?.Write($"Building tooltip for {actor.DistinctId()}");
 
             List<string> chassisDetails = new List<string> { };
 
             // Tonnage
-            float tonnage = UnitHelper.GetUnitTonnage(actor);
-            int tonnageMod = UnitHelper.GetTonnageModifier(tonnage);
+            int tonnageMod = actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE);
             chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_MECH_TONNAGE], new object[] { tonnageMod }).ToString());
             int expectedInitMax = tonnageMod;
 
-            // Any modifiers that come from the chassis/mech/vehicle defs
-            int componentsMod = UnitHelper.GetNormalizedComponentModifier(actor);
-            string compColor = componentsMod >= 0 ? "00FF00" : "FF0000";
-            chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_COMPONENTS], new object[] { compColor, componentsMod }).ToString());
-            expectedInitMax += componentsMod;
+            // Type modifier
+            int typeMod = actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE);
+            chassisDetails.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_TT_UNIT_TYPE], new object[] { typeMod }).ToString());
 
-            // Vehicle rule-of-cool modifier
-            if (actorVehicle != null)
+            if (actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY) != 0)
             {
-                expectedInitMax -= Mod.Config.VehicleROCModifier;
-                string rocColor = Mod.Config.VehicleROCModifier >= 0 ? "00FF00" : "FF0000";
-                chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_VEHICLE_ROC], new object[] { rocColor, Mod.Config.VehicleROCModifier }).ToString());
+                // TODO: FIX
+                // pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_PAINFUL_INJURY], new object[] { penalty }).ToString());
+                // pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_FRESH_INJURY], new object[] { actorInit.lastRoundInjuryMod }).ToString());
             }
 
-            // Modifier from the engine
-            int engineMod = UnitHelper.GetEngineModifier(actor);
-            string engineColor = engineMod >= 0 ? "00FF00" : "FF0000";
-            chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_ENGINES], new object[] { engineColor, engineMod }).ToString());
-            expectedInitMax += engineMod;
-
-            // Check for leg / side loss
-            if (actorMech != null)
+            if (actor.StatCollection.GetValue<int>(ModStats.MOD_MISC) != 0)
             {
-                if (actorMech.IsLocationDestroyed(ChassisLocations.LeftLeg) || actorMech.IsLocationDestroyed(ChassisLocations.RightLeg))
-                {
-                    int rawMod = Mod.Config.CrippledMovementModifier + actorInit.pilotingEffectMod;
-                    int penalty = Math.Min(-1, rawMod);
-                    chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_LEG_DESTROYED], new object[] { penalty }).ToString());
-                    expectedInitMax += penalty;
-                }
-
-                if (actor.IsProne)
-                {
-                    int rawMod = Mod.Config.ProneModifier + actorInit.pilotingEffectMod;
-                    int penalty = Math.Min(-1, rawMod);
-                    chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_PRONE], new object[] { penalty }).ToString());
-                    expectedInitMax += penalty;
-                }
-
-                // Check for shutdown
-                if (actor.IsShutDown)
-                {
-                    int rawMod = Mod.Config.ShutdownModifier + actorInit.pilotingEffectMod;
-                    int penalty = Math.Min(-1, rawMod);
-                    chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_SHUTDOWN], new object[] { penalty }).ToString());
-                    expectedInitMax += penalty;
-                }
 
             }
+
+            if (actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT) != 0)
+            {
+                // pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_CALLED_SHOT_TARG], new object[] { actorInit.lastRoundCalledShotMod }).ToString());
+            }
+
+            if (actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE) != 0)
+            {
+               // pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_VIGILANCE], new object[] { actorInit.lastRoundVigilanceMod }).ToString());
+            }
+
+            if (actor.StatCollection.GetValue<int>(ModStats.STATE_KNOCKDOWN) != 0)
+            {
+
+            }
+
+            if (actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) != 0)
+            {
+                //pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_HESITATION], new object[] { actorInit.lastRoundHesitationPenalty }).ToString());
+            }
+
+            int proneMod = actor.ProneInitModifier();
+            if (proneMod != 0)
+            {
+                chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_LEG_DESTROYED], new object[] { proneMod }).ToString());
+                expectedInitMax += proneMod;
+            }
+
+            int crippledMod = actor.CrippledInitModifier();
+            if (crippledMod != 0)
+            {
+                chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_PRONE], new object[] { crippledMod }).ToString());
+                expectedInitMax += crippledMod;
+            }
+
+            int shutdownMod =  actor.ShutdownInitModifier();
+            if (shutdownMod != 0)
+            {
+                chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_SHUTDOWN], new object[] { shutdownMod }).ToString());
+                expectedInitMax += shutdownMod;
+            }
+
 
             // --- PILOT ---
             List<string> pilotDetails = new List<string> { };
 
             Pilot selectedPilot = actor.GetPilot();
-            int tacticsMod = PilotHelper.GetTacticsModifier(selectedPilot);
+            int tacticsMod = selectedPilot.CurrentSkillMod(selectedPilot.Tactics, ModStats.MOD_SKILL_TACTICS);
             pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_TACTICS], new object[] { tacticsMod }).ToString());
             expectedInitMax += tacticsMod;
 
-            int pilotTagsMod = PilotHelper.GetTagsModifier(selectedPilot);
-            pilotDetails.AddRange(PilotHelper.GetTagsModifierDetails(selectedPilot));
-            expectedInitMax += pilotTagsMod;
+            // TODO: Fix
+            //int pilotTagsMod = actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
+            //pilotDetails.AddRange(PilotHelper.GetTagsModifierDetails(selectedPilot));
+            //expectedInitMax += pilotTagsMod;
 
-            int[] randomnessBounds = PilotHelper.GetRandomnessBounds(selectedPilot);
+            UnitCfg unitCfg = actor.GetUnitConfig();
+            int[] randomnessBounds = selectedPilot.RandomnessBounds(unitCfg);
             int expectedInitRandMin = randomnessBounds[0];
             int expectedInitRandMax = randomnessBounds[1];
 
             // Check for inspired status                
             if (actor.IsMoraleInspired || actor.IsFuryInspired) {
                 pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_INSPIRED]).ToString());
-                expectedInitRandMin += 1;
-                expectedInitRandMin += 3;
-            }
-
-            // Check for injuries. If there injuries on the previous round, apply them in full force. Otherwise, reduce them.
-            if (actorInit.lastRoundInjuryMod != 0) {
-                pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_FRESH_INJURY], new object[] { actorInit.lastRoundInjuryMod }).ToString());
-                expectedInitMax -= actorInit.lastRoundInjuryMod;
-            } else if (actor.GetPilot().Injuries != 0) {
-                // TODO: fold this in
-                int rawPenalty = actorInit.CalculateInjuryPenalty(0, actor.GetPilot().Injuries);
-                int penalty = (int)Math.Ceiling(rawPenalty / 2.0);
-                pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_PAINFUL_INJURY], new object[] { penalty }).ToString());
-                expectedInitMax -= penalty;
-            }
-
-            // Check for an overly cautious player
-            if (actorInit.lastRoundHesitationPenalty > 0) {
-                expectedInitMax -= actorInit.lastRoundHesitationPenalty;
-                pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_HESITATION], new object[] { actorInit.lastRoundHesitationPenalty }).ToString());
-            }
-
-            // Check for called shot
-            if (actorInit.lastRoundCalledShotMod > 0) {
-                expectedInitMax -= actorInit.lastRoundCalledShotMod;
-                pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_CALLED_SHOT_TARG], new object[] { actorInit.lastRoundCalledShotMod }).ToString());
-            }
-
-            // Check for vigilance
-            if (actorInit.lastRoundVigilanceMod > 0) {
-                expectedInitMax -= actorInit.lastRoundVigilanceMod;
-                pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_VIGILANCE], new object[] { actorInit.lastRoundVigilanceMod }).ToString());
+                expectedInitRandMin += unitCfg.InspiredMin;
+                expectedInitRandMax += unitCfg.InspiredMax;
             }
 
             // Finally, randomness bounds
             pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_RANDOM], 
-                new object[] { actorInit.randomnessBounds[0], actorInit.randomnessBounds[1] }).ToString());
+                new object[] { randomnessBounds[0], randomnessBounds[1] }).ToString());
 
             int maxInit = Math.Max(expectedInitMax - expectedInitRandMin, Mod.MinPhase);
             int minInit = Math.Max(expectedInitMax - expectedInitRandMax, Mod.MinPhase);

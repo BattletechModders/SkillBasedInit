@@ -23,6 +23,9 @@ namespace SkillBasedInit
         public int VigilanceRandMax = 6;
         public int VigilanceRandMin = 2;
 
+        public int InspiredMax = 3;
+        public int InspiredMin = 1;
+
         public float DefaultTonnage = 120f;
 
         public Dictionary<int, int> InitBaseByTonnage = new Dictionary<int, int>();

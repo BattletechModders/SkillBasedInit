@@ -7,7 +7,7 @@ namespace SkillBasedInit
         // Tooltips
         public const string LT_TT_TITLE = "TOOLTIP_TITLE_INITIATIVE";
         public const string LT_TT_MECH_TONNAGE = "TOOLTIP_MECH_TONNAGE";
-        public const string LT_TT_VEHICLE_ROC = "TOOLTIP_VEHICLE_RULE_OF_COOL";
+        public const string LT_TT_UNIT_TYPE = "TOOLTIP_UNIT_TYPE";
         public const string LT_TT_COMPONENTS = "TOOLTIP_COMPONENTS";
         public const string LT_TT_ENGINES = "TOOLTIP_ENGINES";
         public const string LT_TT_LEG_DESTROYED = "TOOLTIP_LEG_DESTROYED";
@@ -15,8 +15,6 @@ namespace SkillBasedInit
         public const string LT_TT_SHUTDOWN = "TOOLTIP_SHUTDOWN";
         public const string LT_TT_TACTICS = "TOOLTIP_TACTICS";
         public const string LT_TT_INSPIRED = "TOOLTIP_INSPIRED";
-        public const string LT_TT_FRESH_INJURY = "TOOLTIP_FRESH_INJURY";
-        public const string LT_TT_PAINFUL_INJURY = "TOOLTIP_PAINFUL_INJURY";
         public const string LT_TT_HESITATION = "TOOLTIP_HESITATION";
         public const string LT_TT_CALLED_SHOT_TARG = "TOOLTIP_CALLED_SHOT_TARGET";
         public const string LT_TT_VIGILANCE = "TOOLTIP_VIGILANCE";
@@ -35,9 +33,7 @@ namespace SkillBasedInit
 
         // Mech Bay
         public const string LT_MB_TONNAGE = "MECHBAY_TONNAGE";
-        public const string LT_MB_VEHICLE_ROC = "MECHBAY_VEHICLE_RULE_OF_COOL";
-        public const string LT_MB_COMPONENTS = "MECHBAY_COMPONENTS";
-        public const string LT_MB_ENGINES = "MECHBAY_ENGINES";
+        public const string LT_MB_TYPE_MOD = "MECHBAY_VEHICLE_RULE_OF_COOL";
         public const string LT_MB_LANCE = "MECHBAY_LANCE";
         public const string LT_MB_TACTICS = "MECHBAY_TACTICS";
         public const string LT_MB_TOTAL = "MECHBAY_TOTAL";
@@ -62,9 +58,7 @@ namespace SkillBasedInit
         {
             // Mech Bay
             { LT_MB_TONNAGE, "<b>BASE</b>: {0} (<i>from tonnage</i>)" },
-            { LT_MB_VEHICLE_ROC, "<space=2em><color=#{0}>{1:+0;-#} vehicle</color>" },
-            { LT_MB_COMPONENTS, "<space=2em><color=#{0}>{1:+0;-#} components</color>" },
-            { LT_MB_ENGINES, "<space=2em><color=#{0}>{1:+0;-#} engine</color>" },
+            { LT_MB_TYPE_MOD, "<space=2em><color=#{0}>{1:+0;-#} type</color>" },
             { LT_MB_LANCE, "<space=2em><color=#{0}>{1:+0;-#} lance</color>" },
             { LT_MB_TACTICS, "<space=2em>{0:+0;-#} tactics" },
             { LT_MB_TOTAL, "<b>TOTAL</b>: {0}" },
@@ -78,7 +72,7 @@ namespace SkillBasedInit
             // Tooltip
             { LT_TT_TITLE, "INITIATIVE" },
             { LT_TT_MECH_TONNAGE, "CHASSIS => tonnage: {0}" },
-            { LT_TT_VEHICLE_ROC, "<color=#{0}>{1:+0;-#} vehicle</color>" },
+            { LT_TT_UNIT_TYPE, "<color=#{0}>{1:+0;-#} unit type</color>" },
             { LT_TT_COMPONENTS, "<color=#{0}>{1:+0;-#} components</color>" },
             { LT_TT_ENGINES, "<color=#{0}>{1:+0;-#} engine</color>" },
             { LT_TT_LEG_DESTROYED, "<color=#FF0000>{0} Leg Destroyed</color>" },
@@ -86,8 +80,6 @@ namespace SkillBasedInit
             { LT_TT_SHUTDOWN, "<color=#FF0000>{0} Shutdown</color>" },
             { LT_TT_TACTICS, "PILOT => Tactics: <color=#00FF00>{0:+0}</color>" },
             { LT_TT_INSPIRED, "<color=#00FF00>+1 to +3 Inspired</color>" },
-            { LT_TT_FRESH_INJURY, "<color=#FF0000>-{0} Fresh Injury</color>" },
-            { LT_TT_PAINFUL_INJURY, "<color=#FF0000>-{0} Painful Injury</color>" },
             { LT_TT_HESITATION, "<color=#FF0000>-{0} Hesitation</color>" },
             { LT_TT_CALLED_SHOT_TARG, "<color=#FF0000>-{0} Called Shot Target</color>" },
             { LT_TT_VIGILANCE, "<color=#00FF00>-{0} Vigilance</color>" },

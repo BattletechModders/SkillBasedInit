@@ -26,9 +26,9 @@ namespace SkillBasedInit.Helper
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE);
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
             Mod.Log.Info?.Write(
-                $"  tonnageBase: {UnitHelper.GetTonnageModifier(actor)}  " +
+                $"  tonnageBase: {actor.GetTonnageModifier()}  " +
                 $"unitType: {actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE)}  " +
-                $"unitType: {actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS)}"
+                $"pilotTags: {actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS)}"
                 );
 
 
@@ -56,6 +56,10 @@ namespace SkillBasedInit.Helper
                 actor.StatCollection.Set<int>(ModStats.STATE_VIGILIANCE, 0);
             }
 
+            roundInitiative += actor.ProneInitModifier();
+            roundInitiative += actor.CrippledInitModifier();
+            roundInitiative += actor.ShutdownInitModifier();
+
             Pilot pilot = actor.GetPilot();
 
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) != 0)
@@ -75,9 +79,7 @@ namespace SkillBasedInit.Helper
             roundInitiative += pilot.RandomnessModifier(unitConfig);
             roundInitiative += pilot.InspiredModifier(unitConfig);
 
-            roundInitiative += actor.ProneInitModifier();
-            roundInitiative += actor.CrippledInitModifier();
-            roundInitiative += actor.ShutdownInitModifier();
+            // TODO: Apply tactics mod directly
 
             // Normalize values
             if (roundInitiative <= 0)

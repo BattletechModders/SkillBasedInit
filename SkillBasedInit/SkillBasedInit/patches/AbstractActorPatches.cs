@@ -13,7 +13,6 @@ namespace SkillBasedInit {
     public static class AbstractActor_OnNewRound {
         public static void Postfix(AbstractActor __instance, int round) {
             Mod.Log.Trace?.Write("AA:ONR - entered.");
-            Mod.Log.Debug?.Write($"  AbstractActor starting new round {round}, recalculating initiative element for actor:{__instance.DisplayName}");
             InitiativeHelper.UpdateInitiative(__instance);
         }
     }
@@ -209,13 +208,13 @@ namespace SkillBasedInit {
         static void Postfix(AbstractActor __instance)
         {
             Mod.Log.Info?.Write($"Initializing statistics for actor: {__instance.DistinctId()}");
-            
+
             // Static init values that default to a specific value
-            int tonnageMod = UnitHelper.GetTonnageModifier(__instance);
+            int tonnageMod = __instance.GetTonnageModifier();
             Mod.Log.Info?.Write($"  -- tonnageMod: {tonnageMod}");
             __instance.StatCollection.AddStatistic<int>(ModStats.STATE_TONNAGE, tonnageMod);
 
-            int typeMod = UnitHelper.GetTypeModifier(__instance);
+            int typeMod = __instance.GetTypeModifier();
             Mod.Log.Info?.Write($"  -- typeMod: {typeMod}");
             __instance.StatCollection.AddStatistic<int>(ModStats.STATE_UNIT_TYPE, typeMod);
 

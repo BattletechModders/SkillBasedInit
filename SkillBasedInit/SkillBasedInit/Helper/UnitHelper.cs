@@ -12,45 +12,36 @@ namespace SkillBasedInit.Helper
     {
         public static UnitCfg GetUnitConfig(this AbstractActor actor)
         {
-            if (actor is Turret)
-            {
-                return Mod.Config.Turret;
-            }
-            else if (actor is Vehicle)
-            {
-                return Mod.Config.Vehicle;
-            }
+            if (actor is Turret) return Mod.Config.Turret;
+            else if (actor is Vehicle) return Mod.Config.Vehicle;
             else if (actor is Mech mech)
             {
-                if (mech.FakeVehicle())
-                {
-                    return Mod.Config.Vehicle;
-                }
-                else if (mech.NavalUnit())
-                {
-                    return Mod.Config.Naval;
-
-                }
-                else if (mech.TrooperSquad())
-                {
-                    return Mod.Config.Trooper;
-                }
-                else
-                {
-                    return Mod.Config.Mech;
-                }
+                if (mech.FakeVehicle()) return Mod.Config.Vehicle;
+                else if (mech.NavalUnit()) return Mod.Config.Naval;
+                else if (mech.TrooperSquad()) return Mod.Config.Trooper;                
+                else return Mod.Config.Mech;
             }
-            else
-            {
-                return Mod.Config.Mech;
-            }
+            else return Mod.Config.Mech;
         }
-    }
 
-    public static class UnitHelper
-    {
-        
-        public static bool IsQuadMech(ICombatant combatant)
+        public static UnitCfg GetUnitConfig(this MechDef mechDef)
+        {
+            if (mechDef == null) return null;
+
+            UnitCustomInfo customInfo = mechDef.GetCustomInfo();
+            if (customInfo == null) return Mod.Config.Mech;
+
+            // Technically quads
+            if (customInfo.ArmsCountedAsLegs) return Mod.Config.Mech;
+            else if (customInfo.FakeVehicle) return Mod.Config.Vehicle;
+            else if (customInfo.Naval) return Mod.Config.Naval;
+            else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1) return Mod.Config.Trooper;
+
+            // NOTE: Turrets currently not included in this. I don't think they can drop currently
+            else return Mod.Config.Mech;
+        }
+
+        public static bool IsQuadMech(this ICombatant combatant)
         {
             if (combatant is Mech mech)
             {
@@ -61,7 +52,7 @@ namespace SkillBasedInit.Helper
         }
 
 
-        public static bool IsQuadMech(MechDef mechDef)
+        public static bool IsQuadMech(this MechDef mechDef)
         {
             if (mechDef == null) return false;
 
@@ -71,7 +62,7 @@ namespace SkillBasedInit.Helper
             return customInfo.ArmsCountedAsLegs;
         }
 
-        public static bool IsTrooper(ICombatant combatant)
+        public static bool IsTrooper(this ICombatant combatant)
         {
             if (combatant is Mech mech)
             {
@@ -81,7 +72,7 @@ namespace SkillBasedInit.Helper
             return false;
 
         }
-        public static bool IsTrooper(MechDef mechDef)
+        public static bool IsTrooper(this MechDef mechDef)
         {
             if (mechDef == null) return false;
 
@@ -91,7 +82,7 @@ namespace SkillBasedInit.Helper
             return customInfo?.SquadInfo?.Troopers > 1;
         }
 
-        public static bool IsNaval(ICombatant combatant)
+        public static bool IsNaval(this ICombatant combatant)
         {
             if (combatant is Mech mech)
             {
@@ -102,7 +93,7 @@ namespace SkillBasedInit.Helper
 
         }
 
-        public static bool IsNaval(MechDef mechDef)
+        public static bool IsNaval(this MechDef mechDef)
         {
             if (mechDef == null) return false;
 
@@ -112,7 +103,7 @@ namespace SkillBasedInit.Helper
             return customInfo.Naval;
         }
 
-        public static bool IsVehicle(ICombatant combatant)
+        public static bool IsVehicle(this ICombatant combatant)
         {
             if (combatant is Mech mech)
             {
@@ -127,7 +118,7 @@ namespace SkillBasedInit.Helper
 
         }
 
-        public static bool IsVehicle(MechDef mechDef)
+        public static bool IsVehicle(this MechDef mechDef)
         {
             if (mechDef == null) return false;
 
@@ -137,10 +128,7 @@ namespace SkillBasedInit.Helper
             return customInfo.FakeVehicle;
         }
 
-
-
-
-        public static float GetUnitTonnage(AbstractActor actor)
+        public static float GetUnitTonnage(this AbstractActor actor)
         {
 
             Mod.Log.Debug?.Write($"Calculating unit tonnage for actor: {actor.DistinctId()}");
@@ -201,7 +189,7 @@ namespace SkillBasedInit.Helper
             }
             else
             {
-                UnitCfg unitConfig = UnitHelper.GetUnitConfig(actor);
+                UnitCfg unitConfig = actor.GetUnitConfig();
                 tonnage = unitConfig.DefaultTonnage;
                 Mod.Log.Debug?.Write($" -- unit tonnage is unknown, using tonnage: {tonnage}");
             }
@@ -209,11 +197,34 @@ namespace SkillBasedInit.Helper
             return tonnage;
         }
 
-        public static int GetTonnageModifier(AbstractActor actor)
+        public static float GetUnitTonnage(this MechDef mechDef)
         {
-            int unitTonnage = (int) Math.Ceiling(GetUnitTonnage(actor));
 
-            UnitCfg opts = GetUnitConfig(actor);
+            if (mechDef == null || mechDef.Chassis == null) return 0;
+
+            Mod.Log.Debug?.Write($"Calculating unit tonnage for mechDef: {mechDef.Name}");
+            float tonnage;
+
+            UnitCustomInfo customInfo = mechDef.GetCustomInfo();
+            float chassisTonnage = mechDef.Chassis.Tonnage;
+            if (customInfo == null) return chassisTonnage;
+
+            if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
+            {
+                tonnage = (float)Math.Ceiling(chassisTonnage / customInfo.SquadInfo.Troopers);
+            }
+            else
+            {
+                tonnage = chassisTonnage;
+            }
+
+            return tonnage;
+        }
+
+        public static int GetTonnageModifier(this AbstractActor actor)
+        {
+            int unitTonnage = (int)Math.Ceiling(actor.GetUnitTonnage());
+            UnitCfg opts = actor.GetUnitConfig();
             int initBase = 0;
             foreach (KeyValuePair<int, int> kvp in opts.InitBaseByTonnage)
             {
@@ -231,7 +242,30 @@ namespace SkillBasedInit.Helper
             return initBase;
         }
 
-        public static int GetTypeModifier(AbstractActor actor)
+        public static int GetTonnageModifier(this MechDef mechDef)
+        {
+            int unitTonnage = (int)Math.Ceiling(mechDef.GetUnitTonnage());
+            UnitCfg opts = mechDef.GetUnitConfig();
+            int initBase = 0;
+            foreach (KeyValuePair<int, int> kvp in opts.InitBaseByTonnage)
+            {
+                if (kvp.Key > unitTonnage)
+                {
+                    initBase = kvp.Value;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            Mod.Log.Debug?.Write($"Using tonnageMod: {initBase} for actor: {mechDef.Name} with tonnage: {unitTonnage}");
+            return initBase;
+
+        }
+
+
+        public static int GetTypeModifier(this AbstractActor actor)
         {
             int typeMod;
             if (actor is Turret)
@@ -276,6 +310,28 @@ namespace SkillBasedInit.Helper
 
             return typeMod;
         }
+
+        public static int GetTypeModifier(this MechDef mechDef)
+        {
+            if (mechDef == null || mechDef.Chassis == null) return 0;
+            Mod.Log.Debug?.Write($"Calculating type modifier for mechDef: {mechDef.Name}");
+
+            UnitCustomInfo customInfo = mechDef.GetCustomInfo();
+            if (customInfo == null) return Mod.Config.Mech.TypeMod;
+
+            if (customInfo.FakeVehicle) return Mod.Config.Vehicle.TypeMod;
+            else if (customInfo.Naval) return Mod.Config.Naval.TypeMod;
+            else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1) return Mod.Config.Trooper.TypeMod;
+
+            return Mod.Config.Mech.TypeMod;
+        }
+    }
+
+    public static class UnitHelper
+    {
+        
+
+
 
         // Prone only applies to mechs and quads
         public static int ProneInitModifier(this AbstractActor actor)
@@ -387,7 +443,7 @@ namespace SkillBasedInit.Helper
             UnitCustomInfo customInfo = mech.GetCustomInfo();
             if (customInfo != null && (customInfo.Naval || customInfo.FakeVehicle)) return 0;
 
-            int boundsMin = 0, boundsMax = 0;
+            int boundsMin, boundsMax;
             if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
             {
                 boundsMin = Mod.Config.Trooper.ShutdownModifierMin;
@@ -438,7 +494,7 @@ namespace SkillBasedInit.Helper
         public static int KnockdownPenalty(this AbstractActor actor)
         {
             if (!(actor is Mech)) return 0;
-            if (UnitHelper.IsNaval(actor) || UnitHelper.IsTrooper(actor) || UnitHelper.IsVehicle(actor)) return 0;
+            if (actor.IsNaval() || actor.IsTrooper() || actor.IsVehicle()) return 0;
 
             int rawMod = Mod.Random.Next(Mod.Config.Mech.ProneModifierMin, Mod.Config.Mech.ProneModifierMax);
             int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_KNOCKDOWN);
@@ -456,7 +512,7 @@ namespace SkillBasedInit.Helper
         public static int CalledShotPenalty(this AbstractActor target, AbstractActor attacker)
         {
             // Get attacker bonus, get target bonus, combine
-
+            // TODO: WARNING, CALLED SHOT USED TO BE AVG, SEE PILOTHELPER
             if (target == null || attacker == null) return 0;
 
             UnitCfg unitCfg = target.GetUnitConfig();
@@ -478,6 +534,7 @@ namespace SkillBasedInit.Helper
 
         public static int VigilanceBonus(this AbstractActor actor)
         {
+            // TODO: WARNING, VIGILANCE USED TO BE AVG, SEE PILOTHELPER
             if (actor == null) return 0;
 
             UnitCfg unitCfg = actor.GetUnitConfig();
