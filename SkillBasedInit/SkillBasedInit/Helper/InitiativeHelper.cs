@@ -1,11 +1,5 @@
 ﻿using BattleTech;
-using CustomUnits;
 using IRBTModUtils.Extension;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SkillBasedInit.Helper
 {
@@ -25,7 +19,7 @@ namespace SkillBasedInit.Helper
                 return;
             }
 
-            UnitCfg unitConfig = UnitHelper.GetUnitConfig(actor);
+            UnitCfg unitConfig = actor.GetUnitConfig();
 
             // Set the base init by tonnage
             int roundInitiative = actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE);
@@ -47,33 +41,34 @@ namespace SkillBasedInit.Helper
                 );
 
             // Check for consumable modifiers - these get reset to 0 when we recalculate 
-            if (actor.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT) != 0)
+            if (actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT) != 0)
             {
                 // Actor was hit by a called shot sometime after its turn, apply the penalty
-                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT);
-                Mod.Log.Info?.Write($"  calledShotMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT)}");
-                actor.StatCollection.Set<int>(ModStats.MOD_CALLED_SHOT, 0);
+                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT);
+                Mod.Log.Info?.Write($"  calledShotState: {actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT)}");
+                actor.StatCollection.Set<int>(ModStats.STATE_CALLED_SHOT, 0);
             }
 
-            if (actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE) != 0)
+            if (actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE) != 0)
             {
-                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE);
-                Mod.Log.Info?.Write($"  vigilanceMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE)}");
-                actor.StatCollection.Set<int>(ModStats.MOD_VIGILANCE, 0);
+                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE);
+                Mod.Log.Info?.Write($"  vigilanceState: {actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE)}");
+                actor.StatCollection.Set<int>(ModStats.STATE_VIGILIANCE, 0);
             }
 
             Pilot pilot = actor.GetPilot();
 
-            if (actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION) != 0)
+            if (actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) != 0)
             {
                 // Reduce by pilot's tactics modifier
-                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION);
+                // TODO: Calculate hestitation reduction elsehwere
+                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION);
                 int tacticsMod = pilot.CurrentSkillMod(pilot.Tactics, ModStats.MOD_SKILL_TACTICS);
                 int updatedMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION) - tacticsMod;
                 if (updatedMod < 0) updatedMod = 0;
-                Mod.Log.Info?.Write($"  hesitationMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION)} - tacticsMod: {tacticsMod} => {updatedMod}");
+                Mod.Log.Info?.Write($"  hesitationMod: {actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION)} - tacticsMod: {tacticsMod} => {updatedMod}");
 
-                actor.StatCollection.Set<int>(ModStats.MOD_HESITATION, updatedMod);
+                actor.StatCollection.Set<int>(ModStats.STATE_HESITATION, updatedMod);
             }
 
             // Generate the random element

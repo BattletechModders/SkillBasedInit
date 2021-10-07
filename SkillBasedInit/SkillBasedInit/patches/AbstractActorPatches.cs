@@ -241,12 +241,20 @@ namespace SkillBasedInit {
             Mod.Log.Info?.Write($"  -- initial tacticsMod: {gutsMod}");
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_TACTICS, tacticsMod);
 
-            // Dynamic modifiers that default to 0
+            // Modifiers to various effects
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_INJURY, 0);
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_MISC, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_CALLED_SHOT, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_CALLED_SHOT_ATTACKER, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_CALLED_SHOT_TARGET, 0);
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_VIGILANCE, 0);
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_HESITATION, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_INJURY, 0);
+
+
+            // Stats that track future state
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_CALLED_SHOT, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_VIGILIANCE, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_KNOCKDOWN, 0);
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_HESITATION, 0);
 
             // Bounds modifiers
             __instance.StatCollection.AddStatistic<int>(ModStats.BOUNDS_MOD_INSPIRED, 0);

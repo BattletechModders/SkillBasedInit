@@ -42,6 +42,10 @@ This mod is only intended to be used with RogueTech. You may freely us it standa
 
 If you are using this mod independently of RougeTech, you'll likely want to add initiative boosting equipment or skills of some kind.
 
+### Dependencies
+  
+This mod depends on several other mods to function
+
 ### Disabling The Mod
 To disable the mod, edit `SkillBasedInitiative/mod.json` and change `enabled:true` to `enabled:false`. This will prevent the mod from loading, restoring the original HBS experience. However, it will also **break your RogueTech experience** due to the various pieces of equipment that add initiative modifiers. The net effect is that most units will act in phase 1, rendering initiative largely useless. You will need to do significant overhauls on all the equipment in the mod to remove any **BaseInitiative** changes.
 

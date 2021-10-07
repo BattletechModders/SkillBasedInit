@@ -11,11 +11,17 @@ namespace SkillBasedInit
         public int TypeMod = DEFAULT_TYPE_MOD;
 
         // The maximum value used for randomness, from 0 to this value. Offset by piloting mod.
-        public int RandomnessBoundsMaximum = 10;
-        public int RandomnessBoundsMinimum = 2;
+        public int RandomnessMax = 10;
+        public int RandomnessMin = 2;
 
-        public int HesitationBoundsMaximum = 6;
-        public int HesitationBoundsMinimum = 2;
+        public int HesitationMax = 6;
+        public int HesitationMin = 2;
+
+        public int CalledShotRandMax = 6;
+        public int CalledShotRandMin = 2;
+
+        public int VigilanceRandMax = 6;
+        public int VigilanceRandMin = 2;
 
         public float DefaultTonnage = 120f;
 
@@ -33,7 +39,7 @@ namespace SkillBasedInit
         public int ShutdownModifierMax = -8;
 
         // The init malus when a unit has lost a movement system
-        public int CrippledModifierMin = -6;
+        public int CrippledModifierMin = -5;
         public int CrippledModifierMax = -13;
     }
 
@@ -47,7 +53,7 @@ namespace SkillBasedInit
     public class NavalCfg : UnitCfg
     {
         // The init malus when a unit has lost a movement system
-        public int CrippledModifierMin = -13;
+        public int CrippledModifierMin = -5;
         public int CrippledModifierMax = -13;
     }
 
@@ -62,15 +68,15 @@ namespace SkillBasedInit
     public class VehicleCfg : UnitCfg
     {
         // The init malus when a unit has lost a movement system
-        public int CrippledModifierMin = -6;
+        public int CrippledModifierMin = -5;
         public int CrippledModifierMax = -13;
     }
 
 
     public class PilotCfg
     {
-        public int InspirationBoundsMaximum = 4;
-        public int InspirationBoundsMinimum = 1;
+        public int InspirationMax = 4;
+        public int InspirationMin = 1;
 
     }
 
@@ -239,9 +245,9 @@ namespace SkillBasedInit
             Mod.Log.Info?.Write($"  == MECH ==");
             Mod.Log.Info?.Write($"  TypeMod: {this.Mech.TypeMod} DefaultTonnage: {this.Mech.DefaultTonnage}" +
                 $" CrippledMod (max: {this.Mech.CrippledModifierMax} min: {this.Mech.CrippledModifierMin})" +
-                $" Hesitation: (max: {this.Mech.HesitationBoundsMaximum} min: {this.Mech.HesitationBoundsMinimum}) " +
+                $" Hesitation: (max: {this.Mech.HesitationMax} min: {this.Mech.HesitationMin}) " +
                 $" Prone: (max: {this.Mech.ProneModifierMax} min: {this.Mech.ProneModifierMin}) " +
-                $" Randomness: (max: {this.Mech.RandomnessBoundsMaximum} min: {this.Mech.RandomnessBoundsMinimum}) " +
+                $" Randomness: (max: {this.Mech.RandomnessMax} min: {this.Mech.RandomnessMin}) " +
                 $" Shutdown: (max: {this.Mech.ShutdownModifierMax} min: {this.Mech.ShutdownModifierMin})");
             Mod.Log.Info?.Write("");
 

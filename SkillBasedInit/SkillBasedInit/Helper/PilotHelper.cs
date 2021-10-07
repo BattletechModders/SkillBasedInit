@@ -20,10 +20,10 @@ namespace SkillBasedInit.Helper
             int totalBoundsMod = skillMod + boundsMod;
             Mod.Log.Debug?.Write($"  totalBoundsMod: {totalBoundsMod} = skillMod: {skillMod} + pilotMod: {boundsMod}");
 
-            int adjustedBound = config.RandomnessBoundsMaximum - totalBoundsMod;
-            Mod.Log.Debug?.Write($"  adjustedBound: {adjustedBound} = config.RanBoundsMax: {config.RandomnessBoundsMaximum} - totalBounds: {totalBoundsMod}");
-            if (adjustedBound < config.RandomnessBoundsMinimum)
-                adjustedBound = config.RandomnessBoundsMinimum;
+            int adjustedBound = config.RandomnessMax - totalBoundsMod;
+            Mod.Log.Debug?.Write($"  adjustedBound: {adjustedBound} = config.RanBoundsMax: {config.RandomnessMax} - totalBounds: {totalBoundsMod}");
+            if (adjustedBound < config.RandomnessMin)
+                adjustedBound = config.RandomnessMin;
 
             int modifier = Mod.Random.Next(0, adjustedBound);
             Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand(0, {adjustedBound}");
@@ -42,13 +42,13 @@ namespace SkillBasedInit.Helper
 
             // Randomness is reduced by piloting
             int pilotMod = CurrentSkillMod(pilot, pilot.Piloting, ModStats.MOD_SKILL_PILOT);
-            int adjustedMin = Mod.Config.Pilot.InspirationBoundsMinimum + pilotMod;
-            if (adjustedMin < Mod.Config.Pilot.InspirationBoundsMinimum)
-                adjustedMin = Mod.Config.Pilot.InspirationBoundsMinimum;
+            int adjustedMin = Mod.Config.Pilot.InspirationMin + pilotMod;
+            if (adjustedMin < Mod.Config.Pilot.InspirationMin)
+                adjustedMin = Mod.Config.Pilot.InspirationMin;
             
-            int adjustedMax = Mod.Config.Pilot.InspirationBoundsMinimum + pilotMod;
-            if (adjustedMax < Mod.Config.Pilot.InspirationBoundsMinimum)
-                adjustedMax = Mod.Config.Pilot.InspirationBoundsMinimum;
+            int adjustedMax = Mod.Config.Pilot.InspirationMin + pilotMod;
+            if (adjustedMax < Mod.Config.Pilot.InspirationMin)
+                adjustedMax = Mod.Config.Pilot.InspirationMin;
 
             Mod.Log.Debug?.Write($"  adjusted bounds => min: {adjustedMin} to max: {adjustedMax}");
 

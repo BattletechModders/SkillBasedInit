@@ -8,6 +8,45 @@ using IRBTModUtils.Extension;
 
 namespace SkillBasedInit.Helper
 {
+    public static class UnitExtensions
+    {
+        public static UnitCfg GetUnitConfig(this AbstractActor actor)
+        {
+            if (actor is Turret)
+            {
+                return Mod.Config.Turret;
+            }
+            else if (actor is Vehicle)
+            {
+                return Mod.Config.Vehicle;
+            }
+            else if (actor is Mech mech)
+            {
+                if (mech.FakeVehicle())
+                {
+                    return Mod.Config.Vehicle;
+                }
+                else if (mech.NavalUnit())
+                {
+                    return Mod.Config.Naval;
+
+                }
+                else if (mech.TrooperSquad())
+                {
+                    return Mod.Config.Trooper;
+                }
+                else
+                {
+                    return Mod.Config.Mech;
+                }
+            }
+            else
+            {
+                return Mod.Config.Mech;
+            }
+        }
+    }
+
     public static class UnitHelper
     {
         
@@ -99,41 +138,7 @@ namespace SkillBasedInit.Helper
         }
 
 
-        public static UnitCfg GetUnitConfig(AbstractActor actor)
-        {
-            if (actor is Turret)
-            {
-                return Mod.Config.Turret;
-            }
-            else if (actor is Vehicle)
-            {
-                return Mod.Config.Vehicle;
-            }
-            else if (actor is Mech mech)
-            {
-                if (mech.FakeVehicle())
-                {
-                    return Mod.Config.Vehicle;
-                }
-                else if (mech.NavalUnit())
-                {
-                    return Mod.Config.Naval;
 
-                }
-                else if (mech.TrooperSquad())
-                {
-                    return Mod.Config.Trooper;
-                }
-                else
-                {
-                    return Mod.Config.Mech;
-                }
-            }
-            else
-            {
-                return Mod.Config.Mech;
-            }
-        }
 
         public static float GetUnitTonnage(AbstractActor actor)
         {
@@ -415,67 +420,77 @@ namespace SkillBasedInit.Helper
         {
             if (actor == null) return 0;
 
-            int boundsMin = 0, boundsMax = 0;
-            if (actor is Turret)
-            {
-                boundsMax = Mod.Config.Turret.HesitationBoundsMaximum;
-                boundsMin = Mod.Config.Turret.HesitationBoundsMinimum;
-            }
-            else if (actor is Vehicle)
-            {
-                boundsMax = Mod.Config.Vehicle.HesitationBoundsMaximum;
-                boundsMin = Mod.Config.Vehicle.HesitationBoundsMinimum;
-            }
-            else if (actor is Mech mech)
-            {
-
-                UnitCustomInfo customInfo = mech.GetCustomInfo();
-                if (customInfo.FakeVehicle)
-                {
-                    boundsMax = Mod.Config.Vehicle.HesitationBoundsMaximum;
-                    boundsMin = Mod.Config.Vehicle.HesitationBoundsMinimum;
-                }
-                else if (customInfo.Naval)
-                {
-                    boundsMax = Mod.Config.Naval.HesitationBoundsMaximum;
-                    boundsMin = Mod.Config.Naval.HesitationBoundsMinimum;
-                }
-                else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
-                {
-                    // Cannot be crippled, do nothing
-                    boundsMax = Mod.Config.Trooper.HesitationBoundsMaximum;
-                    boundsMin = Mod.Config.Trooper.HesitationBoundsMinimum;
-                }
-                else
-                {
-                    boundsMax = Mod.Config.Mech.HesitationBoundsMaximum;
-                    boundsMin = Mod.Config.Mech.HesitationBoundsMinimum;
-                }
-            }
-            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} hestiation raw bounds => min: {boundsMin} to max: {boundsMax}");
+            UnitCfg unitCfg = actor.GetUnitConfig();
+            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} hestiation raw bounds => min: {unitCfg.HesitationMin} to max: {unitCfg.HesitationMax}");
             
-            int rawMod = Mod.Random.Next(boundsMin, boundsMax);
+            int rawMod = Mod.Random.Next(unitCfg.HesitationMin, unitCfg.HesitationMax);
             int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION);
             int finalMod = rawMod + actorMod;
-
+            Mod.Log.Debug?.Write($"Hesitation penalty: {finalMod} = rawMod: {rawMod} + actorMod: {actorMod}");
             if (finalMod < 0)
             {
-                Mod.Log.Info?.Write($"Removing negative hestitation: {finalMod} to 0");
+                Mod.Log.Debug?.Write("Normalizing penalty < 0 to 0");
                 finalMod = 0;
             }
-
-            Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
             return finalMod;
         }
-     
-        public static int GetCalledShotModifier(this AbstractActor attacker)
+
+        public static int KnockdownPenalty(this AbstractActor actor)
         {
+            if (!(actor is Mech)) return 0;
+            if (UnitHelper.IsNaval(actor) || UnitHelper.IsTrooper(actor) || UnitHelper.IsVehicle(actor)) return 0;
+
+            int rawMod = Mod.Random.Next(Mod.Config.Mech.ProneModifierMin, Mod.Config.Mech.ProneModifierMax);
+            int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_KNOCKDOWN);
+            int finalMod = rawMod + actorMod;
+            Mod.Log.Debug?.Write($"Knockdown penalty: {finalMod} = rawMod: {rawMod} + actorMod: {actorMod}");
+            if (finalMod < 0)
+            {
+                Mod.Log.Debug?.Write("Normalizing penalty < 0 to 0");
+                finalMod = 0;
+            }
+            return finalMod;
 
         }
 
-        public static int GetVigilanceModifier(this AbstractActor actor)
+        public static int CalledShotPenalty(this AbstractActor target, AbstractActor attacker)
         {
+            // Get attacker bonus, get target bonus, combine
 
+            if (target == null || attacker == null) return 0;
+
+            UnitCfg unitCfg = target.GetUnitConfig();
+            Mod.Log.Debug?.Write($"Unit: {target.DistinctId()} called shot raw bounds => min: {unitCfg.CalledShotRandMin} to max: {unitCfg.CalledShotRandMax}");
+
+            int rawMod = Mod.Random.Next(unitCfg.CalledShotRandMin, unitCfg.CalledShotRandMax);
+            int targetMod = target.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_TARGET);
+            int attackerMod = target.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_ATTACKER);
+            int finalMod = rawMod + targetMod + attackerMod;
+            Mod.Log.Debug?.Write($"Called shot penalty: {finalMod} = rawMod: {rawMod} + targetMod: {targetMod} + attackerMod: {attackerMod}");
+            if (finalMod < 0)
+            {
+                Mod.Log.Debug?.Write("Normalizing penalty < 0 to 0");
+                finalMod = 0;
+            }
+            return finalMod;
+        }
+
+
+        public static int VigilanceBonus(this AbstractActor actor)
+        {
+            if (actor == null) return 0;
+
+            UnitCfg unitCfg = actor.GetUnitConfig();
+            int rawMod = Mod.Random.Next(unitCfg.VigilanceRandMin, unitCfg.VigilanceRandMax);
+            int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE);
+            int finalMod = rawMod + actorMod;
+            Mod.Log.Debug?.Write($"Vigilance bonus: {finalMod} = rawMod: {rawMod} + actorMod: {actorMod}");
+            if (finalMod < 0)
+            {
+                Mod.Log.Debug?.Write("Normalizing bonus < 0 to 0");
+                finalMod = 0;
+            }
+            return finalMod;
         }
 
     }
