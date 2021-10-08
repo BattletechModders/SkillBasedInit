@@ -78,20 +78,20 @@ namespace SkillBasedInit.Patches {
             if (___initiativeObj == null || ___initiativeText == null || ___initiativeColor == null || ___initiativeTooltip == null) {
                 return;
             }
-
+            
             //SkillBasedInit.Logger.Log($"LanceLoadoutSlot::RefreshInitiativeData::post - disabling text");
             bool bothSelected = __instance.SelectedMech != null && __instance.SelectedPilot != null;
             if (!bothSelected) {
                 ___initiativeText.SetText("-");
                 ___initiativeColor.SetUIColor(UIColor.MedGray);
             } else {
+                Mod.Log.Debug?.Write($"Building init data for mechdef: {__instance.SelectedMech.name} with pilot: {__instance.SelectedPilot.name}");
+
                 int initValue = 0;
 
                 // --- MECH ---
                 MechDef selectedMechDef = __instance.SelectedMech.MechDef;
                 List<string> details = new List<string>();
-
-                // Static initiative from tonnage
 
                 // Static initiative from tonnage
                 int tonnageMod = __instance.SelectedMech.MechDef.GetTonnageModifier();
@@ -102,14 +102,13 @@ namespace SkillBasedInit.Patches {
                 int typeMod = __instance.SelectedMech.MechDef.GetTypeModifier();
                 initValue += typeMod;
                 string typeModColor = typeMod >= 0 ? "00FF00" : "FF0000";
-                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_TT_UNIT_TYPE], new object[] { typeModColor, typeMod }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_UNIT_TYPE], new object[] { typeModColor, typeMod }).ToString());
 
                 // --- PILOT ---
                 Pilot selectedPilot = __instance.SelectedPilot.Pilot;
-
                 // TODO: Iterate abilities, look for SBI stats, and apply that logic to the tooltip display
 
-                int tacticsMod = selectedPilot.CurrentSkillMod(selectedPilot.Tactics, ModStats.MOD_SKILL_TACTICS);
+                int tacticsMod = selectedPilot.CurrentSkillMod(selectedPilot.Tactics, null);
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TACTICS], new object[] { tacticsMod }).ToString());
                 initValue += tacticsMod;
 

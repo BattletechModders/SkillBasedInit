@@ -158,10 +158,6 @@ namespace SkillBasedInit
         public VehicleCfg Vehicle = new VehicleCfg();
         public TurretCfg Turret = new TurretCfg();
 
-
-
-
-
         public void Init()
         {
             InitTypeDefaults();
@@ -242,7 +238,7 @@ namespace SkillBasedInit
             Mod.Log.Info?.Write($"  DEBUG:{this.Debug} Trace:{this.Trace}");
 
             Mod.Log.Info?.Write($"  == Pilot Tag Modifiers");
-            foreach (KeyValuePair<string, int> kvp in PilotTagModifiers)
+            foreach (KeyValuePair<string, int> kvp in Pilot.PilotTagModifiers)
             {
                 Mod.Log.Info?.Write($"    tag:{kvp.Key} modifier:{kvp.Value}");
             }

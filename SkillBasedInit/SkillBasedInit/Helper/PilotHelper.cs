@@ -121,9 +121,9 @@ namespace SkillBasedInit.Helper
             int mod = 0;
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct())
             {
-                if (Mod.Config.PilotTagModifiers.ContainsKey(tag))
+                if (Mod.Config.Pilot.PilotTagModifiers.ContainsKey(tag))
                 {
-                    int tagMod = Mod.Config.PilotTagModifiers[tag];
+                    int tagMod = Mod.Config.Pilot.PilotTagModifiers[tag];
                     //Mod.Log.Debug?.Write($"Pilot {pilot.Name} has tag:{tag}, applying modifier:{tagMod}");
                     mod += tagMod;
                 }
@@ -138,9 +138,9 @@ namespace SkillBasedInit.Helper
 
             foreach (string tag in pilot.pilotDef.PilotTags.Distinct())
             {
-                if (Mod.Config.PilotTagModifiers.ContainsKey(tag))
+                if (Mod.Config.Pilot.PilotTagModifiers.ContainsKey(tag))
                 {
-                    int tagMod = Mod.Config.PilotTagModifiers[tag];
+                    int tagMod = Mod.Config.Pilot.PilotTagModifiers[tag];
                     if (tagMod > 0)
                     {
                         details.Add($"<space={space}em><color=#00FF00>{tag}: {tagMod:+0}</color>");
