@@ -51,7 +51,8 @@ namespace SkillBasedInit.patches {
 
             // Type modifier
             int typeMod = actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE);
-            chassisDetails.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_TT_UNIT_TYPE], new object[] { typeMod }).ToString());
+            string typeModColor = typeMod >= 0 ? "00FF00" : "FF0000";
+            chassisDetails.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_TT_UNIT_TYPE], new object[] { typeModColor, typeMod }).ToString());
 
             if (actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY) != 0)
             {

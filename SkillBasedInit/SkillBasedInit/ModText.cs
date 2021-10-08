@@ -4,6 +4,27 @@ namespace SkillBasedInit
 {
     public class ModText
     {
+
+
+        // Floaties
+        public const string LT_FT_INJURY_NOW = "FLOATIE_INJURY_NOW";
+        public const string LT_FT_INJURY_LATER = "FLOATIE_INJURY_LATER";
+        public const string LT_FT_KNOCKDOWN_NOW = "FLOATIE_KNOCKDOWN_NOW";
+        public const string LT_FT_KNOCKDOWN_LATER = "FLOATIE_KNOCKDOWN_LATER";
+        public const string LT_FT_CALLED_SHOT_NOW = "FLOATIE_CALLED_SHOT_NOW";
+        public const string LT_FT_CALLED_SHOT_LATER = "FLOATIE_CALLED_SHOT_LATER";
+        public const string LT_FT_VIGILANCE = "FLOATIE_VIGILANCE";
+
+        // Mech Bay
+        public const string LT_MB_TONNAGE = "MECHBAY_TONNAGE";
+        public const string LT_MB_UNIT_TYPE = "MECHBAY_UNIT_TYPE";
+        public const string LT_MB_LANCE = "MECHBAY_LANCE";
+        public const string LT_MB_TACTICS = "MECHBAY_TACTICS";
+        public const string LT_MB_TOTAL = "MECHBAY_TOTAL";
+        public const string LT_MB_RANDOM = "MECHBAY_RANDOM";
+        public const string LT_MB_EXPECTED_NO_PILOT = "MECHBAY_EXPECTED_NO_PILOT";
+        public const string LT_MB_EXPECTED = "MECHBAY_EXPECTED";
+
         // Tooltips
         public const string LT_TT_TITLE = "TOOLTIP_TITLE_INITIATIVE";
         public const string LT_TT_MECH_TONNAGE = "TOOLTIP_MECH_TONNAGE";
@@ -21,26 +42,6 @@ namespace SkillBasedInit
         public const string LT_TT_RANDOM = "TOOLTIP_RANDOM";
         public const string LT_TT_EXPECTED = "TOOLTIP_EXPECTED";
         public const string LT_TT_HOVER = "TOOLTIP_HOVER";
-
-        // Floaties
-        public const string LT_FT_INJURY_NOW = "FLOATIE_INJURY_NOW";
-        public const string LT_FT_INJURY_LATER = "FLOATIE_INJURY_LATER";
-        public const string LT_FT_KNOCKDOWN_NOW = "FLOATIE_KNOCKDOWN_NOW";
-        public const string LT_FT_KNOCKDOWN_LATER = "FLOATIE_KNOCKDOWN_LATER";
-        public const string LT_FT_CALLED_SHOT_NOW = "FLOATIE_CALLED_SHOT_NOW";
-        public const string LT_FT_CALLED_SHOT_LATER = "FLOATIE_CALLED_SHOT_LATER";
-        public const string LT_FT_VIGILANCE = "FLOATIE_VIGILANCE";
-
-        // Mech Bay
-        public const string LT_MB_TONNAGE = "MECHBAY_TONNAGE";
-        public const string LT_MB_UNIT_TYPE = "MECHBAY_VEHICLE_RULE_OF_COOL";
-        public const string LT_MB_LANCE = "MECHBAY_LANCE";
-        public const string LT_MB_TACTICS = "MECHBAY_TACTICS";
-        public const string LT_MB_TOTAL = "MECHBAY_TOTAL";
-        public const string LT_MB_RANDOM = "MECHBAY_RANDOM";
-        public const string LT_MB_EXPECTED_NO_PILOT = "MECHBAY_EXPECTED_NO_PILOT";
-        public const string LT_MB_EXPECTED = "MECHBAY_EXPECTED";
-
 
         public Dictionary<string, string> Floaties = new Dictionary<string, string>() 
         {

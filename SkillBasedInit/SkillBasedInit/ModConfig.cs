@@ -81,6 +81,11 @@ namespace SkillBasedInit
         public int InspirationMax = 4;
         public int InspirationMin = 1;
 
+        // Definition of any tags that should result in a flat initiative modifier
+        public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
+            { "pilot_morale_high", 2 },
+            { "pilot_morale_low", -2 }
+        };
     }
 
     public class IconCfg
@@ -141,23 +146,21 @@ namespace SkillBasedInit
         public bool Debug = false;
         public bool Trace = false;
 
+        public IconCfg Icons = new IconCfg();
+
+        public ColorCfg Colors = new ColorCfg();
+
+        public PilotCfg Pilot = new PilotCfg();
+
         public MechCfg Mech = new MechCfg();
         public TrooperCfg Trooper = new TrooperCfg();
         public NavalCfg Naval = new NavalCfg();
         public VehicleCfg Vehicle = new VehicleCfg();
         public TurretCfg Turret = new TurretCfg();
 
-        public PilotCfg Pilot = new PilotCfg();
 
-        public IconCfg Icons = new IconCfg();
 
-        public ColorCfg Colors = new ColorCfg();
 
-        // Definition of any tags that should result in a flat initiative modifier
-        public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
-            { "pilot_morale_high", 2 },
-            { "pilot_morale_low", -2 }
-        };
 
         public void Init()
         {
