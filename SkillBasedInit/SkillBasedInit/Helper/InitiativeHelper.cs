@@ -78,9 +78,9 @@ namespace SkillBasedInit.Helper
 
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) != 0)
             {
-                int reducedHesitation = actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) - tacticsMod;
+                int reducedHesitation = actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) + tacticsMod;
                 Mod.Log.Info?.Write($"  hesitationMod: {actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION)} - tacticsMod: {tacticsMod} => {reducedHesitation}");
-                if (reducedHesitation < 0) reducedHesitation = 0;
+                if (reducedHesitation > 0) reducedHesitation = 0;
                 roundInitiative += reducedHesitation;
                 actor.StatCollection.Set<int>(ModStats.STATE_HESITATION, reducedHesitation);
 
