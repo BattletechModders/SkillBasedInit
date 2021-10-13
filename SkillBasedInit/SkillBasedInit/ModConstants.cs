@@ -27,24 +27,18 @@ namespace SkillBasedInit
         public const string MOD_VIGILANCE = "SBI_MOD_VIGILANCE"; // modifies generated vigilance
         public const string STATE_VIGILIANCE = "SBI_STATE_VIGILANCE"; // current vigilant bonus
 
-        public const string MOD_KNOCKDOWN = "SBI_MOD_KNOCKDOWN"; // modifies the knockdown penalty
-        public const string STATE_KNOCKDOWN = "SBI_STATE_KNOCKDOWN"; // current knockdown penalty
-
         public const string MOD_HESITATION = "SBI_MOD_HESITATION"; // modifies generated hesitation
         public const string STATE_HESITATION = "SBI_STATE_HESITATION"; // current hesitation penalty
-
-        // Morale or Fury inspired state 
-        public const string BOUNDS_MOD_INSPIRED = "SBI_BOUNDS_MOD_INSPIRED";
-        public const string BOUNDS_MOD_RANDOMNESS = "SBI_BOUNDS_MOD_RANDOMNESS";
 
         // Calculated by SBI - do not modify directly!
         public const string ROUND_INIT = "SBI_ROUND_INIT";
 
         public const string STATE_TONNAGE = "SBI_STATE_TONNAGE";
         public const string STATE_UNIT_TYPE = "SBI_STATE_UNIT_TYPE";
-        public const string STATE_PILOT_TAGS = "SBI_STATE_PILOT_TAGS";
 
-        // Set default values at start, but expect status effects to change
+        // Pilot specific vallues
+        public const string STATE_PILOT_TAGS = "SBI_STATE_PILOT_TAGS";
+        public const string MOD_SKILL_GUNNERY = "SBI_MOD_GUNNERY";
         public const string MOD_SKILL_GUTS = "SBI_MOD_GUTS";
         public const string MOD_SKILL_PILOT = "SBI_MOD_PILOTING";
         public const string MOD_SKILL_TACTICS = "SBI_MOD_TACTICS";

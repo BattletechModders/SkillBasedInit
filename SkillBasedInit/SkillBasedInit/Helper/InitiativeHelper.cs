@@ -59,27 +59,32 @@ namespace SkillBasedInit.Helper
             roundInitiative += actor.ProneInitModifier();
             roundInitiative += actor.CrippledInitModifier();
             roundInitiative += actor.ShutdownInitModifier();
+            Mod.Log.Info?.Write($" ProneInitModifier: {actor.ProneInitModifier()}  " +
+                $"CrippledInitModifier: {actor.CrippledInitModifier()}  " +
+                $"ShutdownInitModifier: {actor.ShutdownInitModifier()}");
 
             Pilot pilot = actor.GetPilot();
 
-            if (actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) != 0)
-            {
-                // Reduce by pilot's tactics modifier
-                // TODO: Calculate hestitation reduction elsehwere
-                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION);
-                int tacticsMod = pilot.CurrentSkillMod(pilot.Tactics, ModStats.MOD_SKILL_TACTICS);
-                int updatedMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION) - tacticsMod;
-                if (updatedMod < 0) updatedMod = 0;
-                Mod.Log.Info?.Write($"  hesitationMod: {actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION)} - tacticsMod: {tacticsMod} => {updatedMod}");
-
-                actor.StatCollection.Set<int>(ModStats.STATE_HESITATION, updatedMod);
-            }
+            // Reduce by pilot's tactics modifier
+            int tacticsMod = pilot.SBITacticsMod();
+            roundInitiative += tacticsMod;
 
             // Generate the random element
-            roundInitiative += pilot.RandomnessModifier(unitConfig);
-            roundInitiative += pilot.InspiredModifier(unitConfig);
+            int randomnessMod = pilot.RandomnessModifier(unitConfig);
+            roundInitiative += randomnessMod;
+            int inspiredMod = pilot.InspiredModifier(unitConfig);
+            roundInitiative += inspiredMod;
+            Mod.Log.Info?.Write($" TacticsMod: {pilot.SBITacticsMod()}  randomnessMod: {randomnessMod}  inspiredMod: {inspiredMod}");
 
-            // TODO: Apply tactics mod directly
+            if (actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) != 0)
+            {
+                int reducedHesitation = actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) - tacticsMod;
+                Mod.Log.Info?.Write($"  hesitationMod: {actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION)} - tacticsMod: {tacticsMod} => {reducedHesitation}");
+                if (reducedHesitation < 0) reducedHesitation = 0;
+                roundInitiative += reducedHesitation;
+                actor.StatCollection.Set<int>(ModStats.STATE_HESITATION, reducedHesitation);
+
+            }
 
             // Normalize values
             if (roundInitiative <= 0)

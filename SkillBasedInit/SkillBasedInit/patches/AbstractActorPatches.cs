@@ -4,8 +4,6 @@ using Harmony;
 using IRBTModUtils.Extension;
 using SkillBasedInit.Helper;
 using System;
-using System.Collections.Generic;
-using us.frostraptor.modUtils;
 
 namespace SkillBasedInit {
 
@@ -23,7 +21,7 @@ namespace SkillBasedInit {
             Mod.Log.Trace?.Write($"AA:DU - entered.");
 
             int penalty = __instance.GetHesitationPenalty();
-            int newInit = __instance.Initiative + penalty;
+            int newInit = __instance.Initiative - penalty;
             if (newInit > Mod.MaxPhase) newInit = Mod.MaxPhase;
 
             Mod.Log.Debug?.Write($"  Deferring Actor:({__instance.DistinctId()}) initiative:{__instance.Initiative} by:{penalty} to:{newInit}");
@@ -218,28 +216,6 @@ namespace SkillBasedInit {
             Mod.Log.Info?.Write($"  -- typeMod: {typeMod}");
             __instance.StatCollection.AddStatistic<int>(ModStats.STATE_UNIT_TYPE, typeMod);
 
-            // Pilot related values
-            Pilot pilot = __instance.GetPilot();
-
-            int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
-            Mod.Log.Info?.Write($"  -- pilotTagsMod: {pilotTagsMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_PILOT_TAGS, pilotTagsMod);
-
-            Dictionary<int, int> emptySkillMods = new Dictionary<int, int>();
-            List<string> emptyDefIds = new List<string>();
-
-            int gutsMod = SkillUtils.GetModifier(pilot, pilot != null ? pilot.Guts : 0, emptySkillMods, emptyDefIds);
-            Mod.Log.Info?.Write($"  -- initial gutsMod: {gutsMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_GUTS, gutsMod);
-
-            int pilotMod = SkillUtils.GetModifier(pilot, pilot != null ? pilot.Piloting : 0, emptySkillMods, emptyDefIds);
-            Mod.Log.Info?.Write($"  -- initial pilotMod: {gutsMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_PILOT, pilotMod);
-
-            int tacticsMod = SkillUtils.GetModifier(pilot, pilot != null ? pilot.Tactics : 0, emptySkillMods, emptyDefIds);
-            Mod.Log.Info?.Write($"  -- initial tacticsMod: {gutsMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_TACTICS, tacticsMod);
-
             // Modifiers to various effects
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_INJURY, 0);
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_MISC, 0);
@@ -248,18 +224,24 @@ namespace SkillBasedInit {
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_VIGILANCE, 0);
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_HESITATION, 0);
 
-
             // Stats that track future state
             __instance.StatCollection.AddStatistic<int>(ModStats.STATE_CALLED_SHOT, 0);
             __instance.StatCollection.AddStatistic<int>(ModStats.STATE_VIGILIANCE, 0);
-            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_KNOCKDOWN, 0);
             __instance.StatCollection.AddStatistic<int>(ModStats.STATE_HESITATION, 0);
 
-            // Bounds modifiers
-            __instance.StatCollection.AddStatistic<int>(ModStats.BOUNDS_MOD_INSPIRED, 0);
-            
-            // TODO: Modify randomness by pilot 
-            __instance.StatCollection.AddStatistic<int>(ModStats.BOUNDS_MOD_RANDOMNESS, 0);
+            // Pilot related values
+            Pilot pilot = __instance.GetPilot();
+            if (pilot != null)
+            {
+                int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
+                Mod.Log.Info?.Write($"  -- pilotTagsMod: {pilotTagsMod}");
+                __instance.StatCollection.AddStatistic<int>(ModStats.STATE_PILOT_TAGS, pilotTagsMod);
+
+                pilot.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_GUNNERY, 0);
+                pilot.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_GUTS, 0);
+                pilot.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_PILOT, 0);
+                pilot.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_TACTICS, 0);
+            }
         }
     }
 }

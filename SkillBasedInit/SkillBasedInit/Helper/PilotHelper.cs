@@ -13,18 +13,14 @@ namespace SkillBasedInit.Helper
             if (pilot == null) return new int[]{ 0, 0 };
 
             Mod.Log.Debug?.Write($"Calculating randomness bounds for pilot: {pilot.Name}");
-            
-            int skillMod = CurrentSkillMod(pilot, pilot.Piloting, ModStats.MOD_SKILL_PILOT);
-            int boundsMod = pilot.StatCollection.GetValue<int>(ModStats.BOUNDS_MOD_RANDOMNESS);
-            int totalBoundsMod = skillMod + boundsMod;
-            Mod.Log.Debug?.Write($"  totalBoundsMod: {totalBoundsMod} = skillMod: {skillMod} + pilotMod: {boundsMod}");
 
-            int adjustedBound = config.RandomnessMax - totalBoundsMod;
-            Mod.Log.Debug?.Write($"  adjustedBound: {adjustedBound} = config.RanBoundsMax: {config.RandomnessMax} - totalBounds: {totalBoundsMod}");
-            if (adjustedBound < config.RandomnessMin)
-                adjustedBound = config.RandomnessMin;
+            int skillMod = pilot.SBIPilotingMod();
+            int adjustedMax = config.RandomnessMax + skillMod;
+            Mod.Log.Debug?.Write($"  adjustedBound: {adjustedMax} = config.RanBoundsMax: {config.RandomnessMax} - skillMod: {skillMod}");
+            if (adjustedMax >= config.RandomnessMin)
+                adjustedMax = config.RandomnessMin - 1;
 
-            return new int[] { config.RandomnessMin, config.RandomnessMax };
+            return new int[] { config.RandomnessMin, adjustedMax };
         }
 
 
@@ -36,8 +32,9 @@ namespace SkillBasedInit.Helper
 
             int[] bounds = RandomnessBounds(pilot, config);
 
-            int modifier = Mod.Random.Next(bounds[0], bounds[1]);
-            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({bounds[0]}, {bounds[1]}");
+            /// Invert because we assume the range is negative
+            int modifier = Mod.Random.Next(bounds[1], bounds[0]);
+            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({bounds[1]}, {bounds[0]})");
 
             return modifier;
         }
@@ -50,44 +47,56 @@ namespace SkillBasedInit.Helper
 
             Mod.Log.Debug?.Write($"Calculating inspired modifier for pilot: {pilot.Name}");
 
-            // Randomness is reduced by piloting
-            int pilotMod = CurrentSkillMod(pilot, pilot.Piloting, ModStats.MOD_SKILL_PILOT);
-            int adjustedMin = Mod.Config.Pilot.InspirationMin + pilotMod;
-            if (adjustedMin < Mod.Config.Pilot.InspirationMin)
-                adjustedMin = Mod.Config.Pilot.InspirationMin;
-            
-            int adjustedMax = Mod.Config.Pilot.InspirationMin + pilotMod;
-            if (adjustedMax < Mod.Config.Pilot.InspirationMin)
-                adjustedMax = Mod.Config.Pilot.InspirationMin;
+            UnitCfg typeCfg = pilot.ParentActor.GetUnitConfig();
+            int skillMod = pilot.SBITacticsMod();
+            int adjustedMax = typeCfg.InspiredMax + skillMod;
 
-            Mod.Log.Debug?.Write($"  adjusted bounds => min: {adjustedMin} to max: {adjustedMax}");
-
-            int modifier = Mod.Random.Next(adjustedMin, adjustedMax);
-            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({adjustedMin}, {adjustedMax}");
+            int modifier = Mod.Random.Next(typeCfg.InspiredMin, adjustedMax);
+            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({typeCfg.InspiredMin}, {adjustedMax})");
 
             return modifier;
         }
-        public static int CurrentSkillMod(this Pilot pilot, int skillLevel, string statName)
+
+        public static int SBIGunneryMod(this Pilot pilot)
         {
-            int normedMod = SkillUtils.GetModifier(pilot, skillLevel, new Dictionary<int, int>(), new List<string>());
-            int skillMod = statName != null ? pilot.StatCollection.GetValue<int>(statName) : 0;
+            int normedMod = SkillUtils.GetGunneryModifier(pilot);
+            int skillMod = pilot.StatCollection.GetValue<int>(ModStats.MOD_SKILL_GUNNERY);
+            Mod.Log.Debug?.Write($"For pilot: {pilot.Name} with skill: {pilot.Gunnery}  normedMod: {normedMod} + skillMod: {skillMod}");
             return normedMod + skillMod;
         }
 
-        public static int CalledShotModifier(this Pilot pilot)
+        public static int SBIGutsMod(this Pilot pilot)
         {
-            int gunneryMod = CurrentSkillMod(pilot, pilot.Gunnery, ModStats.MOD_SKILL_GUTS); 
-            int tacticsMod = CurrentSkillMod(pilot, pilot.Tactics, ModStats.MOD_SKILL_TACTICS);
-            int average = (int)Math.Floor((gunneryMod + tacticsMod) / 2.0);
-            return average;
+            int normedMod = SkillUtils.GetGutsModifier(pilot);
+            int skillMod = pilot.StatCollection.GetValue<int>(ModStats.MOD_SKILL_GUTS);
+            Mod.Log.Debug?.Write($"For pilot: {pilot.Name} with skill: {pilot.Guts}  normedMod: {normedMod} + skillMod: {skillMod}");
+            return normedMod + skillMod;
         }
 
-        public static int VigilanceModifier(this Pilot pilot)
+        public static int SBIPilotingMod(this Pilot pilot)
         {
-            int gutsMod = CurrentSkillMod(pilot, pilot.Guts, ModStats.MOD_SKILL_GUTS);
-            int tacticsMod = CurrentSkillMod(pilot, pilot.Tactics, ModStats.MOD_SKILL_TACTICS);
-            int average = (int)Math.Floor((gutsMod + tacticsMod) / 2.0);
-            return average;
+            int normedMod = SkillUtils.GetPilotingModifier(pilot);
+            int skillMod = pilot.StatCollection.GetValue<int>(ModStats.MOD_SKILL_PILOT);
+            Mod.Log.Debug?.Write($"For pilot: {pilot.Name} with skill: {pilot.Piloting}  normedMod: {normedMod} + skillMod: {skillMod}");
+            return normedMod + skillMod;
+        }
+
+        public static int SBITacticsMod(this Pilot pilot)
+        {
+            int normedMod = SkillUtils.GetTacticsModifier(pilot);
+            int skillMod = pilot.StatCollection.GetValue<int>(ModStats.MOD_SKILL_TACTICS);
+            Mod.Log.Debug?.Write($"For pilot: {pilot.Name} with skill: {pilot.Tactics}  normedMod: {normedMod} + skillMod: {skillMod}");
+            return normedMod + skillMod;
+        }
+
+        public static int AverageGunneryAndTactics(this Pilot pilot)
+        {
+            return (int)Math.Floor((pilot.SBIGunneryMod() + pilot.SBITacticsMod()) / 2.0);
+        }
+
+        public static int AverageGutsAndTactics(this Pilot pilot)
+        {
+            return (int)Math.Floor((pilot.SBIGutsMod() + pilot.SBITacticsMod()) / 2.0);
         }
 
         public static void LogPilotStats(this Pilot pilot)

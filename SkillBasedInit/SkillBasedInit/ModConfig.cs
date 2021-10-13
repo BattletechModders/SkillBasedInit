@@ -11,14 +11,14 @@ namespace SkillBasedInit
         public int TypeMod = DEFAULT_TYPE_MOD;
 
         // The maximum value used for randomness, from 0 to this value. Offset by piloting mod.
-        public int RandomnessMax = 10;
-        public int RandomnessMin = 2;
+        public int RandomnessMax = -10;
+        public int RandomnessMin = -2;
 
-        public int HesitationMax = 6;
-        public int HesitationMin = 2;
+        public int HesitationMax = -6;
+        public int HesitationMin = -2;
 
-        public int CalledShotRandMax = 6;
-        public int CalledShotRandMin = 2;
+        public int CalledShotRandMax = -6;
+        public int CalledShotRandMin = -2;
 
         public int VigilanceRandMax = 6;
         public int VigilanceRandMin = 2;
@@ -78,9 +78,6 @@ namespace SkillBasedInit
 
     public class PilotCfg
     {
-        public int InspirationMax = 4;
-        public int InspirationMin = 1;
-
         // Definition of any tags that should result in a flat initiative modifier
         public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
             { "pilot_morale_high", 2 },

@@ -348,7 +348,7 @@ namespace SkillBasedInit.Helper
     {
         
         // Prone only applies to mechs and quads
-        public static int ProneInitModifier(this AbstractActor actor)
+        public static int ProneInitModifier(this AbstractActor actor, bool isKnockdown=false)
         {
             if (!(actor is Mech)) return 0;
 
@@ -364,15 +364,14 @@ namespace SkillBasedInit.Helper
             Mod.Log.Debug?.Write($"Unit: {mech.DistinctId()} is prone, raw bounds => min: {boundsMin} to max: {boundsMax}");
 
             Pilot pilot = actor.GetPilot();
-            int pilotMod = pilot.CurrentSkillMod(pilot.Piloting, ModStats.MOD_SKILL_PILOT);
-            int adjustedMax = boundsMax - pilotMod;
-
-            int finalMod = adjustedMax;
-            if (adjustedMax <= boundsMin)
+            int pilotMod = pilot.SBIPilotingMod();
+            int adjustedMax = boundsMax + pilotMod;
+            if (adjustedMax >= boundsMin)
             {
-                finalMod = boundsMin;
-                Mod.Log.Debug?.Write($"  adjustedMax < boundsMin, returning {boundsMin}");
+                adjustedMax = boundsMin + 1;
             }
+
+            int finalMod = Mod.Random.Next(boundsMin, adjustedMax);
 
             Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
             return finalMod;
@@ -431,7 +430,7 @@ namespace SkillBasedInit.Helper
             Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} is crippled, raw bounds => min: {boundsMin} to max: {boundsMax}");
 
             Pilot pilot = actor.GetPilot();
-            int pilotMod = pilot.CurrentSkillMod(pilot.Piloting, ModStats.MOD_SKILL_PILOT);
+            int pilotMod = pilot.SBIPilotingMod();
             int adjustedMax = boundsMax - pilotMod;
 
             int finalMod = adjustedMax;
@@ -471,7 +470,7 @@ namespace SkillBasedInit.Helper
             Mod.Log.Debug?.Write($"Unit: {mech.DistinctId()} is shutdown, raw bounds => min: {boundsMin} to max: {boundsMax}");
 
             Pilot pilot = actor.GetPilot();
-            int pilotMod = pilot.CurrentSkillMod(pilot.Piloting, ModStats.MOD_SKILL_PILOT);
+            int pilotMod = pilot.SBIPilotingMod();
             int adjustedMax = boundsMax - pilotMod;
             Mod.Log.Debug?.Write($"  adjustedMax: {adjustedMax} = max: {boundsMax} - pilotMod: {pilotMod}");
 
@@ -493,53 +492,47 @@ namespace SkillBasedInit.Helper
             UnitCfg unitCfg = actor.GetUnitConfig();
             Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} hestiation raw bounds => min: {unitCfg.HesitationMin} to max: {unitCfg.HesitationMax}");
             
-            int rawMod = Mod.Random.Next(unitCfg.HesitationMin, unitCfg.HesitationMax);
+            // Invert because we assume the range is negative
+            int rawMod = Mod.Random.Next(unitCfg.HesitationMax, unitCfg.HesitationMin);
             int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION);
             int finalMod = rawMod + actorMod;
             Mod.Log.Debug?.Write($"Hesitation penalty: {finalMod} = rawMod: {rawMod} + actorMod: {actorMod}");
-            if (finalMod < 0)
+            if (finalMod > 0)
             {
-                Mod.Log.Debug?.Write("Normalizing penalty < 0 to 0");
+                Mod.Log.Debug?.Write("Normalizing penalty > 0 to 0");
                 finalMod = 0;
             }
             return finalMod;
-        }
-
-        public static int KnockdownPenalty(this AbstractActor actor)
-        {
-            if (!(actor is Mech)) return 0;
-            if (actor.IsNaval() || actor.IsTrooper() || actor.IsVehicle()) return 0;
-
-            int rawMod = Mod.Random.Next(Mod.Config.Mech.ProneModifierMin, Mod.Config.Mech.ProneModifierMax);
-            int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_KNOCKDOWN);
-            int finalMod = rawMod + actorMod;
-            Mod.Log.Debug?.Write($"Knockdown penalty: {finalMod} = rawMod: {rawMod} + actorMod: {actorMod}");
-            if (finalMod < 0)
-            {
-                Mod.Log.Debug?.Write("Normalizing penalty < 0 to 0");
-                finalMod = 0;
-            }
-            return finalMod;
-
         }
 
         public static int CalledShotPenalty(this AbstractActor target, AbstractActor attacker)
         {
             // Get attacker bonus, get target bonus, combine
-            // TODO: WARNING, CALLED SHOT USED TO BE AVG, SEE PILOTHELPER
             if (target == null || attacker == null) return 0;
 
             UnitCfg unitCfg = target.GetUnitConfig();
             Mod.Log.Debug?.Write($"Unit: {target.DistinctId()} called shot raw bounds => min: {unitCfg.CalledShotRandMin} to max: {unitCfg.CalledShotRandMax}");
 
-            int rawMod = Mod.Random.Next(unitCfg.CalledShotRandMin, unitCfg.CalledShotRandMax);
-            int targetMod = target.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_TARGET);
-            int attackerMod = target.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_ATTACKER);
-            int finalMod = rawMod + targetMod + attackerMod;
-            Mod.Log.Debug?.Write($"Called shot penalty: {finalMod} = rawMod: {rawMod} + targetMod: {targetMod} + attackerMod: {attackerMod}");
-            if (finalMod < 0)
+            // Invert because we assume the range is negative
+            int targetCSMod = target.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_TARGET);
+            int targetSkillMod = target.GetPilot().AverageGutsAndTactics();
+            int targetMod = targetCSMod + targetSkillMod;
+            Mod.Log.Debug?.Write($"Target calledShotMod: {targetMod} = calledShotMod: {targetCSMod} + skillMod: {targetSkillMod}");
+
+            int attackerCSMod = attacker.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_ATTACKER);
+            int attackerSkillMod = attacker.GetPilot().AverageGunneryAndTactics();
+            int attackerMod = attackerCSMod + attackerSkillMod;
+            Mod.Log.Debug?.Write($"Attacker calledShotMod: {attackerMod} = calledShotMod: {attackerCSMod} + skillMod: {attackerSkillMod}");
+
+            int adjustedMax = unitCfg.CalledShotRandMax + targetMod + attackerMod;
+            if (adjustedMax >= unitCfg.CalledShotRandMin)
+                adjustedMax = unitCfg.CalledShotRandMin - 1;
+
+            int finalMod = Mod.Random.Next(adjustedMax, unitCfg.CalledShotRandMin);
+            Mod.Log.Debug?.Write($"Called shot penalty: {finalMod} from Rand({adjustedMax} to {unitCfg.CalledShotRandMin}) ");
+            if (finalMod > 0)
             {
-                Mod.Log.Debug?.Write("Normalizing penalty < 0 to 0");
+                Mod.Log.Debug?.Write("Normalizing penalty > 0 to 0");
                 finalMod = 0;
             }
             return finalMod;
@@ -548,14 +541,15 @@ namespace SkillBasedInit.Helper
 
         public static int VigilanceBonus(this AbstractActor actor)
         {
-            // TODO: WARNING, VIGILANCE USED TO BE AVG, SEE PILOTHELPER
-            if (actor == null) return 0;
+            if (actor == null || actor.GetPilot() == null) return 0;
 
             UnitCfg unitCfg = actor.GetUnitConfig();
-            int rawMod = Mod.Random.Next(unitCfg.VigilanceRandMin, unitCfg.VigilanceRandMax);
             int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE);
-            int finalMod = rawMod + actorMod;
-            Mod.Log.Debug?.Write($"Vigilance bonus: {finalMod} = rawMod: {rawMod} + actorMod: {actorMod}");
+            int skillMod = actor.GetPilot().AverageGutsAndTactics();
+            int adjustedMax = actorMod + skillMod + unitCfg.VigilanceRandMax;
+
+            int finalMod = Mod.Random.Next(unitCfg.VigilanceRandMin, adjustedMax);
+            Mod.Log.Debug?.Write($"Vigilance bonus: {finalMod} = min:{unitCfg.VigilanceRandMin} to max: {unitCfg.VigilanceRandMax} + actorMod: {actorMod} + skillMod: {skillMod}");
             if (finalMod < 0)
             {
                 Mod.Log.Debug?.Write("Normalizing bonus < 0 to 0");

@@ -16,23 +16,34 @@ namespace SkillBasedInit.Patches
     public static class Mech_CompleteKnockdown
     {
 
-        public static string KnockdownSourceID;
-        public static int KnockdownStackItemUID;
-
-        public static void Prefix(Mech __instance, string sourceID, int stackItemUID)
-        {
-            Mod.Log.Trace?.Write("M:CK:pre - entered.");
-            KnockdownSourceID = sourceID;
-            KnockdownStackItemUID = stackItemUID;
-            Mod.Log.Debug?.Write($"Mech:CompleteKnockdown:prefix - Recording sourceID:{sourceID} stackItemUID:{stackItemUID}");
-        }
-
-        public static void Postfix(Mech __instance)
+        public static void Postfix(Mech __instance, string sourceID, int stackItemUID)
         {
             Mod.Log.Trace?.Write("M:CK:post - entered.");
-            Mod.Log.Debug?.Write($"Mech:CompleteKnockdown:postfix - Removing sourceID:{KnockdownSourceID} stackItemUID:{KnockdownStackItemUID}.");
-            KnockdownSourceID = null;
-            KnockdownStackItemUID = -1;
+            Mod.Log.Debug?.Write($"Completing knockdown for actor: {__instance.DistinctId()} from sourceID:{sourceID} stackItemUID:{stackItemUID}.");
+
+            bool applyNextTurn = __instance.HasActivatedThisRound || __instance.Initiative >= Mod.MaxPhase;
+            if (applyNextTurn)
+            {
+                Mod.Log.Debug?.Write("Actor has already acted, applying prone modifier next turn.");
+                return;
+            }
+
+            int penalty = __instance.ProneInitModifier(isKnockdown: true);
+            if (penalty == 0) return; // Nothing to do
+
+            Mod.Log.Info?.Write($"Applying penalty: {penalty} to {__instance.DistinctId()} with init: {__instance.Initiative} immediately.");
+
+            __instance.Initiative += penalty;
+            if (__instance.Initiative > Mod.MaxPhase)
+            {
+                __instance.Initiative = Mod.MaxPhase;
+            }
+            __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
+
+            string floatieMsg = new Text(Mod.LocalizedText.Floaties[ModText.LT_FT_KNOCKDOWN], new object[] { penalty }).ToString();
+            __instance.Combat.MessageCenter.PublishMessage(
+                    new FloatieMessage(__instance.GUID, __instance.GUID, floatieMsg, FloatieMessage.MessageNature.Debuff)
+                    );
         }
     }
 
@@ -66,7 +77,6 @@ namespace SkillBasedInit.Patches
     public static class AbstractActor_ForceUnitOnePhaseDown
     {
 
-        static bool InvokeIsKnockdown = false;
         static bool InvokeIsCalledShot = false;
 
         // We temporarily set the actorInit to PhaseAssault to trick the original method into not firing, then do our work in a postfix.
@@ -77,24 +87,10 @@ namespace SkillBasedInit.Patches
         {
             Mod.Log.Trace?.Write("AA:FUOPD:pre - entered.");
 
-            if (sourceID == Mech_CompleteKnockdown.KnockdownSourceID && stackItemUID == Mech_CompleteKnockdown.KnockdownStackItemUID)
-            {
-                InvokeIsKnockdown = true;
-                InvokeIsCalledShot = false;
-            }
-            else if (AttackStackSequence_OnAdded.IsMoraleAttack)
-            {
-                InvokeIsKnockdown = false;
-                InvokeIsCalledShot = true;
-            }
-            else
-            {
-                InvokeIsKnockdown = false;
-                InvokeIsCalledShot = false;
-            }
+            InvokeIsCalledShot = AttackStackSequence_OnAdded.IsMoraleAttack ? true : false;
 
             // In either of these cases, we want our logic to apply, not default. Fake out the call temporarily, then restore init at the end.
-            if (InvokeIsKnockdown || InvokeIsCalledShot)
+            if (InvokeIsCalledShot)
             {
                 PreInvokeInitiative = __instance.Initiative;
                 __instance.Initiative = __instance.Combat.Constants.Phase.PhaseAssault;
@@ -104,35 +100,18 @@ namespace SkillBasedInit.Patches
         public static void Postfix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf)
         {
             Mod.Log.Trace?.Write("AA:FUOPD:post - entered.");
-            bool applyNextTurn = __instance.HasActivatedThisRound || __instance.Initiative >= Mod.MaxPhase;
-            int penalty = 0;
-            string floatieMsg = "";
-            if (InvokeIsKnockdown)
-            {
-                penalty = __instance.KnockdownPenalty();
-                floatieMsg = applyNextTurn ?
-                    new Text(Mod.LocalizedText.Floaties[ModText.LT_FT_KNOCKDOWN_LATER], new object[] { penalty }).ToString() :
-                    new Text(Mod.LocalizedText.Floaties[ModText.LT_FT_KNOCKDOWN_NOW], new object[] { penalty }).ToString();
-            }
-            else if (InvokeIsCalledShot)
-            {
-                penalty = __instance.CalledShotPenalty(AttackStackSequence_OnAdded.Attacker);
-                floatieMsg = applyNextTurn ?
-                    new Text(Mod.LocalizedText.Floaties[ModText.LT_FT_CALLED_SHOT_LATER], new object[] { penalty }).ToString() :
-                    new Text(Mod.LocalizedText.Floaties[ModText.LT_FT_CALLED_SHOT_NOW], new object[] { penalty }).ToString();
-            }
+            if (!InvokeIsCalledShot) return;
 
-            if (penalty == 0) return;
-            
+            bool applyNextTurn = __instance.HasActivatedThisRound || __instance.Initiative >= Mod.MaxPhase;
+            int penalty = __instance.CalledShotPenalty(AttackStackSequence_OnAdded.Attacker);
+            if (penalty == 0) return; // nothing to do
+
             if (applyNextTurn)
             {
                 Mod.Log.Info?.Write($"Applying penalty: {penalty} to {__instance.DistinctId()} with init: {PreInvokeInitiative} next turn.");
+                __instance.StatCollection.ModifyStat<int>("self", -1, ModStats.STATE_CALLED_SHOT, StatCollection.StatOperation.Int_Add, penalty);
 
-                __instance.StatCollection.ModifyStat<int>("self", -1, 
-                    InvokeIsKnockdown ? ModStats.STATE_KNOCKDOWN : ModStats.STATE_CALLED_SHOT, 
-                    StatCollection.StatOperation.Int_Add, penalty);
-
-                // Reset their initiative on this round
+                // Leave their init untouched on this round
                 __instance.Initiative = PreInvokeInitiative;
             }
             else
@@ -148,6 +127,9 @@ namespace SkillBasedInit.Patches
                 __instance.Combat.MessageCenter.PublishMessage(new ActorPhaseInfoChanged(__instance.GUID));
             }
 
+            string floatieMsg = applyNextTurn ?
+                new Text(Mod.LocalizedText.Floaties[ModText.LT_FT_CALLED_SHOT_LATER], new object[] { penalty }).ToString() :
+                new Text(Mod.LocalizedText.Floaties[ModText.LT_FT_CALLED_SHOT_NOW], new object[] { penalty }).ToString();
             __instance.Combat.MessageCenter.PublishMessage(
                 new FloatieMessage(__instance.GUID, __instance.GUID, floatieMsg, FloatieMessage.MessageNature.Debuff)
                 );
