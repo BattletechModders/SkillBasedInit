@@ -271,41 +271,41 @@ namespace SkillBasedInit.Helper
             if (actor is Turret)
             {
                 typeMod = Mod.Config.Turret.TypeMod;
-                Mod.Log.Debug?.Write($" -- unit is type turret, using typeMod: {typeMod}");
+                Mod.Log.Debug?.Write($"  -- unit is type turret, using typeMod: {typeMod}");
             }
             else if (actor is Vehicle)
             {
                 typeMod = Mod.Config.Vehicle.TypeMod;
-                Mod.Log.Debug?.Write($" -- unit is type vehicle, using typeMod: {typeMod}");
+                Mod.Log.Debug?.Write($"  -- unit is type vehicle, using typeMod: {typeMod}");
             }
             else if (actor is Mech mech)
             {
                 if (mech.FakeVehicle())
                 {
                     typeMod = Mod.Config.Vehicle.TypeMod;
-                    Mod.Log.Debug?.Write($" -- unit is type vehicle, using typeMod: {typeMod}");
+                    Mod.Log.Debug?.Write($"  -- unit is type vehicle, using typeMod: {typeMod}");
                 }
                 else if (mech.NavalUnit())
                 {
                     typeMod = Mod.Config.Naval.TypeMod;
-                    Mod.Log.Debug?.Write($" -- unit is type naval, using typeMod: {typeMod}");
+                    Mod.Log.Debug?.Write($"  -- unit is type naval, using typeMod: {typeMod}");
 
                 }
                 else if (mech.TrooperSquad())
                 {
                     typeMod = Mod.Config.Trooper.TypeMod;
-                    Mod.Log.Debug?.Write($" -- unit is type troopers, using typeMod: {typeMod}");
+                    Mod.Log.Debug?.Write($"  -- unit is type troopers, using typeMod: {typeMod}");
                 }
                 else
                 {
                     typeMod = Mod.Config.Mech.TypeMod;
-                    Mod.Log.Debug?.Write($" -- unit is type mech, using typeMod: {typeMod}");
+                    Mod.Log.Debug?.Write($"  -- unit is type mech, using typeMod: {typeMod}");
                 }
             }
             else
             {
                 typeMod = 0;
-                Mod.Log.Debug?.Write(" -- unit is unknown type, using 0 typeMod.");
+                Mod.Log.Debug?.Write("  -- unit is unknown type, using 0 typeMod.");
             }
 
             return typeMod;
