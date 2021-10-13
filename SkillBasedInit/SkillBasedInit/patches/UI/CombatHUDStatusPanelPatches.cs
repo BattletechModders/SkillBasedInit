@@ -103,7 +103,7 @@ namespace SkillBasedInit.patches {
                     int pilotTagsMods = actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
                     initiativeBase += pilotTagsMods;
                     string pilotTagsColor = pilotTagsMods >= 0 ? "00FF00" : "FF0000";
-                    chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_PILOT_TAGS], new object[] { pilotTagsColor, pilotTagsMods }).ToString());
+                    pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_PILOT_TAGS], new object[] { pilotTagsColor, pilotTagsMods }).ToString());
                 }
 
                 int inspiredMod = selectedPilot.InspiredModifier(unitCfg);
@@ -119,7 +119,7 @@ namespace SkillBasedInit.patches {
                     int injuryMod = actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY);
                     initiativeBase += injuryMod;
                     string injuryModColor = injuryMod >= 0 ? "00FF00" : "FF0000";
-                    chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_INJURY], new object[] { injuryModColor, injuryMod }).ToString());
+                    pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_INJURY], new object[] { injuryModColor, injuryMod }).ToString());
                 }
             }
 
@@ -128,7 +128,7 @@ namespace SkillBasedInit.patches {
                 int hestiateMod = actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION);
                 Mod.Log.Debug?.Write($"  hestiationMod: {hestiateMod}");
                 initiativeBase += hestiateMod;
-                chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_HESITATION], new object[] { hestiateMod }).ToString());
+                pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_HESITATION], new object[] { hestiateMod }).ToString());
             }
 
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT) != 0)
@@ -136,7 +136,7 @@ namespace SkillBasedInit.patches {
                 int calledShotMod = actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT);
                 Mod.Log.Debug?.Write($"  hestiationMod: {calledShotMod}");
                 initiativeBase += calledShotMod;
-                chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_CALLED_SHOT], new object[] { calledShotMod }).ToString());
+                pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_CALLED_SHOT], new object[] { calledShotMod }).ToString());
             }
 
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE) != 0)
@@ -144,7 +144,7 @@ namespace SkillBasedInit.patches {
                 int vigilanceMod = actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE);
                 Mod.Log.Debug?.Write($"  hestiationMod: {vigilanceMod}");
                 initiativeBase += vigilanceMod;
-                chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_VIGILANCE], new object[] { vigilanceMod }).ToString());
+                pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_VIGILANCE], new object[] { vigilanceMod }).ToString());
             }
 
 
