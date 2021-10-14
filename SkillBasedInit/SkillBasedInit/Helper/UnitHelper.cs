@@ -368,10 +368,10 @@ namespace SkillBasedInit.Helper
             int adjustedMax = boundsMax + pilotMod;
             if (adjustedMax >= boundsMin)
             {
-                adjustedMax = boundsMin + 1;
+                adjustedMax = boundsMin - 1;
             }
 
-            int finalMod = Mod.Random.Next(boundsMin, adjustedMax);
+            int finalMod = Mod.Random.Next(adjustedMax, boundsMin);
 
             Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
             return finalMod;
@@ -380,64 +380,48 @@ namespace SkillBasedInit.Helper
         // Crippled applies to mechs, quads, vehicles, naval
         public static int CrippledInitModifier(this AbstractActor actor)
         {
-            if (!((actor is Vehicle) || (actor is Mech))) return 0;
+            if (actor is null) return 0;
 
-            int boundsMin = 0, boundsMax = 0;
-            if (actor is Vehicle vehicle &&
-                (vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right))
-                )
+            // Turrets cannot be crippled
+            if (actor is Turret) return 0;
+
+            UnitCustomInfo customInfo = actor.GetCustomInfo();
+            
+            // Troopers cannot be crippled
+            if (customInfo != null && customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1) return 0;
+
+            
+            bool isCrippled = false;
+            if (actor is Vehicle vehicle)
             {
-                boundsMin = Mod.Config.Vehicle.CrippledModifierMin;
-                boundsMax = Mod.Config.Vehicle.CrippledModifierMax;
-            }
+                Mod.Log.Debug?.Write($"Checking true vehicle for crippled");
+                if (vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right))
+                    isCrippled = true;
+            }            
             else if (actor is Mech mech)
             {
-                UnitCustomInfo customInfo = mech.GetCustomInfo();
-                if (customInfo != null && customInfo.FakeVehicle)
-                {
-                    // CU treats legs as vehicle sides. 
-                    if (mech.IsLegged)
-                    {
-                        boundsMin = Mod.Config.Vehicle.CrippledModifierMin;
-                        boundsMax = Mod.Config.Vehicle.CrippledModifierMax;
-                    }
-
-                }
-                else if (customInfo != null && customInfo.Naval)
-                {
-                    // CU treats legs as vehicle sides. 
-                    if (mech.IsLegged)
-                    {
-                        boundsMin = Mod.Config.Naval.CrippledModifierMin;
-                        boundsMax = Mod.Config.Naval.CrippledModifierMax;
-                    }
-                }
-                else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
-                {
-                    // Cannot be crippled, do nothing
-                    boundsMin = 0;
-                    boundsMax = 0;
-                }
-                // Should be a mech, or a CU that is mech-like
-                else if (mech.IsLegged)
-                {
-                    boundsMin = Mod.Config.Mech.CrippledModifierMin;
-                    boundsMax = Mod.Config.Mech.CrippledModifierMax;
-                }
+                // CU treats legs as vehicle sides, so this works for our purposes
+                // TODO: Quads may want to defer until mutiples are legged, but for now one leg - crippled
+                isCrippled = mech.IsLegged;
             }
 
-            if (boundsMax == 0) return 0;
-            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} is crippled, raw bounds => min: {boundsMin} to max: {boundsMax}");
+            if (!isCrippled) return 0; // Nothing to do
+
+            UnitCfg unitCfg = actor.GetUnitConfig();
+            if (unitCfg.CrippledModifierMin == 0) return 0; // Nothing to do
+
+            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} is crippled, raw bounds => min: {unitCfg.CrippledModifierMin} " +
+                $"to max: {unitCfg.CrippledModifierMax}");
 
             Pilot pilot = actor.GetPilot();
             int pilotMod = pilot.SBIPilotingMod();
-            int adjustedMax = boundsMax - pilotMod;
+            int adjustedMax = unitCfg.CrippledModifierMax + pilotMod;
 
             int finalMod = adjustedMax;
-            if (adjustedMax <= boundsMin)
+            if (adjustedMax >= unitCfg.CrippledModifierMin)
             {
-                finalMod = boundsMin;
-                Mod.Log.Debug?.Write($"  adjustedMax < boundsMin, returning {boundsMin}");
+                finalMod = unitCfg.CrippledModifierMin;
+                Mod.Log.Debug?.Write($"  adjustedMax >= boundsMin, setting to {unitCfg.CrippledModifierMin}");
             }
 
             Mod.Log.Debug?.Write($"  finalMod: {finalMod}");

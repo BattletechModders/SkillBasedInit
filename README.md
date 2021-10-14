@@ -9,6 +9,14 @@ The skill level of each Pilot becomes very important in this mod. Novice MechWar
 
 Instead of four weight classes (light / medium / heavy / assault), this mod divides units into 10-ton groups. 20-25 ton mechs are slightly faster than 30-35 ton mechs. 40-45 ton mechs are faster than 50-55 ton mechs, while 60-65 ton mechs are faster than 70-75 ton mechs. 80-85 tons mechs are faster than 90-95, which are faster than 100. This offers a small bonus to pilots of lighter units.
 
+
+In addition, this mod emphasizes a MechWarrior's Tactics, Guts, and Piloting skills.
+
+* *Tactics* - contributes directly to the initiative value. If you want your Mechwarriors to consistently achieve a high phase number, increase their Tactics skill.
+* *Piloting* reduces the randomness of many calculations, providing a more consistent result round over round.
+* *Gunnery* is used during called shots by the attacker; it increases the initiative penalty the target suffers
+* *Guts* is used during called shots by the target; it reduces the initiative loss
+
 Almost all values are available through tooltips in the mech bay, lance drop and combat UI screens. Hover over the initiative badges (the hexagons) and many details of the system will be defined.
 
 ### Dependencies
@@ -130,7 +138,9 @@ When a Mech is knocked prone, it suffers penalty to initiative configured as Mec
 
 ### Hesitation Modifier
 
-Lorum ipsum
+Every time a mech chooses the Reserve option, it accrues a *Hesitation* penalty. A random value between `Unit.HesitationMax` and `Unit.HestiationMin` is calculated, with any value from `SBI_MOD_HESITATION` applied to the random value. This penalty is then applied to _next turns initiative_ value. This penalty is *cumulative*, so every time Reserve is chosen the randomly generated penalty is added to the current total.
+
+At the start of the next turn, the pilots tactics modifier is subtracted from the hesitation penalty. The remainder is then applied to the initiative calculation and remains until the next round. This can result in an actor keeping a large hesitation penalty around for most of the combat, making it harder to react to the enemy opfor.
 
 ### Crippled Modifier
 
@@ -154,21 +164,6 @@ When a unit reaches the *Inspired* state (by the team gaining enough morale or r
 
 This mod completely ignores the HBS statistics related to initiative, and replaces them with its own. Any status effects or equipment that modify the `BaseInitiative`, `PhaseModifierSelf`, or `PhaseModifierSelf` will be completely ignored by this mod.
 
-## Skills
-
-This mod emphasizes a MechWarrior's Tactics, Guts, and Piloting skills.
-
-* Tactics contributes directly to the initiative value. If you want your Mechwarriors to consistently achieve a high phase number, increase their Tactics skill.
-* Guts prevents initiative losses from injuries or melee attacks. A high guts rating is necessary to ensure you retain high phase numbers even after taking damage.
-* Piloting prevents initiative losses from knockdowns, shutdowns, and other effects. A high piloting rating is necessary to ensure you don't get dropped too far back in the phase order due to knockdowns.
-
-## Pilot Tags
-
-Certain pilot tags provide bonuses or penalties to reflect the different quirks each pilot has.
-
-
-
-
 
 ### Changing Colors
 The mod applies colors to the following combat UI elements:
@@ -183,151 +178,5 @@ These colors can be customized through the `mod.json`.
 
 Works in progress or planned effects include:
 
-- [] BUG: Hesitation not working as expected. Math.min used instead of Math.max
-- [] Units that are unsettled, panicked or similar will have a reduced initiative.
-- [x] Reduce penalties for injuries at the bottom end of the guts range
-- [x] Change start-of-phase popups to be buff/debuff icons shown when a friendly mech is selected
-- [x] Change combat tooltip to show both static and dynamic effects
-- [x] Change combat tooltip to no longer obscure the paperdoll
-- [] Show an initiative track at the top of the screen so that players know which models are going when. Perhaps use the unit icons and a number underneath them?
 - [] Modify Reserve button to change to 'Reserve to Phase 1' when ALT key is held down. Model pays for all the phases it holds though. (See BTDebug for how to lash to ALT key)
-- [] Tooltips for ability boosted state
-- [] Tooltips for melee bonus to attack, resist
-- [] Change text for Called Shot, Vigiliance to reflect the new functions under SBI
-- [] Check all modifiers to ensure they can be reduced to 0 with high enough stats
 
-
-### Bugs and Issues
-
-These items are known bugs or issues that should be resolved before declaring a 1.0 version.
-
-* **CONFIRMED BUG**: When loading a save that is within a battle, the phase bars are displayed.
-* Determine if there are other stats that should be evaluated. In particular "PhaseModifier" : "PhaseModifierSelf" may be appropriate to check on each round.
-* Extract logging from HBS.Logging to prevent duplication of logs
-* Knockdown doesn't seem to immediately apply in some cases - see https://www.twitch.tv/videos/345435095 @ 1:31
-* Crippled on vehicles is a very narrow margin. Once their structure is removed, they are destroyed - so this rarely happens. This would be better served with a critical hit effect, like broken tracks?
-* *CONSIDER*: Should knockdown penalty apply on the turn you go down? You're already taking an injury penalty there. YES, because you can have bonusHealth that will avoid the injury penalty.
-
-## Technical Details
-
-The sections below detail some of the calculations used by the mod. Please note that these can vary as the code changes, and may be out of date. You are better off checking the code for these details instead of relying upon this documentation.
-
-
-
-![Tactics Impact Table](tactics_table.png "Tactics Impact on initiative")
-
-#### Reserve Penalty
-In addition, tactics reduces the impact of the reserve carry over penalty. Each time a unit reserves, the number of phases dropped is added to a penalty applied on the following round. Each time the phase drop is applied, it is reduced by the tactics skill modifier defined above. A high enough tactics modifier can reduce this penalty to 0.
-
-Example: A unit reserves 3 times during a round, dropping 5 phases, 3 phases, and 7 phases. The reserve penalty applied on the following round would be:
-
-Tactics | Modifier | Calculation | Penalty
--- | -- | -- | --
-3 | +1 | (-5 + 1 = -4) + (-3 + 1 = -2) + (-7 + 1 = -6) | -12
-5 | +2 | (-5 + 2 = -3) + (-3 + 2 = -1) + (-7 + 2 = -5) | -9
-7 | +3 | (-5 + 3 = -2) + (-3 + 3 = 0) + (-7 + 3 = -4) | -6 
-9 | +4 | (-5 + 4 = -1) + (-3 + 4 = 0) + (-7 + 4 = -3) | -4 
-
-### Impact of Piloting
-
-The Piloting skill impacts initiative in two ways. The first is by reducing a random element that is added each turn. Each turn, a unit's maximum initiative (tonnage initiative + tactics modifier + equipment modifiers) is reduced by a random amount, defined in the table below:
-
-Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- 
-Random Modifier | 3-9 | 2-8 | 2-8 | 1-7 | 1-7 | 0-6 | 0-6 | 0-5 | 0-5 | 0-4 | 0-3 | 0-3 | 0-2
-
-The diagram below illustrates this as ranges based around the maximum initiative, represented as 0.
-![Piloting Impact Table](piloting_table.png "Piloting Impact on initiative")
-
-In addition, some effects that reduce your initiative will be offset by a high piloting skill. Suffering a knockdown, being prone or shutdown results in initiative penalties. These penalties are reduced as per the table below:
-
-| Skill                | 1    | 2    | 3    | 4    | 5    | 6    | 7    | 8    | 9    | 10   | 11   | 12   | 13   |
-| -------------------- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| Modifier             | +0   | +1   | +1   | +2   | +2   | +3   | +3   | +4   | +4   | +5   | +6   | +7   | +8   |
-| with Level 5 Ability | +0   | +1   | +1   | +2   | +3   | +4   | +4   | +5   | +5   | +6   | +7   | +8   | +9   |
-| with Level 8 Ability | +0   | +1   | +1   | +2   | +4   | +5   | +5   | +6   | +6   | +7   | +8   | +9   | +10  |
-
-If the modifier is greater than the penalty, a flat -1 penalty will be applied.
-
-### Impact of Guts
-
-Guts skill comes into play when the pilot suffers an injury, or the unit is successfully attacked in melee.
-
-When a pilot is injured, they suffer a random penalty within a range bounded by their Guts skill. The ranges are defined below.
-
-Skill | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
-Injury Modifier | 5-7 | 4-6 | 4-6 | 3-6 | 3-6 | 3-5 | 3-5 | 2-5 | 2-5 | 1-4 | 1-3 | 1-3 | 1-2
-
-Each injury adds +1 to the upper bound only. A pilot with Guts 5 and 2 injuries would suffer between -4 and -9 when they are injured, both on the turn they are injured and on subsequent turns. However, on subsequent turns this penalty is halved, representing the pilot fighting through the pain.
-
-When successfully damaged by a melee attack, the unit suffers an initiative penalty determined by the relative tonnage of the attacker and defender (see above). This penalty is reduced by the target's Guts skill rating, as defined by the table below.
-
-| Skill                | 1    | 2    | 3    | 4    | 5    | 6    | 7    | 8    | 9    | 10   | 11   | 12   | 13   |
-| -------------------- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
-| Modifier             | +0   | +1   | +1   | +2   | +2   | +3   | +3   | +4   | +4   | +5   | +6   | +7   | +8   |
-| with Level 5 Ability | +0   | +1   | +1   | +2   | +3   | +4   | +4   | +5   | +5   | +6   | +7   | +8   | +9   |
-| with Level 8 Ability | +0   | +1   | +1   | +2   | +4   | +5   | +5   | +6   | +6   | +7   | +8   | +9   | +10  |
-
-If the modifier is greater than the penalty, a flat -1 penalty will be applied.
-
-### Pilot Tags
-
-Pilot tags impact the game in three major ways:
-​    1) some provide a direct bonus or penalty to initiative
-​    2) some provide a bonus or penalty to the tonnage calculation for melee purposes
-​    3) a rare few provide subtle, unique benefits
-
-#### Direct Modifiers
-
-In the `mod.json` file the property `PilotTagModifiers` defines a dictionary keyed by `pilot tag` with a value equal to the direct initiative modifier applied to that tag. These values must be integers, those positive and negative values are allowed. Currently the only tags with modifiers are:
-
-* **pilot_morale_high** : +2
-* **pilot_morale_low**: -2
-
-
-### Tonnage Impact
-The tonnage of a unit determines a multiplier applied to the lower (3) and upper (5) bounds of the phase calculation. After multiplication, the lower bound is rounded down, while the upper bound is rounded up.
-
-Tonnage | 05 | 10-15 | 20-25 | 30-35 | 40-45 | 50-55 | 60-65 | 70-75 | 80-85 | 90-95 | 100 | 100+
--- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | --
-*Base Initiative* | 22 | 21 | 20 | 19 | 18 | 17 | 16 | 15 | 14 | 13 | 12 | 9
-
-
-### Miscellaneous
-
-Turrets suffer a -4 penalty, while tanks suffer a -2 to reflect their relative slowness in the background material. This may be removed in the future if chassis specific quirks are added to replicate this effect.
-
-## Changelog
-
-### 0.5.1
-- Fixes issue where static bonuses/penalties were applied twice
-- Fixes display issue where tooltips wouldn't show pilot tag bonuses/penalties
-
-### 0.5.0
-- Adds tooltips for MechLab, Lance Drop, and Combat screens. Hover over the Initiative badge (hexagon) to see the modifiers being applied.
-- Tweaked engine modifiers to be 2/4/6 (instead of 1/2/3)
-- Fixed issue with combat saves - can not save during combat and reload.
-- Added pilot tags as initiative modifiers. Pilot tags can now result in straight +/- modifers to init. Controlled through mod.json
-- Added pilot tag melee multipliers. Pilot tags can now add or subtract to the melee multiplier. Values are added/subtracted from 1.0. The final multiplier is used to determine the effective tonnage of the unit for melee attacks. The first value increase the tonnage as the attacker, the second as the defender.
-
-### 0.4.0
-- Adds carry-over penalty for reserve (HESITATION!)
-- Adds engine vs. tonnage modifier of -3 to +3
-- Removes the green highlight for the profile; now highlights only the name title bar
-- Highlight/icon colors exposed through `mod.json`
-
-### 0.3.1
-- Eliminates messages from dead actors
-- Fixes issue where knockdown, prone, shutdown penalties were applied as bonuses
-
-### 0.3.0
-- Possible fix for issue with reinforcements that spawn during a round
-- Simplified modifiers, documented as per github.com
-- Implemented injury penalties as they occur.
-- Bonus health from cockpits works to eliminate injuries
-- Reduced existing injury penalties by 1/2.
-- Fixes to melee impacts. Guts reduces impacts of melee.
-- Refine prone and shutdown modifiers. Prone now incurs a -9, shutdown -6. Both are modified by piloting.
-- New approach that allows piloting skill to reduce randomness
-- Added some colorization to make it easier to distinguish units that have/haven't activated

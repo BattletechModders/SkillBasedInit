@@ -26,39 +26,28 @@ namespace SkillBasedInit
         public int InspiredMax = 3;
         public int InspiredMin = 1;
 
+        // Values of 0 mean no actual value
+        public int ProneModifierMin = 0;
+        public int ProneModifierMax = 0;
+
+        // Values of 0 mean no actual value
+        public int ShutdownModifierMin = 0;
+        public int ShutdownModifierMax = 0;
+
+        // Values of 0 mean no actual value
+        public int CrippledModifierMin = 0;
+        public int CrippledModifierMax = 0;
+
         public float DefaultTonnage = 120f;
 
         public Dictionary<int, int> InitBaseByTonnage = new Dictionary<int, int>();
     }
 
-    public class MechCfg : UnitCfg
-    {
-        // The init malus when a unit starts the round prone
-        public int ProneModifierMin = -2;
-        public int ProneModifierMax = -9;
+    public class MechCfg : UnitCfg { }
 
-        // The malus for a unit that starts the round shutdown
-        public int ShutdownModifierMin = -2;
-        public int ShutdownModifierMax = -8;
+    public class TrooperCfg : UnitCfg { }
 
-        // The init malus when a unit has lost a movement system
-        public int CrippledModifierMin = -5;
-        public int CrippledModifierMax = -13;
-    }
-
-    public class TrooperCfg : UnitCfg
-    {
-        // The malus for a unit that starts the round shutdown
-        public int ShutdownModifierMin = -2;
-        public int ShutdownModifierMax = -8;
-    }
-
-    public class NavalCfg : UnitCfg
-    {
-        // The init malus when a unit has lost a movement system
-        public int CrippledModifierMin = -5;
-        public int CrippledModifierMax = -13;
-    }
+    public class NavalCfg : UnitCfg { }
 
     public class TurretCfg : UnitCfg
     {
@@ -68,20 +57,14 @@ namespace SkillBasedInit
         public float HeavyTonnage = 100.0f;
     }
 
-    public class VehicleCfg : UnitCfg
-    {
-        // The init malus when a unit has lost a movement system
-        public int CrippledModifierMin = -5;
-        public int CrippledModifierMax = -13;
-    }
+    public class VehicleCfg : UnitCfg { }
 
 
     public class PilotCfg
     {
         // Definition of any tags that should result in a flat initiative modifier
         public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
-            { "pilot_morale_high", 2 },
-            { "pilot_morale_low", -2 }
+
         };
     }
 
@@ -183,16 +166,27 @@ namespace SkillBasedInit
                 Mod.Config.Mech.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
             if (Mod.Config.Mech.TypeMod == UnitCfg.DEFAULT_TYPE_MOD)
                 Mod.Config.Mech.TypeMod = 0;
+            if (Mod.Config.Mech.CrippledModifierMax == 0) Mod.Config.Mech.CrippledModifierMax = -13;
+            if (Mod.Config.Mech.CrippledModifierMin == 0) Mod.Config.Mech.CrippledModifierMin = -5;
+            if (Mod.Config.Mech.ProneModifierMax == 0) Mod.Config.Mech.ProneModifierMax = -9;
+            if (Mod.Config.Mech.ProneModifierMin == 0) Mod.Config.Mech.ProneModifierMin = -2;
+            if (Mod.Config.Mech.ShutdownModifierMax == 0) Mod.Config.Mech.ShutdownModifierMax = -8;
+            if (Mod.Config.Mech.ShutdownModifierMin == 0) Mod.Config.Mech.ShutdownModifierMin = -2;
+
 
             if (Mod.Config.Naval.InitBaseByTonnage.Count == 0)
                 Mod.Config.Naval.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
             if (Mod.Config.Naval.TypeMod == UnitCfg.DEFAULT_TYPE_MOD)
                 Mod.Config.Naval.TypeMod = -2;
+            if (Mod.Config.Naval.CrippledModifierMax == 0) Mod.Config.Naval.CrippledModifierMax = -13;
+            if (Mod.Config.Naval.CrippledModifierMin == 0) Mod.Config.Naval.CrippledModifierMin = -5;
 
             if (Mod.Config.Trooper.InitBaseByTonnage.Count == 0)
                 Mod.Config.Trooper.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
             if (Mod.Config.Trooper.TypeMod == UnitCfg.DEFAULT_TYPE_MOD)
                 Mod.Config.Trooper.TypeMod = +2;
+            if (Mod.Config.Trooper.ShutdownModifierMax == 0) Mod.Config.Trooper.ShutdownModifierMax = -8;
+            if (Mod.Config.Trooper.ShutdownModifierMin == 0) Mod.Config.Trooper.ShutdownModifierMin = -2;
 
             if (Mod.Config.Turret.InitBaseByTonnage.Count == 0)
                 Mod.Config.Turret.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
@@ -203,7 +197,17 @@ namespace SkillBasedInit
                 Mod.Config.Vehicle.InitBaseByTonnage = new Dictionary<int, int>(DefaultInitBaseByTonnage);
             if (Mod.Config.Vehicle.TypeMod == UnitCfg.DEFAULT_TYPE_MOD)
                 Mod.Config.Vehicle.TypeMod = -2;
+            if (Mod.Config.Vehicle.CrippledModifierMax == 0) Mod.Config.Vehicle.CrippledModifierMax = -13;
+            if (Mod.Config.Vehicle.CrippledModifierMin == 0) Mod.Config.Vehicle.CrippledModifierMin = -5;
 
+            if (Mod.Config.Pilot.PilotTagModifiers.Count == 0)
+            {
+                Mod.Config.Pilot.PilotTagModifiers = new Dictionary<string, int>()
+                {
+                    { "pilot_morale_high", 2 },
+                    { "pilot_morale_low", -2 }
+                };
+            }
         }
 
         private void InitializeColors()
