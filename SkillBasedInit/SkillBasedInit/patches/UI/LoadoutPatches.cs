@@ -127,8 +127,8 @@ namespace SkillBasedInit.Patches {
                 }
 
                 // --- Tooltip ---
-                int maxInit = Math.Max(initValue - randomnessBounds[0], Mod.MinPhase);
-                int minInit = Math.Max(initValue - randomnessBounds[1], Mod.MinPhase);
+                int maxInit = Math.Max(initValue + randomnessBounds[0], Mod.MinPhase);
+                int minInit = Math.Max(initValue + randomnessBounds[1], Mod.MinPhase);
                 int avgMod = (int)Math.Ceiling((maxInit - minInit) / 2f);
                 int avgInit = maxInit - avgMod;
 

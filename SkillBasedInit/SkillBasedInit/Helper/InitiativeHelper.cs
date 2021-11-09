@@ -74,6 +74,7 @@ namespace SkillBasedInit.Helper
             roundInitiative += randomnessMod;
             int inspiredMod = pilot.InspiredModifier(unitConfig);
             roundInitiative += inspiredMod;
+
             Mod.Log.Info?.Write($" TacticsMod: {pilot.SBITacticsMod()}  randomnessMod: {randomnessMod}  inspiredMod: {inspiredMod}");
 
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) != 0)
@@ -108,7 +109,7 @@ namespace SkillBasedInit.Helper
                 actor.Initiative = (Mod.MaxPhase + 1) - roundInitiative;
             }
 
-            Mod.Log.Info?.Write($"  using phase: {actor.Initiative} for actor.");
+            Mod.Log.Info?.Write($"  using phase: {actor.Initiative} = ({Mod.MaxPhase} + 1) - {roundInitiative})");
         }
 
         // Calculate the left and right phase boundaries *as initiative* 

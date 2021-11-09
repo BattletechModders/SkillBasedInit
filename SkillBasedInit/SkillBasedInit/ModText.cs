@@ -58,7 +58,7 @@ namespace SkillBasedInit
             { LT_MB_LANCE, "<space=2em><color=#{0}>{1:+0;-#} lance</color>" },
             { LT_MB_TACTICS, "<space=2em>{0:+0;-#} tactics" },
             { LT_MB_TOTAL, "<b>TOTAL</b>: {0}" },
-            { LT_MB_RANDOM, "<space=2em><color=#FF0000>-{0} to -{1} random</color> (<i>reduced by tactics</i>)" },
+            { LT_MB_RANDOM, "<space=2em><color=#FF0000>{0} to {1} random</color> (<i>reduced by tactics</i>)" },
             { LT_MB_EXPECTED_NO_PILOT, "<b>EXPECTED PHASE</b>: {0}" },
             { LT_MB_EXPECTED, "<b>EXPECTED PHASE</b>: {0} to {1}" },
         };
