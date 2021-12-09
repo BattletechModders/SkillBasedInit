@@ -10,6 +10,14 @@ namespace SkillBasedInit.Helper
         {
 
             Mod.Log.Info?.Write($"Updating initiative for actor: {actor.DistinctId()}");
+
+            if (!actor.Combat.TurnDirector.IsInterleaved)
+            {
+                actor.Initiative = actor.Combat.TurnDirector.NonInterleavedPhase;
+                Mod.Log.Info?.Write($"  combat is not interleaved, using phase: {actor.Initiative})");
+                return;
+            }
+
             // If the actor is dead, skip them
             if (actor.IsDead || actor.IsFlaggedForDeath)
             {
@@ -26,7 +34,7 @@ namespace SkillBasedInit.Helper
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE);
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
             Mod.Log.Info?.Write(
-                $"  tonnageBase: {actor.GetTonnageModifier()}  " +
+                $"roundInit: {roundInitiative} <=  tonnageBase: {actor.GetTonnageModifier()}  " +
                 $"unitType: {actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE)}  " +
                 $"pilotTags: {actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS)}"
                 );
@@ -36,7 +44,7 @@ namespace SkillBasedInit.Helper
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY);
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_MISC);
             Mod.Log.Info?.Write(
-                $"  injuryMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY)}  " +
+                $"roundInit: {roundInitiative} <=  injuryMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY)}  " +
                 $"miscMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_MISC)}"
                 );
 
@@ -45,37 +53,37 @@ namespace SkillBasedInit.Helper
             {
                 // Actor was hit by a called shot sometime after its turn, apply the penalty
                 roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT);
-                Mod.Log.Info?.Write($"  calledShotState: {actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT)}");
+                Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  calledShotState: {actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT)}");
                 actor.StatCollection.Set<int>(ModStats.STATE_CALLED_SHOT, 0);
             }
 
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE) != 0)
             {
                 roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE);
-                Mod.Log.Info?.Write($"  vigilanceState: {actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE)}");
+                Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  vigilanceState: {actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE)}");
                 actor.StatCollection.Set<int>(ModStats.STATE_VIGILIANCE, 0);
             }
 
             roundInitiative += actor.ProneInitModifier();
             roundInitiative += actor.CrippledInitModifier();
             roundInitiative += actor.ShutdownInitModifier();
-            Mod.Log.Info?.Write($" ProneInitModifier: {actor.ProneInitModifier()}  " +
-                $"CrippledInitModifier: {actor.CrippledInitModifier()}  " +
-                $"ShutdownInitModifier: {actor.ShutdownInitModifier()}");
+            Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  proneInitModifier: {actor.ProneInitModifier()}  " +
+                $"crippledInitModifier: {actor.CrippledInitModifier()}  " +
+                $"shutdownInitModifier: {actor.ShutdownInitModifier()}");
 
             Pilot pilot = actor.GetPilot();
 
             // Reduce by pilot's tactics modifier
             int tacticsMod = pilot.SBITacticsMod();
             roundInitiative += tacticsMod;
+            int inspiredMod = pilot.InspiredModifier(unitConfig);
+            roundInitiative += inspiredMod;
 
             // Generate the random element
             int randomnessMod = pilot.RandomnessModifier(unitConfig);
             roundInitiative += randomnessMod;
-            int inspiredMod = pilot.InspiredModifier(unitConfig);
-            roundInitiative += inspiredMod;
 
-            Mod.Log.Info?.Write($" TacticsMod: {pilot.SBITacticsMod()}  randomnessMod: {randomnessMod}  inspiredMod: {inspiredMod}");
+            Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  tacticsMod: {tacticsMod}  inspiredMod: {inspiredMod} randomnessMod: {randomnessMod}");
 
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) != 0)
             {
@@ -91,25 +99,18 @@ namespace SkillBasedInit.Helper
             if (roundInitiative <= 0)
             {
                 roundInitiative = Mod.MinPhase;
-                Mod.Log.Debug?.Write($"  Round init {roundInitiative} less than 0, setting to 1.");
+                Mod.Log.Info?.Write($"  Round init {roundInitiative} less than 0, setting to 1.");
             }
             else if (roundInitiative > 30)
             {
                 roundInitiative = Mod.MaxPhase;
-                Mod.Log.Debug?.Write($"  Round init {roundInitiative} greater than 30, setting to 30.");
+                Mod.Log.Info?.Write($"  Round init {roundInitiative} greater than 30, setting to 30.");
             }
 
-            // Init is flipped... 1 acts in first phase, then 2, etc.
-            if (!actor.Combat.TurnDirector.IsInterleaved)
-            {
-                actor.Initiative = actor.Combat.TurnDirector.NonInterleavedPhase;
-            }
-            else
-            {
-                actor.Initiative = (Mod.MaxPhase + 1) - roundInitiative;
-            }
-
-            Mod.Log.Info?.Write($"  using phase: {actor.Initiative} = ({Mod.MaxPhase} + 1) - {roundInitiative})");
+            // Phases are flipped... 1 acts in first phase, then 2, etc.
+            int phase = (Mod.MaxPhase + 1) - roundInitiative;
+            actor.Initiative = roundInitiative;
+            Mod.Log.Info?.Write($"  actor.Initiative: {actor.Initiative} => phase: {phase}");
         }
 
         // Calculate the left and right phase boundaries *as initiative* 
