@@ -164,17 +164,17 @@ namespace SkillBasedInit.Helper
             }
             else if (actor is Mech mech)
             {
-                if (mech.FakeVehicle())
+                if (mech.IsVehicle())
                 {
                     tonnage = mech.tonnage;
                     Mod.Log.Debug?.Write($" -- unit is a fake vehicle, using tonnage: {tonnage}");
                 }
-                else if (mech.NavalUnit())
+                else if (mech.IsNaval())
                 {
                     tonnage = mech.tonnage;
                     Mod.Log.Debug?.Write($" -- unit is a naval unit, using tonnage: {tonnage}");
                 }
-                else if (mech.TrooperSquad())
+                else if (mech.IsTrooper())
                 {
                     TrooperSquad squad = mech as TrooperSquad;
                     tonnage = (float)Math.Ceiling(squad.tonnage / squad.info.SquadInfo.Troopers);
@@ -228,12 +228,10 @@ namespace SkillBasedInit.Helper
             int initBase = 0;
             foreach (KeyValuePair<int, int> kvp in opts.InitBaseByTonnage)
             {
-                if (unitTonnage >= kvp.Key)
+                Mod.Log.Debug?.Write($"  -- key: {kvp.Key}  value: {kvp.Value}");
+                if (unitTonnage <= kvp.Key)
                 {
                     initBase = kvp.Value;
-                }
-                else
-                {
                     break;
                 }
             }
@@ -280,21 +278,29 @@ namespace SkillBasedInit.Helper
             }
             else if (actor is Mech mech)
             {
-                if (mech.FakeVehicle())
+                UnitCustomInfo customInfo = mech.GetCustomInfo();
+                if (customInfo != null)
                 {
-                    typeMod = Mod.Config.Vehicle.TypeMod;
-                    Mod.Log.Debug?.Write($"  -- unit is type vehicle, using typeMod: {typeMod}");
-                }
-                else if (mech.NavalUnit())
-                {
-                    typeMod = Mod.Config.Naval.TypeMod;
-                    Mod.Log.Debug?.Write($"  -- unit is type naval, using typeMod: {typeMod}");
-
-                }
-                else if (mech.TrooperSquad())
-                {
-                    typeMod = Mod.Config.Trooper.TypeMod;
-                    Mod.Log.Debug?.Write($"  -- unit is type troopers, using typeMod: {typeMod}");
+                    if (customInfo.FakeVehicle)
+                    {
+                        typeMod = Mod.Config.Vehicle.TypeMod;
+                        Mod.Log.Debug?.Write($"  -- unit is type vehicle, using typeMod: {typeMod}");
+                    }
+                    else if (customInfo.Naval)
+                    {
+                        typeMod = Mod.Config.Naval.TypeMod;
+                        Mod.Log.Debug?.Write($"  -- unit is type naval, using typeMod: {typeMod}");
+                    }
+                    else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
+                    {
+                        typeMod = Mod.Config.Trooper.TypeMod;
+                        Mod.Log.Debug?.Write($"  -- unit is type troopers, using typeMod: {typeMod}");
+                    }
+                    else
+                    {
+                        typeMod = Mod.Config.Mech.TypeMod;
+                        Mod.Log.Debug?.Write($"  -- unit is type mech, using typeMod: {typeMod}");
+                    }
                 }
                 else
                 {

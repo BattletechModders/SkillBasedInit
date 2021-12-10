@@ -34,9 +34,10 @@ namespace SkillBasedInit.Helper
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE);
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
             Mod.Log.Info?.Write(
-                $"roundInit: {roundInitiative} <=  tonnageBase: {actor.GetTonnageModifier()}  " +
-                $"unitType: {actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE)}  " +
-                $"pilotTags: {actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS)}"
+                $"roundInit: {roundInitiative} <=" +
+                $"  tonnageBase: {actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE)}" +
+                $"  unitType: {actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE)}" +
+                $"  pilotTags: {actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS)}"
                 );
 
 
@@ -44,8 +45,9 @@ namespace SkillBasedInit.Helper
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY);
             roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_MISC);
             Mod.Log.Info?.Write(
-                $"roundInit: {roundInitiative} <=  injuryMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY)}  " +
-                $"miscMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_MISC)}"
+                $"roundInit: {roundInitiative} <=" +
+                $"  injuryMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY)}" +
+                $"  miscMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_MISC)}"
                 );
 
             // Check for consumable modifiers - these get reset to 0 when we recalculate 
@@ -92,7 +94,6 @@ namespace SkillBasedInit.Helper
                 if (reducedHesitation > 0) reducedHesitation = 0;
                 roundInitiative += reducedHesitation;
                 actor.StatCollection.Set<int>(ModStats.STATE_HESITATION, reducedHesitation);
-
             }
 
             // Normalize values
@@ -107,10 +108,10 @@ namespace SkillBasedInit.Helper
                 Mod.Log.Info?.Write($"  Round init {roundInitiative} greater than 30, setting to 30.");
             }
 
-            // Phases are flipped... 1 acts in first phase, then 2, etc.
-            int phase = (Mod.MaxPhase + 1) - roundInitiative;
-            actor.Initiative = roundInitiative;
-            Mod.Log.Info?.Write($"  actor.Initiative: {actor.Initiative} => phase: {phase}");
+            // Init and phases are flipped. If we want phase 24, we need init of (30 + 1) - 24 = 6.
+            int newInit = (Mod.MaxPhase + 1) - roundInitiative;
+            actor.Initiative = newInit;
+            Mod.Log.Info?.Write($"  actor.Initiative: {actor.Initiative} => phase: {roundInitiative}");
         }
 
         // Calculate the left and right phase boundaries *as initiative* 
