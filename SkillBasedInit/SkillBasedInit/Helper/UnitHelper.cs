@@ -377,7 +377,8 @@ namespace SkillBasedInit.Helper
                 adjustedMax = boundsMin - 1;
             }
 
-            int finalMod = Mod.Random.Next(adjustedMax, boundsMin);
+            // Invert the modifier, because Init is inverted. actor.Initiative = (Mod.MaxPhase + 1) - phaseModifier
+            int finalMod = -1 * Mod.Random.Next(adjustedMax, boundsMin);
 
             Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
             return finalMod;
