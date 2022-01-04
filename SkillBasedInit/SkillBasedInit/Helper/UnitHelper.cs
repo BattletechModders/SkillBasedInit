@@ -526,7 +526,7 @@ namespace SkillBasedInit.Helper
                 Mod.Log.Debug?.Write("Normalizing penalty > 0 to 0");
                 finalMod = 0;
             }
-            return finalMod;
+            return finalMod * -1;
         }
 
 
