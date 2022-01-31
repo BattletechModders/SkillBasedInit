@@ -320,7 +320,8 @@ namespace SkillBasedInit.Helper
                 Mod.Log.Debug?.Write("  -- unit is unknown type, using 0 typeMod.");
             }
 
-            return typeMod;
+            // Typemod is a phase modifier in config, so invert for init
+            return typeMod * -1;
         }
 
         public static int GetTypeModifier(this MechDef mechDef)
@@ -328,32 +329,40 @@ namespace SkillBasedInit.Helper
             if (mechDef == null || mechDef.Chassis == null) return 0;
             Mod.Log.Debug?.Write($"Calculating type modifier for mechDef: {mechDef.Name}");
 
+            int typeMod = Mod.Config.Mech.TypeMod;
+
             UnitCustomInfo customInfo = mechDef.GetCustomInfo();
             if (customInfo == null)
             {
                 Mod.Log.Debug?.Write("Mechdef has no customInfo, using Mech config.");
-                return Mod.Config.Mech.TypeMod;
+            }
+            else
+            {
+                if (customInfo.FakeVehicle)
+                {
+                    Mod.Log.Debug?.Write("Mechdef GetTypeMod returning vehicle typeMod.");
+                    typeMod = Mod.Config.Vehicle.TypeMod;
+                }
+                else if (customInfo.Naval)
+                {
+                    Mod.Log.Debug?.Write("Mechdef GetTypeMod returning naval typeMod.");
+                    typeMod = Mod.Config.Naval.TypeMod;
+                }
+                else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
+                {
+                    Mod.Log.Debug?.Write("Mechdef GetTypeMod returning trooper typeMod.");
+                    typeMod = Mod.Config.Trooper.TypeMod;
+                }
+                else
+                {
+                    Mod.Log.Debug?.Write("Mechdef GetTypeMod fallthrough, returning mech typeMod.");
+                }
             }
 
-            if (customInfo.FakeVehicle)
-            {
-                Mod.Log.Debug?.Write("Mechdef GetTypeMod returning vehicle typeMod.");
-                return Mod.Config.Vehicle.TypeMod;
-            }
-            else if (customInfo.Naval)
-            {
-                Mod.Log.Debug?.Write("Mechdef GetTypeMod returning naval typeMod.");
-                return Mod.Config.Naval.TypeMod;
-            }
-            else if (customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1)
-            {
-                Mod.Log.Debug?.Write("Mechdef GetTypeMod returning trooper typeMod.");
-                return Mod.Config.Trooper.TypeMod;
-            }
-
-            Mod.Log.Debug?.Write("Mechdef GetTypeMod fallthrough, returning mech typeMod.");
-            return Mod.Config.Mech.TypeMod;
+            // Typemod is a phase modifier in config, so invert for init
+            return typeMod * -1;
         }
+
     }
 
     public static class UnitHelper

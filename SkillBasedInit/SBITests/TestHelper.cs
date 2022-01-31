@@ -44,12 +44,18 @@ namespace SBITests
             mech.StatCollection.AddStatistic("RightArm.Structure", 1f);
             mech.StatCollection.AddStatistic("LeftLeg.Structure", 1f);
             mech.StatCollection.AddStatistic("RightLeg.Structure", 1f);
+
+            Traverse isPilotableT = Traverse.Create(mech).Field("isPilotable");
+            isPilotableT.SetValue(true);
     
             InitModStats(mech);
 
             Pilot pilot = BuildTestPilot();
             Traverse pilotT = Traverse.Create(mech).Property("pilot");
             pilotT.SetValue(pilot);
+
+            Traverse pilotParentT = Traverse.Create(pilot).Field("_parentActor");
+            pilotParentT.SetValue(mech);
 
             return mech;
         }
@@ -148,10 +154,10 @@ namespace SBITests
             pilot.StatCollection.Set<int>("Health", 3);
             pilot.StatCollection.Set<int>("Injuries", 0);
 
-            pilot.StatCollection.Set<int>("Gunnery", 3);
-            pilot.StatCollection.Set<int>("Guts", 4);
-            pilot.StatCollection.Set<int>("Piloting", 5);
-            pilot.StatCollection.Set<int>("Tactics", 6);
+            pilot.StatCollection.Set<int>("Gunnery", 1);
+            pilot.StatCollection.Set<int>("Guts", 1);
+            pilot.StatCollection.Set<int>("Piloting", 1);
+            pilot.StatCollection.Set<int>("Tactics", 1);
             // Init any required stats
             int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
             pilot.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.STATE_PILOT_TAGS, pilotTagsMod);

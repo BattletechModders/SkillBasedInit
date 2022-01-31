@@ -63,9 +63,13 @@ namespace SkillBasedInit.Helper
 
 
             // Check non-consumable modifiers - they apply without change
-            int injuryMod = actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY);
+
+            // Injury mod is a phase mod, so invert it
+            int injuryMod = actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY) * -1;
             roundInitiative += injuryMod;
-            int miscMod = actor.StatCollection.GetValue<int>(ModStats.MOD_MISC);
+
+            // Misc mod is a phase mod, so invert it.
+            int miscMod = actor.StatCollection.GetValue<int>(ModStats.MOD_MISC) * -1;
             roundInitiative += miscMod;
             Mod.Log.Info?.Write(
                 $"roundInit: {roundInitiative} <=" +
@@ -103,11 +107,13 @@ namespace SkillBasedInit.Helper
 
             Pilot pilot = actor.GetPilot();
 
-            // Reduce by pilot's tactics modifier
+            // Tactics modifier are positive, so reduce init
             int tacticsMod = pilot.SBITacticsMod();
             roundInitiative -= tacticsMod;
+
+            // Inspired mods are positive phases, so reduce init 
             int inspiredMod = pilot.InspiredModifier(unitConfig);
-            roundInitiative += inspiredMod;
+            roundInitiative -= inspiredMod;
 
             // Generate the random element
             int randomnessMod = pilot.RandomnessModifier(unitConfig);

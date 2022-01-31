@@ -1,10 +1,13 @@
-﻿using CustomUnits;
+﻿using BattleTech;
+using CustomUnits;
+using Harmony;
 using IRBTModUtils.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SkillBasedInit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -95,6 +98,14 @@ namespace SBITests
     [TestClass]
     public static class TestGlobalInit
     {
+        public static HarmonyInstance HarmonyInst;
+
+        public static MethodInfo MI_IsMoraleInspired;
+        public static MethodInfo MI_IsFuryInspired;
+
+        public static HarmonyMethod HM_AlwaysTrue;
+        public static HarmonyMethod HM_AlwaysFalse;
+
         [AssemblyInitialize]
         public static void TestInitialize(TestContext testContext)
         {
@@ -128,12 +139,41 @@ namespace SBITests
 
             IRBTModUtils.Mod.Config = new IRBTModUtils.ModConfig();
             IRBTModUtils.Mod.Config.Init();
+
+            // Initialize Harmony
+            TestGlobalInit.HarmonyInst = HarmonyInstance.Create("us.frostraptor.sbi.test");
+            PropertyInfo isMoraleInspiredProp = AccessTools.Property(typeof(AbstractActor), "IsMoraleInspired");
+            MI_IsMoraleInspired = isMoraleInspiredProp.GetMethod;
+            PropertyInfo isFuryInspired = AccessTools.Property(typeof(AbstractActor), "IsFuryInspired");
+            MI_IsFuryInspired = isFuryInspired.GetMethod;
+
+            HM_AlwaysFalse = new HarmonyMethod(typeof(AlwaysFalsePrefix), "Prefix");
+            HM_AlwaysTrue = new HarmonyMethod(typeof(AlwaysTruePrefix), "Prefix");
         }
 
         [AssemblyCleanup]
         public static void TearDown()
         {
 
+        }
+    }
+
+    // Harmony helper methods down here
+    public static class AlwaysTruePrefix
+    {
+        static bool Prefix(ref bool __result)
+        {
+            __result = true;
+            return false;
+        }
+    }
+
+    public static class AlwaysFalsePrefix
+    {
+        static bool Prefix(ref bool __result)
+        {
+            __result = false;
+            return false;
         }
     }
 }
