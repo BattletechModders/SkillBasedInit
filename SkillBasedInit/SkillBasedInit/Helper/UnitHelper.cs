@@ -553,7 +553,7 @@ namespace SkillBasedInit.Helper
 
             if (finalMod < 0)
             {
-                Mod.Log.Debug?.Write("Normalizing penalty > 0 to 0");
+                Mod.Log.Debug?.Write("Normalizing penalty < 0 to 0");
                 finalMod = 0;
             }
 
@@ -561,21 +561,32 @@ namespace SkillBasedInit.Helper
         }
 
 
-        public static int VigilanceBonus(this AbstractActor actor)
+        public static int VigilanceInitMod(this AbstractActor actor)
         {
             if (actor == null || actor.GetPilot() == null) return 0;
 
+            // Config is a phase modifier, so invert. These will be negatives presumably
             UnitCfg unitCfg = actor.GetUnitConfig();
-            int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE);
-            int skillMod = actor.GetPilot().AverageGutsAndTacticsMod();
-            int adjustedMax = actorMod + skillMod + unitCfg.VigilanceRandMax;
+            int invertedMin = unitCfg.VigilanceRandMin * -1;
+            int invertedMax = unitCfg.VigilanceRandMax * -1;
+
+            //  Assume this is a phase modifier, and invert
+            int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE) * -1;
+
+            // Invert the value so it reduces the outcome
+            int skillMod = actor.GetPilot().AverageGutsAndTacticsMod() * -1;
+
+            int adjustedMin = invertedMin + actorMod + skillMod;
+            Mod.Log.Debug?.Write($"  adjustedMin: {adjustedMin} = invertedMin: {invertedMin} + actorMod: {actorMod} + skillMod: {skillMod})");
+            int adjustedMax = invertedMax + actorMod + skillMod;
+            Mod.Log.Debug?.Write($"  adjustedMax: {adjustedMax} = invertedMin: {invertedMax} + actorMod: {actorMod} + skillMod: {skillMod})");
 
             // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
-            int finalMod = Mod.Random.Next(unitCfg.VigilanceRandMin, adjustedMax + 1);
-            Mod.Log.Debug?.Write($"Vigilance bonus: {finalMod} = min:{unitCfg.VigilanceRandMin} to max: {unitCfg.VigilanceRandMax} + actorMod: {actorMod} + skillMod: {skillMod}");
-            if (finalMod < 0)
+            int finalMod = Mod.Random.Next(adjustedMax, adjustedMin + 1);
+            Mod.Log.Debug?.Write($"Vigilance bonus: {finalMod} = min:{adjustedMin} to max: {adjustedMax}");
+            if (finalMod > 0)
             {
-                Mod.Log.Debug?.Write("Normalizing bonus < 0 to 0");
+                Mod.Log.Debug?.Write("Normalizing bonus > 0 to 0");
                 finalMod = 0;
             }
             return finalMod;

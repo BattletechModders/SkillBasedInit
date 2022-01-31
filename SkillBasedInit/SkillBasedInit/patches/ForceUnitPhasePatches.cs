@@ -196,7 +196,7 @@ namespace SkillBasedInit.Patches
             if (InvokeIsVigilance)
             {
 
-                int bonus = __instance.VigilanceBonus();
+                int bonus = __instance.VigilanceInitMod();
                 if (bonus != 0)
                 {
                     __instance.StatCollection.ModifyStat<int>("self", -1, ModStats.STATE_VIGILIANCE, StatCollection.StatOperation.Int_Add, bonus);

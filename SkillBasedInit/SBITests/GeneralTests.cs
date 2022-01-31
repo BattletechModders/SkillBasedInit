@@ -134,23 +134,6 @@ namespace SBITests
 
         // TODO: FIX ME
         [TestMethod]
-        public void TestCalledShot()
-        {
-            Assert.IsTrue(false);
-        }
-
-
-        // TODO: FIX ME
-        [TestMethod]
-        public void TestVigilance()
-        {
-            Assert.IsTrue(false);
-
-        }
-
-
-        // TODO: FIX ME
-        [TestMethod]
         public void TestProne()
         {
             Assert.IsTrue(false);
