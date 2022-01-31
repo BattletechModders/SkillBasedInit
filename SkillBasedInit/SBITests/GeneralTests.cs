@@ -9,7 +9,7 @@ using System;
 namespace SBITests
 {
     [TestClass]
-    public class UnitTests
+    public class GeneralTests
     {
         [TestInitialize]
         public void ClassInitialize()
@@ -181,33 +181,33 @@ namespace SBITests
             Mech mech50 = TestHelper.BuildTestMech(tonnage: 50);
             mech50.GetPilot().StatCollection.Set<int>("Tactics", 1);
             InitiativeHelper.UpdateInitiative(mech50);
-            // Tonnage = phase 14 => init 17, +1 type, tactics 1 = -0, +0 random => 18 init
-            Assert.AreEqual(18, mech50.Initiative);
+            // Tonnage = phase 14 => init 17, 0 type, tactics 1 = -0, +0 random => 17 init
+            Assert.AreEqual(17, mech50.Initiative);
 
             mech50.GetPilot().StatCollection.Set<int>("Tactics", 2);
             InitiativeHelper.UpdateInitiative(mech50);
-            // Tonnage = phase 14 => init 17, +1 type, tactics 2 = -1, +0 random => 17 init
-            Assert.AreEqual(17, mech50.Initiative);
+            // Tonnage = phase 14 => init 17, 0 type, tactics 2 = -1, +0 random => 16 init
+            Assert.AreEqual(16, mech50.Initiative);
 
             mech50.GetPilot().StatCollection.Set<int>("Tactics", 4);
             InitiativeHelper.UpdateInitiative(mech50);
-            // Tonnage = phase 14 => init 17, +1 type, tactics 4 = -2, +0 random => 16 init
-            Assert.AreEqual(16, mech50.Initiative);
+            // Tonnage = phase 14 => init 17, 0 type, tactics 4 = -2, +0 random => 15 init
+            Assert.AreEqual(15, mech50.Initiative);
 
             mech50.GetPilot().StatCollection.Set<int>("Tactics", 6);
             InitiativeHelper.UpdateInitiative(mech50);
-            // Tonnage = phase 14 => init 17, +1 type, tactics 6 = -3, +0 random => 15 init
-            Assert.AreEqual(15, mech50.Initiative);
+            // Tonnage = phase 14 => init 17, +0 type, tactics 6 = -3, +0 random => 14 init
+            Assert.AreEqual(14, mech50.Initiative);
 
             mech50.GetPilot().StatCollection.Set<int>("Tactics", 8);
             InitiativeHelper.UpdateInitiative(mech50);
-            // Tonnage = phase 14 => init 17, +1 type, tactics 8 = -4, +0 random => 14 init
-            Assert.AreEqual(14, mech50.Initiative);
+            // Tonnage = phase 14 => init 17, 0 type, tactics 8 = -4, +0 random => 13 init
+            Assert.AreEqual(13, mech50.Initiative);
 
             mech50.GetPilot().StatCollection.Set<int>("Tactics", 10);
             InitiativeHelper.UpdateInitiative(mech50);
-            // Tonnage = phase 14 => init 17, +1 type, tactics 10 = -5, +0 random => 13 init
-            Assert.AreEqual(13, mech50.Initiative);
+            // Tonnage = phase 14 => init 17, 0 type, tactics 10 = -5, +0 random => 12 init
+            Assert.AreEqual(12, mech50.Initiative);
         }
 
 

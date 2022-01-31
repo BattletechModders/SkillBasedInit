@@ -103,7 +103,7 @@ namespace SkillBasedInit.Patches
             if (!InvokeIsCalledShot) return;
 
             bool applyNextTurn = __instance.HasActivatedThisRound || __instance.Initiative >= Mod.MaxPhase;
-            int penalty = __instance.CalledShotPenalty(AttackStackSequence_OnAdded.Attacker);
+            int penalty = __instance.CalledShotInitMod(AttackStackSequence_OnAdded.Attacker);
             if (penalty == 0) return; // nothing to do
 
             if (applyNextTurn)

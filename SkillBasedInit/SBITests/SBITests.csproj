@@ -62,8 +62,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PilotTests.cs" />
     <Compile Include="ConversionTests.cs" />
-    <Compile Include="UnitTests.cs" />
+    <Compile Include="CalledShotTests.cs" />
+    <Compile Include="GeneralTests.cs" />
     <Compile Include="TestGlobalInit.cs" />
     <Compile Include="TestHelper.cs" />
     <Compile Include="NonInterleavedTests.cs" />

@@ -393,7 +393,8 @@ namespace SkillBasedInit.Helper
             }
 
             // Invert because mod config is negative, but we want a positive number to add to actor.Initiative
-            int finalMod = -1 * Mod.Random.Next(adjustedMax, boundsMin);
+            // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
+            int finalMod = -1 * Mod.Random.Next(adjustedMax, boundsMin + 1);
 
             Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
             return finalMod;
@@ -497,9 +498,10 @@ namespace SkillBasedInit.Helper
 
             UnitCfg unitCfg = actor.GetUnitConfig();
             Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} hestiation raw bounds => min: {unitCfg.HesitationMin} to max: {unitCfg.HesitationMax}");
-            
+
             // Invert because we assume the range is negative
-            int rawMod = Mod.Random.Next(unitCfg.HesitationMax, unitCfg.HesitationMin);
+            // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
+            int rawMod = Mod.Random.Next(unitCfg.HesitationMax, unitCfg.HesitationMin + 1);
             int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION);
             int finalMod = rawMod + actorMod;
             Mod.Log.Debug?.Write($"Hesitation penalty: {finalMod} = rawMod: {rawMod} + actorMod: {actorMod}");
@@ -511,37 +513,51 @@ namespace SkillBasedInit.Helper
             return finalMod;
         }
 
-        public static int CalledShotPenalty(this AbstractActor target, AbstractActor attacker)
+        public static int CalledShotInitMod(this AbstractActor target, AbstractActor attacker)
         {
+
             // Get attacker bonus, get target bonus, combine
             if (target == null || attacker == null) return 0;
 
+            // Config is phase modifiers, so invert
             UnitCfg unitCfg = target.GetUnitConfig();
-            Mod.Log.Debug?.Write($"Unit: {target.DistinctId()} called shot raw bounds => min: {unitCfg.CalledShotRandMin} to max: {unitCfg.CalledShotRandMax}");
+            int invertedMin = unitCfg.CalledShotRandMin * -1;
+            int invertedMax = unitCfg.CalledShotRandMax * -1;
+            Mod.Log.Debug?.Write($"Unit: {target.DistinctId()} raw called shot raw bounds => min: {invertedMin} to max: {invertedMax}");
 
-            // Invert because we assume the range is negative
-            int targetCSMod = target.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_TARGET);
-            int targetSkillMod = target.GetPilot().AverageGutsAndTactics();
+            // Assume the stat is a phase modifier, so invert
+            int targetCSMod = target.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_TARGET) * -1;
+            int targetSkillMod = target.GetPilot().AverageGutsAndTacticsMod();
             int targetMod = targetCSMod + targetSkillMod;
             Mod.Log.Debug?.Write($"Target calledShotMod: {targetMod} = calledShotMod: {targetCSMod} + skillMod: {targetSkillMod}");
 
-            int attackerCSMod = attacker.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_ATTACKER);
-            int attackerSkillMod = attacker.GetPilot().AverageGunneryAndTactics();
+            // Assume the stat is a phase modifier, so invert
+            int attackerCSMod = attacker.StatCollection.GetValue<int>(ModStats.MOD_CALLED_SHOT_ATTACKER) * -1;
+            int attackerSkillMod = attacker.GetPilot().AverageGunneryAndTacticsMod();
             int attackerMod = attackerCSMod + attackerSkillMod;
             Mod.Log.Debug?.Write($"Attacker calledShotMod: {attackerMod} = calledShotMod: {attackerCSMod} + skillMod: {attackerSkillMod}");
 
-            int adjustedMax = unitCfg.CalledShotRandMax + targetMod + attackerMod;
-            if (adjustedMax >= unitCfg.CalledShotRandMin)
-                adjustedMax = unitCfg.CalledShotRandMin - 1;
+            int actorDelta = attackerMod - targetMod;
+            if (actorDelta < 0) 
+                actorDelta = 0;
+            Mod.Log.Debug?.Write($"actor delta: {actorDelta} = attackerMod: {attackerMod} - targetMod: {targetMod}");
 
-            int finalMod = Mod.Random.Next(adjustedMax, unitCfg.CalledShotRandMin);
-            Mod.Log.Debug?.Write($"Called shot penalty: {finalMod} from Rand({adjustedMax} to {unitCfg.CalledShotRandMin}) ");
-            if (finalMod > 0)
+            int adjustedMin = invertedMin + actorDelta;
+            int adjustedMax = invertedMax + actorDelta;
+            if (adjustedMax <= adjustedMin)
+                adjustedMax = adjustedMin + 1;
+
+            // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
+            int finalMod = Mod.Random.Next(adjustedMin, adjustedMax + 1);
+            Mod.Log.Debug?.Write($"Called shot penalty: {finalMod} from Rand({adjustedMin}, {adjustedMax}) ");
+
+            if (finalMod < 0)
             {
                 Mod.Log.Debug?.Write("Normalizing penalty > 0 to 0");
                 finalMod = 0;
             }
-            return finalMod * -1;
+
+            return finalMod;
         }
 
 
@@ -551,10 +567,11 @@ namespace SkillBasedInit.Helper
 
             UnitCfg unitCfg = actor.GetUnitConfig();
             int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_VIGILANCE);
-            int skillMod = actor.GetPilot().AverageGutsAndTactics();
+            int skillMod = actor.GetPilot().AverageGutsAndTacticsMod();
             int adjustedMax = actorMod + skillMod + unitCfg.VigilanceRandMax;
 
-            int finalMod = Mod.Random.Next(unitCfg.VigilanceRandMin, adjustedMax);
+            // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
+            int finalMod = Mod.Random.Next(unitCfg.VigilanceRandMin, adjustedMax + 1);
             Mod.Log.Debug?.Write($"Vigilance bonus: {finalMod} = min:{unitCfg.VigilanceRandMin} to max: {unitCfg.VigilanceRandMax} + actorMod: {actorMod} + skillMod: {skillMod}");
             if (finalMod < 0)
             {

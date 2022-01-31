@@ -134,7 +134,7 @@ namespace SBITests
             return actor;
         }
 
-        private static Pilot BuildTestPilot()
+        public static Pilot BuildTestPilot()
         {
             HumanDescriptionDef humanDescDef = new HumanDescriptionDef();
             Traverse callsignT = Traverse.Create(humanDescDef).Property("Callsign");

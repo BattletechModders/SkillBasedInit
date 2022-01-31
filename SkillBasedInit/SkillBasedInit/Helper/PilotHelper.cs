@@ -38,7 +38,8 @@ namespace SkillBasedInit.Helper
 
             int[] bounds = RandomnessBounds(pilot, config.RandomnessMin, config.RandomnessMax);
 
-            int modifier = Mod.Random.Next(bounds[0], bounds[1]);
+            // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
+            int modifier = Mod.Random.Next(bounds[0], bounds[1] + 1);
             Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({bounds[0]}, {bounds[1]})");
 
             return modifier;
@@ -56,7 +57,8 @@ namespace SkillBasedInit.Helper
             int skillMod = pilot.SBITacticsMod();
             int adjustedMax = typeCfg.InspiredMax + skillMod;
 
-            int modifier = Mod.Random.Next(typeCfg.InspiredMin, adjustedMax);
+            // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
+            int modifier = Mod.Random.Next(typeCfg.InspiredMin, adjustedMax + 1);
             Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({typeCfg.InspiredMin}, {adjustedMax})");
 
             return modifier;
@@ -94,14 +96,14 @@ namespace SkillBasedInit.Helper
             return normedMod + skillMod;
         }
 
-        public static int AverageGunneryAndTactics(this Pilot pilot)
+        public static int AverageGunneryAndTacticsMod(this Pilot pilot)
         {
-            return (int)Math.Floor((pilot.SBIGunneryMod() + pilot.SBITacticsMod()) / 2.0);
+            return (int)Math.Ceiling((pilot.SBIGunneryMod() + pilot.SBITacticsMod()) / 2.0);
         }
 
-        public static int AverageGutsAndTactics(this Pilot pilot)
+        public static int AverageGutsAndTacticsMod(this Pilot pilot)
         {
-            return (int)Math.Floor((pilot.SBIGutsMod() + pilot.SBITacticsMod()) / 2.0);
+            return (int)Math.Ceiling((pilot.SBIGutsMod() + pilot.SBITacticsMod()) / 2.0);
         }
 
         public static void LogPilotStats(this Pilot pilot)
