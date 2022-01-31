@@ -48,7 +48,8 @@ namespace SkillBasedInit.patches {
 
             // Tonnage
             int tonnageMod = actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE);
-            chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_MECH_TONNAGE], new object[] { tonnageMod }).ToString());
+            int tonnagePhase = InitiativeHelper.InitiativeToPhase(tonnageMod);
+            chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_MECH_TONNAGE], new object[] { tonnagePhase }).ToString());
             int initiativeBase = tonnageMod;
 
             // Type modifier
@@ -97,7 +98,7 @@ namespace SkillBasedInit.patches {
                 initiativeBase -= tacticsMod;
                 pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_TACTICS], new object[] { tacticsMod }).ToString());
                 Mod.Log.Debug?.Write($"  tacticsMod: {tacticsMod}");
-
+                
                 if (actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS) != 0)
                 {
                     int pilotTagsMods = actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
@@ -134,7 +135,7 @@ namespace SkillBasedInit.patches {
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT) != 0)
             {
                 int calledShotMod = actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT);
-                Mod.Log.Debug?.Write($"  hestiationMod: {calledShotMod}");
+                Mod.Log.Debug?.Write($"  calledShotMod: {calledShotMod}");
                 initiativeBase += calledShotMod;
                 pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_CALLED_SHOT], new object[] { calledShotMod }).ToString());
             }
@@ -142,7 +143,7 @@ namespace SkillBasedInit.patches {
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE) != 0)
             {
                 int vigilanceMod = actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE);
-                Mod.Log.Debug?.Write($"  hestiationMod: {vigilanceMod}");
+                Mod.Log.Debug?.Write($"  vigilanceMod: {vigilanceMod}");
                 initiativeBase += vigilanceMod;
                 pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_VIGILANCE], new object[] { vigilanceMod }).ToString());
             }
@@ -158,12 +159,17 @@ namespace SkillBasedInit.patches {
             int maxRandomMod = randomnessBounds[1];
             
             // Highest init = base + minimumRandomness => base + minRandom
-            int maxPhase = Math.Min(initiativeBase + minRandomMod, Mod.MaxPhase);
-            Mod.Log.Debug?.Write($"  initiativeBase: {initiativeBase} + minRandomMod: {minRandomMod} = maxInit: {maxPhase}");
+            int maxInitVal = Math.Min(initiativeBase + minRandomMod, Mod.MaxPhase);
+            Mod.Log.Debug?.Write($"  initiativeBase: {initiativeBase} + minRandomMod: {minRandomMod} = maxInit: {maxInitVal}");
 
             // Lowest init = base + maxRandom => base + maxRandom
-            int minPhase = Math.Max(initiativeBase + maxRandomMod, Mod.MinPhase);
-            Mod.Log.Debug?.Write($"  initiativeBase: {initiativeBase} + maxRandomMod: {maxRandomMod} = minInit: {minPhase}");
+            int minInitVal = Math.Max(initiativeBase + maxRandomMod, Mod.MinPhase);
+            Mod.Log.Debug?.Write($"  initiativeBase: {initiativeBase} + maxRandomMod: {maxRandomMod} = minInit: {minInitVal}");
+
+            // Invert to phases for human display
+            int maxPhase = InitiativeHelper.InitiativeToPhase(maxInitVal);
+            int minPhase = InitiativeHelper.InitiativeToPhase(minInitVal);
+            Mod.Log.Debug?.Write($"  maxPhase: {maxPhase}  minPhase: {minPhase}");
 
             List<string> toolTipDetails = new List<string> { };
             toolTipDetails.Add(String.Join(", ", chassisDetails.ToArray()));

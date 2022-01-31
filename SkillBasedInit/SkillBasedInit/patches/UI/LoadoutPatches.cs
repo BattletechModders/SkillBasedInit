@@ -132,14 +132,19 @@ namespace SkillBasedInit.Patches {
                 int avgMod = (int)Math.Ceiling((maxInit - minInit) / 2f);
                 int avgInit = maxInit - avgMod;
 
+                // Convert to phases for humans 
+                int maxPhase = InitiativeHelper.InitiativeToPhase(maxInit);
+                int minPhase = InitiativeHelper.InitiativeToPhase(minInit);
+                int avgPhase = InitiativeHelper.InitiativeToPhase(avgInit);
+
                 // --- Badge ---
-                ___initiativeText.SetText($"{avgInit}");
+                ___initiativeText.SetText($"{avgPhase}");
                 ___initiativeText.color = Color.black;
                 ___initiativeColor.SetUIColor(UIColor.White);
 
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TOTAL], new object[] { initValue }).ToString());
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_RANDOM], new object[] { randomnessBounds[0], randomnessBounds[1] }).ToString());
-                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_EXPECTED], new object[] { maxInit, minInit }).ToString());
+                details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_EXPECTED], new object[] { minPhase, maxPhase }).ToString());
 
                 string tooltipTitle = $"{selectedMechDef.Name}: {selectedPilot.Name}";
                 string tooltipText = String.Join("\n", details.ToArray());
