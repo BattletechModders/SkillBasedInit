@@ -108,7 +108,9 @@ namespace SkillBasedInit.Helper
             if (combatant is Mech mech)
             {
                 UnitCustomInfo customInfo = mech.GetCustomInfo();
-                return customInfo != null && customInfo.FakeVehicle;
+                if (customInfo == null) return false;
+
+                return customInfo.FakeVehicle;
             }
             else if (combatant is Vehicle)
             {
@@ -377,7 +379,7 @@ namespace SkillBasedInit.Helper
                 adjustedMax = boundsMin - 1;
             }
 
-            // Invert the modifier, because Init is inverted. actor.Initiative = (Mod.MaxPhase + 1) - phaseModifier
+            // Invert because mod config is negative, but we want a positive number to add to actor.Initiative
             int finalMod = -1 * Mod.Random.Next(adjustedMax, boundsMin);
 
             Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
