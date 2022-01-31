@@ -95,7 +95,7 @@ namespace SkillBasedInit.Helper
                 actor.StatCollection.Set<int>(ModStats.STATE_VIGILIANCE, 0);
             }
 
-            int proneMod = actor.ProneInitModifier();
+            int proneMod = actor.ProneInitMod();
             roundInitiative += proneMod;
             int crippledMod = actor.CrippledInitModifier();
             roundInitiative += crippledMod;
@@ -108,12 +108,12 @@ namespace SkillBasedInit.Helper
             Pilot pilot = actor.GetPilot();
 
             // Tactics modifier are positive, so reduce init
-            int tacticsMod = pilot.SBITacticsMod();
-            roundInitiative -= tacticsMod;
+            int tacticsMod = pilot.SBITacticsMod() * -1;
+            roundInitiative += tacticsMod;
 
             // Inspired mods are positive phases, so reduce init 
-            int inspiredMod = pilot.InspiredModifier(unitConfig);
-            roundInitiative -= inspiredMod;
+            int inspiredMod = pilot.InspiredModifier();
+            roundInitiative += inspiredMod;
 
             // Generate the random element
             int randomnessMod = pilot.RandomnessModifier(unitConfig);

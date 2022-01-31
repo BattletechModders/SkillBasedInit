@@ -369,7 +369,7 @@ namespace SkillBasedInit.Helper
     {
         
         // Prone only applies to mechs and quads
-        public static int ProneInitModifier(this AbstractActor actor, bool isKnockdown=false)
+        public static int ProneInitMod(this AbstractActor actor)
         {
             if (!(actor is Mech)) return 0;
 
@@ -380,22 +380,23 @@ namespace SkillBasedInit.Helper
             if (customInfo != null && (customInfo.Naval || customInfo.FakeVehicle)) return 0;
             if (customInfo != null && customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1) return 0;
 
-            int boundsMin = Mod.Config.Mech.ProneModifierMin;
-            int boundsMax = Mod.Config.Mech.ProneModifierMax;
+            // Config is a phase mod, so invert
+            int boundsMin = Mod.Config.Mech.ProneModifierMin * -1;
+            int boundsMax = Mod.Config.Mech.ProneModifierMax * -1;
             Mod.Log.Debug?.Write($"Unit: {mech.DistinctId()} is prone, raw bounds => min: {boundsMin} to max: {boundsMax}");
 
             Pilot pilot = actor.GetPilot();
             int pilotMod = pilot.SBIPilotingMod();
-            int adjustedMax = boundsMax + pilotMod;
-            if (adjustedMax >= boundsMin)
-            {
-                adjustedMax = boundsMin - 1;
-            }
+            int adjustedMin = boundsMin - pilotMod;
+            if (adjustedMin < 0)
+                adjustedMin = 0;
 
-            // Invert because mod config is negative, but we want a positive number to add to actor.Initiative
+            int adjustedMax = boundsMax - pilotMod;
+            if (adjustedMax <= adjustedMin)
+                adjustedMax = adjustedMin + 1;
+
             // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
-            int finalMod = -1 * Mod.Random.Next(adjustedMax, boundsMin + 1);
-
+            int finalMod = Mod.Random.Next(adjustedMin, adjustedMax + 1);
             Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
             return finalMod;
         }
@@ -433,20 +434,25 @@ namespace SkillBasedInit.Helper
             UnitCfg unitCfg = actor.GetUnitConfig();
             if (unitCfg.CrippledModifierMin == 0) return 0; // Nothing to do
 
-            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} is crippled, raw bounds => min: {unitCfg.CrippledModifierMin} " +
-                $"to max: {unitCfg.CrippledModifierMax}");
+            // Config is a phase modifier, so invert
+            int invertedMin = unitCfg.CrippledModifierMin * -1;
+            int invertedMax = unitCfg.CrippledModifierMax * -1;
+
+            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} is crippled, raw bounds => min: {invertedMin} " +
+                $"to max: {invertedMax}");
 
             Pilot pilot = actor.GetPilot();
             int pilotMod = pilot.SBIPilotingMod();
-            int adjustedMax = unitCfg.CrippledModifierMax + pilotMod;
 
-            int finalMod = adjustedMax;
-            if (adjustedMax >= unitCfg.CrippledModifierMin)
-            {
-                finalMod = unitCfg.CrippledModifierMin;
-                Mod.Log.Debug?.Write($"  adjustedMax >= boundsMin, setting to {unitCfg.CrippledModifierMin}");
-            }
+            int adjustedMin = invertedMin - pilotMod;
+            if (adjustedMin < 0)
+                adjustedMin = 0;
+            int adjustedMax = invertedMax - pilotMod;
+            if (adjustedMax <= adjustedMin)
+                adjustedMax = adjustedMin + 1;
 
+            // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
+            int finalMod = Mod.Random.Next(adjustedMin, adjustedMax + 1);
             Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
             return finalMod;
         }

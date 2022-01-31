@@ -134,23 +134,6 @@ namespace SBITests
 
         // TODO: FIX ME
         [TestMethod]
-        public void TestProne()
-        {
-            Assert.IsTrue(false);
-
-        }
-
-
-        // TODO: FIX ME
-        [TestMethod]
-        public void TestCrippled()
-        {
-            Assert.IsTrue(false);
-
-        }
-
-        // TODO: FIX ME
-        [TestMethod]
         public void TestTacticsMod()
         {
             Mech mech50 = TestHelper.BuildTestMech(tonnage: 50);
@@ -185,29 +168,6 @@ namespace SBITests
             Assert.AreEqual(12, mech50.Initiative);
         }
 
-
-
-        // TODO: FIX ME
-        [TestMethod]
-        public void TestInspired()
-        {
-            Mod.Config.Mech.TypeMod = 0;
-
-            // Patch isMoraleInspired to return true
-            TestGlobalInit.HarmonyInst.Unpatch(TestGlobalInit.MI_IsMoraleInspired, HarmonyPatchType.Prefix);
-            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsMoraleInspired, prefix: TestGlobalInit.HM_AlwaysTrue);
-
-            Mech mech50 = TestHelper.BuildTestMech(tonnage: 50);
-            mech50.GetPilot().StatCollection.Set<int>("Tactics", 1);
-            for (int i = 0; i < 30; i++)
-            {
-                InitiativeHelper.UpdateInitiative(mech50);
-                // Tonnage = phase 14 => init 17, -0 type, tactics 1 = -0, inspired -1 to -4 => [16, 13] init
-                Console.WriteLine($"Initiative is: {mech50.Initiative}");
-                Assert.IsTrue(mech50.Initiative <= 16);
-                Assert.IsTrue(mech50.Initiative >= 13);
-            }
-        }
 
         // TODO: FIX ME
         [TestMethod]

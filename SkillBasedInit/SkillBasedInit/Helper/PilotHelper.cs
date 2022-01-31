@@ -45,7 +45,7 @@ namespace SkillBasedInit.Helper
             return modifier;
         }
 
-        public static int InspiredModifier(this Pilot pilot, UnitCfg config)
+        public static int InspiredModifier(this Pilot pilot)
         {
             if (pilot == null) return 0;
             if (pilot.ParentActor == null) return 0;
@@ -53,13 +53,20 @@ namespace SkillBasedInit.Helper
 
             Mod.Log.Debug?.Write($"Calculating inspired modifier for pilot: {pilot.Name}");
 
-            UnitCfg typeCfg = pilot.ParentActor.GetUnitConfig();
-            int skillMod = pilot.SBITacticsMod();
-            int adjustedMax = typeCfg.InspiredMax + skillMod;
+            // Config are phase modifiers, so invert
+            UnitCfg unitCfg = pilot.ParentActor.GetUnitConfig();
+            int invertedMin = unitCfg.InspiredMin * -1;
+            int invertedMax = unitCfg.InspiredMax * -1;
+
+            // Invert, because we expect this to be a bonus
+            int skillMod = pilot.SBITacticsMod() * -1;
+
+            int adjustedMin = invertedMin + skillMod; 
+            int adjustedMax = invertedMax + skillMod;
 
             // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
-            int modifier = Mod.Random.Next(typeCfg.InspiredMin, adjustedMax + 1);
-            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({typeCfg.InspiredMin}, {adjustedMax})");
+            int modifier = Mod.Random.Next(adjustedMax, adjustedMin + 1);
+            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({adjustedMax}, {adjustedMin})");
 
             return modifier;
         }

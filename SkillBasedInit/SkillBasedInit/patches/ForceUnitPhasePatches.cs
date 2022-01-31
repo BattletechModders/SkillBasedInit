@@ -28,7 +28,7 @@ namespace SkillBasedInit.Patches
                 return;
             }
 
-            int penalty = __instance.ProneInitModifier(isKnockdown: true);
+            int penalty = __instance.ProneInitMod();
             if (penalty == 0) return; // Nothing to do
 
             Mod.Log.Info?.Write($"Applying penalty: {penalty} to {__instance.DistinctId()} with init: {__instance.Initiative} immediately.");

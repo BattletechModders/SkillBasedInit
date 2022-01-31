@@ -62,6 +62,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CrippledTests.cs" />
+    <Compile Include="InspiredTests.cs" />
+    <Compile Include="ProneTests.cs" />
     <Compile Include="ShutdownTests.cs" />
     <Compile Include="VigilanceTests.cs" />
     <Compile Include="PilotTests.cs" />

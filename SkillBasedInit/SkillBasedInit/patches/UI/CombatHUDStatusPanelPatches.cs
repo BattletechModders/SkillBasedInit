@@ -65,7 +65,7 @@ namespace SkillBasedInit.patches {
                 chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_COMPONENTS], new object[] { miscModColor, miscMod }).ToString());
             }
 
-            int proneMod = actor.ProneInitModifier();
+            int proneMod = actor.ProneInitMod();
             if (proneMod != 0)
             {
                 chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_CRIPPLED], new object[] { proneMod }).ToString());
@@ -106,7 +106,7 @@ namespace SkillBasedInit.patches {
                     pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_PILOT_TAGS], new object[] { pilotTagsColor, pilotTagsMods }).ToString());
                 }
 
-                int inspiredMod = selectedPilot.InspiredModifier(unitCfg);
+                int inspiredMod = selectedPilot.InspiredModifier();
                 if (inspiredMod != 0)
                 {
                     initiativeBase += inspiredMod;

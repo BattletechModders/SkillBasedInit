@@ -103,6 +103,8 @@ namespace SBITests
         public static MethodInfo MI_IsMoraleInspired;
         public static MethodInfo MI_IsFuryInspired;
         public static MethodInfo MI_IsShutdown;
+        public static MethodInfo MI_IsProne;
+        public static MethodInfo MI_IsLegged;
 
         public static HarmonyMethod HM_AlwaysTrue;
         public static HarmonyMethod HM_AlwaysFalse;
@@ -147,8 +149,15 @@ namespace SBITests
             MI_IsMoraleInspired = isMoraleInspiredProp.GetMethod;
             PropertyInfo isFuryInspired = AccessTools.Property(typeof(AbstractActor), "IsFuryInspired");
             MI_IsFuryInspired = isFuryInspired.GetMethod;
+
             PropertyInfo isShutdown = AccessTools.Property(typeof(Mech), "IsShutDown");
             MI_IsShutdown = isShutdown.GetMethod;
+
+            PropertyInfo isProne = AccessTools.Property(typeof(Mech), "IsProne");
+            MI_IsProne = isProne.GetMethod;
+
+            PropertyInfo isLegged = AccessTools.Property(typeof(Mech), "IsLegged");
+            MI_IsLegged = isLegged.GetMethod;
 
             HM_AlwaysFalse = new HarmonyMethod(typeof(AlwaysFalsePrefix), "Prefix");
             HM_AlwaysTrue = new HarmonyMethod(typeof(AlwaysTruePrefix), "Prefix");
