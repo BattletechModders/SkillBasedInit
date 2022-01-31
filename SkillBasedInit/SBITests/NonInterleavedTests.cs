@@ -11,7 +11,7 @@ namespace SBITests
     [TestClass]
     public class NonInterleavedTests
     {
-        [TestMethod]
+        //[TestMethod]
         public void TestNonInterleaved()
         {
             Mech mech = TestHelper.BuildTestMech(tonnage: 50);

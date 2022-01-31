@@ -30,7 +30,6 @@ namespace SBITests
         }
 
 
-        // TODO: FIX ME
         [TestMethod]
         public void TestInspired()
         {

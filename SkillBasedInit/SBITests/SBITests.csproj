@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CrippledTests.cs" />
+    <Compile Include="CombinedTests.cs" />
     <Compile Include="InspiredTests.cs" />
     <Compile Include="ProneTests.cs" />
     <Compile Include="ShutdownTests.cs" />
