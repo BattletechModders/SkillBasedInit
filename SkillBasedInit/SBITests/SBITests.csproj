@@ -62,6 +62,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ShutdownTests.cs" />
     <Compile Include="VigilanceTests.cs" />
     <Compile Include="PilotTests.cs" />
     <Compile Include="ConversionTests.cs" />

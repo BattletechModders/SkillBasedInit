@@ -99,7 +99,7 @@ namespace SkillBasedInit.Helper
             roundInitiative += proneMod;
             int crippledMod = actor.CrippledInitModifier();
             roundInitiative += crippledMod;
-            int shutdownMod = actor.ShutdownInitModifier();
+            int shutdownMod = actor.ShutdownInitMod();
             roundInitiative += shutdownMod;
             Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  proneInitModifier: {proneMod}  " +
                 $"crippledInitModifier: {crippledMod}  " +

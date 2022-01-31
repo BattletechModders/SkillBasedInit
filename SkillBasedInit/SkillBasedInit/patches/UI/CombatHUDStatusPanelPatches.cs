@@ -79,7 +79,7 @@ namespace SkillBasedInit.patches {
                 initiativeBase += crippledMod;
             }
 
-            int shutdownMod =  actor.ShutdownInitModifier();
+            int shutdownMod =  actor.ShutdownInitMod();
             if (shutdownMod != 0)
             {
                 chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_SHUTDOWN], new object[] { shutdownMod }).ToString());

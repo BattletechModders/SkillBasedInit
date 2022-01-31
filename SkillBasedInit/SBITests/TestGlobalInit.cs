@@ -30,12 +30,12 @@ namespace SBITests
             VigilanceRandMin = 2,
             InspiredMax = 3,
             InspiredMin = 1,
-            ProneModifierMax = 6,
-            ProneModifierMin = 2,
-            ShutdownModifierMax = 6,
-            ShutdownModifierMin = 2,
-            CrippledModifierMax = 6,
-            CrippledModifierMin = 2,
+            ProneModifierMax = -6,
+            ProneModifierMin = -2,
+            ShutdownModifierMax = -6,
+            ShutdownModifierMin = -2,
+            CrippledModifierMax = -6,
+            CrippledModifierMin = -2,
             DefaultTonnage = 120f,
             InitBaseByTonnage = new Dictionary<int, int>
                 {
@@ -57,7 +57,7 @@ namespace SBITests
         {
             TypeMod = 0,
             RandomnessMax = 0,
-            RandomnessMin = 05,
+            RandomnessMin = 5,
             HesitationMax = -6,
             HesitationMin = -2,
             CalledShotRandMax = -6,
@@ -102,6 +102,7 @@ namespace SBITests
 
         public static MethodInfo MI_IsMoraleInspired;
         public static MethodInfo MI_IsFuryInspired;
+        public static MethodInfo MI_IsShutdown;
 
         public static HarmonyMethod HM_AlwaysTrue;
         public static HarmonyMethod HM_AlwaysFalse;
@@ -146,6 +147,8 @@ namespace SBITests
             MI_IsMoraleInspired = isMoraleInspiredProp.GetMethod;
             PropertyInfo isFuryInspired = AccessTools.Property(typeof(AbstractActor), "IsFuryInspired");
             MI_IsFuryInspired = isFuryInspired.GetMethod;
+            PropertyInfo isShutdown = AccessTools.Property(typeof(Mech), "IsShutDown");
+            MI_IsShutdown = isShutdown.GetMethod;
 
             HM_AlwaysFalse = new HarmonyMethod(typeof(AlwaysFalsePrefix), "Prefix");
             HM_AlwaysTrue = new HarmonyMethod(typeof(AlwaysTruePrefix), "Prefix");

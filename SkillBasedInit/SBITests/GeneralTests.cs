@@ -151,14 +151,6 @@ namespace SBITests
 
         // TODO: FIX ME
         [TestMethod]
-        public void TestShutdown()
-        {
-            Assert.IsTrue(false);
-
-        }
-
-        // TODO: FIX ME
-        [TestMethod]
         public void TestTacticsMod()
         {
             Mech mech50 = TestHelper.BuildTestMech(tonnage: 50);

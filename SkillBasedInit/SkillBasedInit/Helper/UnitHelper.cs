@@ -453,7 +453,7 @@ namespace SkillBasedInit.Helper
 
 
         // Shutdown only applies to mechs, quads, and troopers
-        public static int ShutdownInitModifier(this AbstractActor actor)
+        public static int ShutdownInitMod(this AbstractActor actor)
         {
             if (!(actor is Mech)) return 0;
             
@@ -474,21 +474,27 @@ namespace SkillBasedInit.Helper
                 boundsMin = Mod.Config.Mech.ShutdownModifierMin;
                 boundsMax = Mod.Config.Mech.ShutdownModifierMax;
             }
+
+            // BoundsMax are phase modifiers, so invert
+            boundsMin *= -1;
+            boundsMax *= -1;
             Mod.Log.Debug?.Write($"Unit: {mech.DistinctId()} is shutdown, raw bounds => min: {boundsMin} to max: {boundsMax}");
 
             Pilot pilot = actor.GetPilot();
             int pilotMod = pilot.SBIPilotingMod();
+
+            int adjustedMin = boundsMin - pilotMod;
+            if (adjustedMin < 0)
+                    adjustedMin = 0;
+
             int adjustedMax = boundsMax - pilotMod;
+            if (adjustedMax <= adjustedMin)
+                adjustedMax = adjustedMin + 1;
             Mod.Log.Debug?.Write($"  adjustedMax: {adjustedMax} = max: {boundsMax} - pilotMod: {pilotMod}");
 
-            int finalMod = adjustedMax;
-            if (adjustedMax <= boundsMin)
-            {
-                finalMod = boundsMin;
-                Mod.Log.Debug?.Write($"  adjustedMax < boundsMin, returning {boundsMin}");
-            }
-
-            Mod.Log.Debug?.Write($"  finalMod: {finalMod}");
+            // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
+            int finalMod = Mod.Random.Next(adjustedMin, adjustedMax + 1);
+            Mod.Log.Debug?.Write($"  finalMod: {finalMod} = Random({adjustedMin}, {adjustedMax})");
             return finalMod;
         }
 
