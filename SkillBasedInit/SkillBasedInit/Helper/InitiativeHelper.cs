@@ -6,6 +6,22 @@ namespace SkillBasedInit.Helper
     public static class InitiativeHelper
     {
 
+        // Init and phases are flipped. ForceUnitOnePhaseDown is initiative++, ForceUnitOnePhaseUp is initiative--.
+        // Init of 1 = phase 30, 6 = 24, 10 = 21, 30 = 1
+        public static int PhaseToInitiative(int phase)
+        {
+            int initiative = (Mod.MaxPhase + 1) - phase;
+            return initiative;
+        }
+
+        // Init and phases are flipped. ForceUnitOnePhaseDown is initiative++, ForceUnitOnePhaseUp is initiative--.
+        // Init of 1 = phase 30, 6 = 24, 10 = 21, 30 = 1
+        public static int InitiativeToPhase(int initiative)
+        {
+            int phase = (Mod.MaxPhase + 1) - initiative;
+            return phase;
+        }
+
         public static void UpdateInitiative(AbstractActor actor)
         {
 
@@ -30,54 +46,66 @@ namespace SkillBasedInit.Helper
             UnitCfg unitConfig = actor.GetUnitConfig();
 
             // Set the base init by tonnage
-            int roundInitiative = actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE);
-            roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE);
-            roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
+            int tonnageMod = actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE);
+            int roundInitiative = tonnageMod;
+
+            int typeMod = actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE);
+            roundInitiative += typeMod;
+
+            int pilotTagsMod = actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
+            roundInitiative += pilotTagsMod;
             Mod.Log.Info?.Write(
                 $"roundInit: {roundInitiative} <=" +
-                $"  tonnageBase: {actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE)}" +
-                $"  unitType: {actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE)}" +
-                $"  pilotTags: {actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS)}"
+                $"  tonnageBase: {tonnageMod}" +
+                $"  unitType: {typeMod}" +
+                $"  pilotTags: {pilotTagsMod}"
                 );
 
 
             // Check non-consumable modifiers - they apply without change
-            roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY);
-            roundInitiative += actor.StatCollection.GetValue<int>(ModStats.MOD_MISC);
+            int injuryMod = actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY);
+            roundInitiative += injuryMod;
+            int miscMod = actor.StatCollection.GetValue<int>(ModStats.MOD_MISC);
+            roundInitiative += miscMod;
             Mod.Log.Info?.Write(
                 $"roundInit: {roundInitiative} <=" +
-                $"  injuryMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_INJURY)}" +
-                $"  miscMod: {actor.StatCollection.GetValue<int>(ModStats.MOD_MISC)}"
+                $"  injuryMod: {injuryMod}" +
+                $"  miscMod: {miscMod}"
                 );
 
             // Check for consumable modifiers - these get reset to 0 when we recalculate 
-            if (actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT) != 0)
+            int calledShotMod = actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT);
+            if (calledShotMod != 0)
             {
                 // Actor was hit by a called shot sometime after its turn, apply the penalty
-                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT);
-                Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  calledShotState: {actor.StatCollection.GetValue<int>(ModStats.STATE_CALLED_SHOT)}");
+                roundInitiative += calledShotMod;
+                Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  calledShotState: {calledShotMod}");
                 actor.StatCollection.Set<int>(ModStats.STATE_CALLED_SHOT, 0);
             }
 
-            if (actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE) != 0)
+            int vigilanceMod = actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE);
+            if (vigilanceMod != 0)
             {
-                roundInitiative += actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE);
-                Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  vigilanceState: {actor.StatCollection.GetValue<int>(ModStats.STATE_VIGILIANCE)}");
+                roundInitiative += vigilanceMod;
+                Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  vigilanceState: {vigilanceMod}");
                 actor.StatCollection.Set<int>(ModStats.STATE_VIGILIANCE, 0);
             }
 
-            roundInitiative += actor.ProneInitModifier();
-            roundInitiative += actor.CrippledInitModifier();
-            roundInitiative += actor.ShutdownInitModifier();
-            Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  proneInitModifier: {actor.ProneInitModifier()}  " +
-                $"crippledInitModifier: {actor.CrippledInitModifier()}  " +
-                $"shutdownInitModifier: {actor.ShutdownInitModifier()}");
+            int proneMod = actor.ProneInitModifier();
+            roundInitiative += proneMod;
+            int crippledMod = actor.CrippledInitModifier();
+            roundInitiative += crippledMod;
+            int shutdownMod = actor.ShutdownInitModifier();
+            roundInitiative += shutdownMod;
+            Mod.Log.Info?.Write($"roundInit: {roundInitiative} <=  proneInitModifier: {proneMod}  " +
+                $"crippledInitModifier: {crippledMod}  " +
+                $"shutdownInitModifier: {shutdownMod}");
 
             Pilot pilot = actor.GetPilot();
 
             // Reduce by pilot's tactics modifier
             int tacticsMod = pilot.SBITacticsMod();
-            roundInitiative += tacticsMod;
+            roundInitiative -= tacticsMod;
             int inspiredMod = pilot.InspiredModifier(unitConfig);
             roundInitiative += inspiredMod;
 
@@ -108,10 +136,9 @@ namespace SkillBasedInit.Helper
                 Mod.Log.Info?.Write($"  Round init {roundInitiative} greater than 30, setting to 30.");
             }
 
-            // Init and phases are flipped. If we want phase 24, we need init of (30 + 1) - 24 = 6.
-            int newInit = (Mod.MaxPhase + 1) - roundInitiative;
-            actor.Initiative = newInit;
-            Mod.Log.Info?.Write($"  actor.Initiative: {actor.Initiative} => phase: {roundInitiative}");
+            actor.Initiative = roundInitiative;
+            int newPhase = InitiativeHelper.InitiativeToPhase(roundInitiative);
+            Mod.Log.Info?.Write($"  actor.Initiative: {actor.Initiative} => phase: {newPhase}");
         }
 
         // Calculate the left and right phase boundaries *as initiative* 

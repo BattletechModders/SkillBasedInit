@@ -1,5 +1,6 @@
 ﻿using BattleTech;
 using Harmony;
+using HBS.Collections;
 using IRBTModUtils;
 using SkillBasedInit.Helper;
 using System;
@@ -35,7 +36,20 @@ namespace SBITests
 
             mech = (Mech)InitAbstractActor(mech);
 
+            mech.StatCollection.AddStatistic("Head.Structure", 1f);
+            mech.StatCollection.AddStatistic("CenterTorso.Structure", 1f);
+            mech.StatCollection.AddStatistic("LeftTorso.Structure", 1f);
+            mech.StatCollection.AddStatistic("RightTorso.Structure", 1f);
+            mech.StatCollection.AddStatistic("LeftArm.Structure", 1f);
+            mech.StatCollection.AddStatistic("RightArm.Structure", 1f);
+            mech.StatCollection.AddStatistic("LeftLeg.Structure", 1f);
+            mech.StatCollection.AddStatistic("RightLeg.Structure", 1f);
+    
             InitModStats(mech);
+
+            Pilot pilot = BuildTestPilot();
+            Traverse pilotT = Traverse.Create(mech).Property("pilot");
+            pilotT.SetValue(pilot);
 
             return mech;
         }
@@ -60,7 +74,7 @@ namespace SBITests
         private static void InitModStats(AbstractActor actor)
         {
             // ModStats - should follow AbstractActorPatches::InitEffectStats
-            int tonnageMod = actor.GetTonnageModifier();
+            int tonnageMod = actor.GetBaseInitByTonnage();
             actor.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.STATE_TONNAGE, tonnageMod);
 
             int typeMod = actor.GetTypeModifier();
@@ -94,13 +108,16 @@ namespace SBITests
             TurnDirector td = (TurnDirector)Activator.CreateInstance(typeof(TurnDirector), nonPublic: true);
 
             Traverse firstPhaseT = Traverse.Create(td).Property("FirstPhase");
-            firstPhaseT.SetValue(1);
+            firstPhaseT.SetValue(TestConsts.FirstPhase);
 
             Traverse lastPhaseT = Traverse.Create(td).Property("LastPhase");
-            lastPhaseT.SetValue(30);
+            lastPhaseT.SetValue(TestConsts.LastPhase);
 
             Traverse tdCGST = Traverse.Create(td).Property("Combat");
             tdCGST.SetValue(cgs);
+
+            Traverse isInterleavedT = Traverse.Create(td).Property("_isInterleaved");
+            isInterleavedT.SetValue(true);
 
             Traverse cgsTDT = Traverse.Create(cgs).Property("TurnDirector");
             cgsTDT.SetValue(td);
@@ -113,11 +130,28 @@ namespace SBITests
 
         private static Pilot BuildTestPilot()
         {
+            HumanDescriptionDef humanDescDef = new HumanDescriptionDef();
+            Traverse callsignT = Traverse.Create(humanDescDef).Property("Callsign");
+            callsignT.SetValue("foobar");
+
             PilotDef pilotDef = new PilotDef();
+
+            Traverse humanDescDefT = Traverse.Create(pilotDef).Property("Description");
+            humanDescDefT.SetValue(humanDescDef);
+
+            Traverse pilotTagsT = Traverse.Create(pilotDef).Property("PilotTags");
+            pilotTagsT.SetValue(new TagSet());
+
             Guid guid = new Guid();
 
             Pilot pilot = new Pilot(pilotDef, guid.ToString(), false);
+            pilot.StatCollection.Set<int>("Health", 3);
+            pilot.StatCollection.Set<int>("Injuries", 0);
 
+            pilot.StatCollection.Set<int>("Gunnery", 3);
+            pilot.StatCollection.Set<int>("Guts", 4);
+            pilot.StatCollection.Set<int>("Piloting", 5);
+            pilot.StatCollection.Set<int>("Tactics", 6);
             // Init any required stats
             int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
             pilot.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.STATE_PILOT_TAGS, pilotTagsMod);

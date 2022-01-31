@@ -94,7 +94,7 @@ namespace SkillBasedInit.patches {
             if (selectedPilot != null)
             {
                 int tacticsMod = selectedPilot.SBITacticsMod();
-                initiativeBase += tacticsMod;
+                initiativeBase -= tacticsMod;
                 pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_TACTICS], new object[] { tacticsMod }).ToString());
                 Mod.Log.Debug?.Write($"  tacticsMod: {tacticsMod}");
 
@@ -147,8 +147,7 @@ namespace SkillBasedInit.patches {
                 pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_VIGILANCE], new object[] { vigilanceMod }).ToString());
             }
 
-
-            int[] randomnessBounds = selectedPilot.RandomnessBounds(unitCfg);
+            int[] randomnessBounds = selectedPilot.RandomnessBounds(unitCfg.RandomnessMin, unitCfg.RandomnessMax);
             pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_RANDOM],
                 new object[] { randomnessBounds[0], randomnessBounds[1] }).ToString());
 

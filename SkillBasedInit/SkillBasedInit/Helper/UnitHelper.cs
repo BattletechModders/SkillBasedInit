@@ -223,35 +223,37 @@ namespace SkillBasedInit.Helper
             return tonnage;
         }
 
-        public static int GetTonnageModifier(this AbstractActor actor)
+        public static int GetBaseInitByTonnage(this AbstractActor actor)
         {
             int unitTonnage = (int)Math.Ceiling(actor.GetUnitTonnage());
             UnitCfg opts = actor.GetUnitConfig();
-            int initBase = 0;
+            int initPhase = 0;
             foreach (KeyValuePair<int, int> kvp in opts.InitBaseByTonnage)
             {
                 Mod.Log.Debug?.Write($"  -- key: {kvp.Key}  value: {kvp.Value}");
                 if (unitTonnage <= kvp.Key)
                 {
-                    initBase = kvp.Value;
+                    initPhase = kvp.Value;
                     break;
                 }
             }
+            // Now invert to an initiative modifier
+            int baseInit = InitiativeHelper.PhaseToInitiative(initPhase);
+            Mod.Log.Debug?.Write($"Using initPhase: {initPhase} => baseInit: {baseInit} for actor: {actor.DistinctId()} with tonnage: {unitTonnage}");
 
-            Mod.Log.Debug?.Write($"Using tonnageMod: {initBase} for actor: {actor.DistinctId()} with tonnage: {unitTonnage}");
-            return initBase;
+            return baseInit;
         }
 
-        public static int GetTonnageModifier(this MechDef mechDef)
+        public static int GetBaseInitByTonnage(this MechDef mechDef)
         {
             int unitTonnage = (int)Math.Ceiling(mechDef.GetUnitTonnage());
             UnitCfg opts = mechDef.GetUnitConfig();
-            int initBase = 0;
+            int initPhase = 0;
             foreach (KeyValuePair<int, int> kvp in opts.InitBaseByTonnage)
             {
                 if (unitTonnage >= kvp.Key)
                 {
-                    initBase = kvp.Value;
+                    initPhase = kvp.Value;
                 }
                 else
                 {
@@ -259,9 +261,11 @@ namespace SkillBasedInit.Helper
                 }
             }
 
-            Mod.Log.Debug?.Write($"Using tonnageMod: {initBase} for mechDef: {mechDef.Name} with tonnage: {unitTonnage}");
-            return initBase;
+            // Now invert to an initiative modifier
+            int baseInit = InitiativeHelper.PhaseToInitiative(initPhase);
+            Mod.Log.Debug?.Write($"Using initPhase: {initPhase} => baseInit: {baseInit} for mechDef: {mechDef.Name} with tonnage: {unitTonnage}");
 
+            return baseInit;
         }
 
 

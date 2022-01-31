@@ -40,14 +40,14 @@ namespace SkillBasedInit
 
         public float DefaultTonnage = 120f;
 
+        // NOTE: These are PHASES, NOT MODIFIERS. They MUST be inverted!
         public Dictionary<int, int> InitBaseByTonnage = new Dictionary<int, int>();
+
+        public UnitCfg ShallowCopy()
+        {
+            return (UnitCfg)this.MemberwiseClone();
+        }
     }
-
-    public class MechCfg : UnitCfg { }
-
-    public class TrooperCfg : UnitCfg { }
-
-    public class NavalCfg : UnitCfg { }
 
     public class TurretCfg : UnitCfg
     {
@@ -56,9 +56,6 @@ namespace SkillBasedInit
         public float MediumTonnage = 80.0f;
         public float HeavyTonnage = 100.0f;
     }
-
-    public class VehicleCfg : UnitCfg { }
-
 
     public class PilotCfg
     {
@@ -132,10 +129,10 @@ namespace SkillBasedInit
 
         public PilotCfg Pilot = new PilotCfg();
 
-        public MechCfg Mech = new MechCfg();
-        public TrooperCfg Trooper = new TrooperCfg();
-        public NavalCfg Naval = new NavalCfg();
-        public VehicleCfg Vehicle = new VehicleCfg();
+        public UnitCfg Mech = new UnitCfg();
+        public UnitCfg Trooper = new UnitCfg();
+        public UnitCfg Naval = new UnitCfg();
+        public UnitCfg Vehicle = new UnitCfg();
         public TurretCfg Turret = new TurretCfg();
 
         public void Init()

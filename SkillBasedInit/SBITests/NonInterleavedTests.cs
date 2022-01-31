@@ -9,19 +9,19 @@ using System;
 namespace SBITests
 {
     [TestClass]
-    public class InitTests
+    public class NonInterleavedTests
     {
         [TestMethod]
         public void TestNonInterleaved()
         {
             Mech mech = TestHelper.BuildTestMech(tonnage: 50);
 
-            Traverse isInterleavedT = Traverse.Create(mech.Combat.TurnDirector).Field("_isInterleaved");
-            isInterleavedT.SetValue(true);
+            Traverse isInterleavedT = Traverse.Create(mech.Combat.TurnDirector).Property("_isInterleaved");
+            isInterleavedT.SetValue(false);
 
             InitiativeHelper.UpdateInitiative(mech);
 
-            Assert.AreEqual(30, mech.Initiative);
+            Assert.AreEqual(TestConsts.LastPhase, mech.Initiative);
         }
     }
 }

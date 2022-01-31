@@ -208,7 +208,7 @@ namespace SkillBasedInit {
             Mod.Log.Info?.Write($"Initializing statistics for actor: {__instance.DistinctId()}");
 
             // Static init values that default to a specific value
-            int tonnageMod = __instance.GetTonnageModifier();
+            int tonnageMod = __instance.GetBaseInitByTonnage();
             Mod.Log.Info?.Write($"  -- tonnageMod: {tonnageMod}");
             __instance.StatCollection.AddStatistic<int>(ModStats.STATE_TONNAGE, tonnageMod);
 

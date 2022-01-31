@@ -8,21 +8,27 @@ namespace SkillBasedInit.Helper
 {
     public static class PilotExtensions
     {
-        public static int[] RandomnessBounds(this Pilot pilot, UnitCfg config)
+        // Max and min will be negative here, as they represent phase modifiers
+        //  invert them for calculation purposes
+        public static int[] RandomnessBounds(this Pilot pilot, int min, int max)
         {
             if (pilot == null) return new int[]{ 0, 0 };
 
             Mod.Log.Debug?.Write($"Calculating randomness bounds for pilot: {pilot.Name}");
 
+            int invertedMin = -1 * min;
+            int invertedMax = -1 * max;
+
+            // skillMod reduces the maximum randomness
             int skillMod = pilot.SBIPilotingMod();
-            int adjustedMax = config.RandomnessMax + skillMod;
-            Mod.Log.Debug?.Write($"  adjustedBound: {adjustedMax} = config.RanBoundsMax: {config.RandomnessMax} - skillMod: {skillMod}");
-            if (adjustedMax >= config.RandomnessMin)
-                adjustedMax = config.RandomnessMin - 1;
+            int adjustedMax = invertedMax - skillMod;
 
-            return new int[] { config.RandomnessMin, adjustedMax };
+            Mod.Log.Debug?.Write($"  adjustedBound: {adjustedMax} = config.RanBoundsMax: {invertedMax} - skillMod: {skillMod}");
+            if (adjustedMax < min)
+                adjustedMax = min;
+
+            return new int[] { invertedMin, adjustedMax };
         }
-
 
         public static int RandomnessModifier(this Pilot pilot, UnitCfg config)
         {
@@ -30,11 +36,10 @@ namespace SkillBasedInit.Helper
 
             Mod.Log.Debug?.Write($"Calculating randomness modifier for pilot: {pilot.Name}");
 
-            int[] bounds = RandomnessBounds(pilot, config);
+            int[] bounds = RandomnessBounds(pilot, config.RandomnessMin, config.RandomnessMax);
 
-            /// Invert because we assume the range is negative
-            int modifier = Mod.Random.Next(bounds[1], bounds[0]);
-            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({bounds[1]}, {bounds[0]})");
+            int modifier = Mod.Random.Next(bounds[0], bounds[1]);
+            Mod.Log.Debug?.Write($"  modifier: {modifier} => Math.Rand({bounds[0]}, {bounds[1]})");
 
             return modifier;
         }

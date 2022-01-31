@@ -31,7 +31,7 @@ namespace SkillBasedInit.Patches {
                 List<string> details = new List<string>();
 
                 // Static initiative from tonnage
-                int tonnageMod = ___selectedMech.GetTonnageModifier();
+                int tonnageMod = ___selectedMech.GetBaseInitByTonnage();
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
 
                 // Type modifier
@@ -94,7 +94,7 @@ namespace SkillBasedInit.Patches {
                 List<string> details = new List<string>();
 
                 // Static initiative from tonnage
-                int tonnageMod = __instance.SelectedMech.MechDef.GetTonnageModifier();
+                int tonnageMod = __instance.SelectedMech.MechDef.GetBaseInitByTonnage();
                 initValue += tonnageMod;
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TONNAGE], new object[] { tonnageMod }).ToString());
 
@@ -110,14 +110,14 @@ namespace SkillBasedInit.Patches {
 
                 int tacticsMod = selectedPilot.SBITacticsMod();
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_TACTICS], new object[] { tacticsMod }).ToString());
-                initValue += tacticsMod;
+                initValue -= tacticsMod;
 
                 int pilotTagsMod = PilotHelper.GetTagsModifier(selectedPilot);
                 details.AddRange(PilotHelper.GetTagsModifierDetails(selectedPilot));
                 initValue += pilotTagsMod;
 
                 UnitCfg unitCfg = __instance.SelectedMech.MechDef.GetUnitConfig();
-                int[] randomnessBounds = selectedPilot.RandomnessBounds(unitCfg);
+                int[] randomnessBounds = selectedPilot.RandomnessBounds(unitCfg.RandomnessMin, unitCfg.RandomnessMax);
 
                 // --- LANCE ---
                 if (___LC != null) {
