@@ -168,14 +168,6 @@ namespace SBITests
             Assert.AreEqual(12, mech50.Initiative);
         }
 
-
-        // TODO: FIX ME
-        [TestMethod]
-        public void TestHesitation()
-        {
-            Assert.IsTrue(false);
-
-        }
     }
 
 

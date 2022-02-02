@@ -67,6 +67,7 @@
     <Compile Include="InspiredTests.cs" />
     <Compile Include="ProneTests.cs" />
     <Compile Include="ShutdownTests.cs" />
+    <Compile Include="HesitationTests.cs" />
     <Compile Include="VigilanceTests.cs" />
     <Compile Include="PilotTests.cs" />
     <Compile Include="ConversionTests.cs" />

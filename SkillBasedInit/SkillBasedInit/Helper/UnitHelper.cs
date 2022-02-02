@@ -508,18 +508,24 @@ namespace SkillBasedInit.Helper
         {
             if (actor == null) return 0;
 
+            // Hesitation is a phase modifier, so invert
             UnitCfg unitCfg = actor.GetUnitConfig();
-            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} hestiation raw bounds => min: {unitCfg.HesitationMin} to max: {unitCfg.HesitationMax}");
+            int invertedMax = unitCfg.HesitationMax * -1;
+            int invertedMin = unitCfg.HesitationMin * -1;
+            Mod.Log.Debug?.Write($"Unit: {actor.DistinctId()} hestiation raw bounds => min: {invertedMin} to max: {invertedMax}");
 
             // Invert because we assume the range is negative
             // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
-            int rawMod = Mod.Random.Next(unitCfg.HesitationMax, unitCfg.HesitationMin + 1);
-            int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION);
+            int rawMod = Mod.Random.Next(invertedMin, invertedMax + 1);
+            
+            // Assume the stat is a phase mod, and invert
+            int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION) * -1;
+            
             int finalMod = rawMod + actorMod;
             Mod.Log.Debug?.Write($"Hesitation penalty: {finalMod} = rawMod: {rawMod} + actorMod: {actorMod}");
-            if (finalMod > 0)
+            if (finalMod < 0)
             {
-                Mod.Log.Debug?.Write("Normalizing penalty > 0 to 0");
+                Mod.Log.Debug?.Write("Normalizing penalty < 0 to 0");
                 finalMod = 0;
             }
             return finalMod;

@@ -141,6 +141,89 @@ namespace SBITests
                 Assert.IsTrue(mech30.Initiative <= 2);
             }
         }
+
+        [TestMethod]
+        public void TestCombined_Hesitation()
+        {
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsMoraleInspired, prefix: TestGlobalInit.HM_AlwaysFalse);
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsFuryInspired, prefix: TestGlobalInit.HM_AlwaysFalse);
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsLegged, prefix: TestGlobalInit.HM_AlwaysFalse);
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsProne, prefix: TestGlobalInit.HM_AlwaysFalse);
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsShutdown, prefix: TestGlobalInit.HM_AlwaysFalse);
+
+            Mod.Config.Mech.TypeMod = 2;
+            Mech mech30 = TestHelper.BuildTestMech(tonnage: 30);
+            mech30.GetPilot().StatCollection.Set<int>("Tactics", 10);
+
+            mech30.StatCollection.Set<int>(ModStats.MOD_INJURY, 0);
+            mech30.StatCollection.Set<int>(ModStats.MOD_MISC, 0);
+
+            //Tonnage = phase 16 => init 15
+            // type => -2
+            // tactics => -5
+            // hesitation => 8 - (tactics 5 + 1) => 2
+            // random => +[1,4]
+            // ==> 10 + [1,4] - [11,14]
+            Console.WriteLine("Combined test 1");
+            for (int i = 0; i < 30; i++)
+            {
+                // Hesitation
+                mech30.StatCollection.Set<int>(ModStats.STATE_HESITATION, 8);
+                InitiativeHelper.UpdateInitiative(mech30);
+
+                Console.WriteLine($"Mech init: {mech30.Initiative}");
+                Assert.IsTrue(mech30.Initiative >= 11);
+                Assert.IsTrue(mech30.Initiative <= 14);
+            }
+        }
+
+        [TestMethod]
+        public void TestCombined_Hesitation_Reduction()
+        {
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsMoraleInspired, prefix: TestGlobalInit.HM_AlwaysFalse);
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsFuryInspired, prefix: TestGlobalInit.HM_AlwaysFalse);
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsLegged, prefix: TestGlobalInit.HM_AlwaysFalse);
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsProne, prefix: TestGlobalInit.HM_AlwaysFalse);
+            TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsShutdown, prefix: TestGlobalInit.HM_AlwaysFalse);
+
+            Mod.Config.Mech.TypeMod = 2;
+            Mech mech30 = TestHelper.BuildTestMech(tonnage: 30);
+            mech30.GetPilot().StatCollection.Set<int>("Tactics", 1);
+
+            mech30.StatCollection.Set<int>(ModStats.MOD_INJURY, 0);
+            mech30.StatCollection.Set<int>(ModStats.MOD_MISC, 0);
+
+            mech30.StatCollection.Set<int>(ModStats.STATE_HESITATION, 8);
+
+            //Tonnage = phase 16 => init 15
+            // type => -2
+            // tactics => -0
+            // hesitation => 8 - (tactics 0 + 1) => 7
+            // random => +[1,4]
+            // ==> 20 + [1,4] - [21,25]
+            InitiativeHelper.UpdateInitiative(mech30);
+            Console.WriteLine($"Mech init: {mech30.Initiative}");
+            Assert.IsTrue(mech30.Initiative >= 21);
+            Assert.IsTrue(mech30.Initiative <= 25);
+
+            // hestiation => 7 - (tactics 0 + 1) => 6
+            InitiativeHelper.UpdateInitiative(mech30);
+            Console.WriteLine($"Mech init: {mech30.Initiative}");
+            Assert.IsTrue(mech30.Initiative >= 20);
+            Assert.IsTrue(mech30.Initiative <= 24);
+
+            // hestiation => 6 - (tactics 0 + 1) => 5
+            InitiativeHelper.UpdateInitiative(mech30);
+            Console.WriteLine($"Mech init: {mech30.Initiative}");
+            Assert.IsTrue(mech30.Initiative >= 19);
+            Assert.IsTrue(mech30.Initiative <= 23);
+
+            // hestiation => 5 - (tactics 0 + 1) => 4
+            InitiativeHelper.UpdateInitiative(mech30);
+            Console.WriteLine($"Mech init: {mech30.Initiative}");
+            Assert.IsTrue(mech30.Initiative >= 18);
+            Assert.IsTrue(mech30.Initiative <= 22);
+        }
     }
 
 

@@ -123,9 +123,11 @@ namespace SkillBasedInit.Helper
 
             if (actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) != 0)
             {
-                int reducedHesitation = actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) + tacticsMod;
-                Mod.Log.Info?.Write($"  hesitationMod: {actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION)} - tacticsMod: {tacticsMod} => {reducedHesitation}");
-                if (reducedHesitation > 0) reducedHesitation = 0;
+                // Tactics mod is raw, so reduce hestitation init by raw statics modifier
+                int hestiationReduction = pilot.SBITacticsMod() + 1;
+                int reducedHesitation = actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION) - hestiationReduction;
+                Mod.Log.Info?.Write($"  hesitationMod: {actor.StatCollection.GetValue<int>(ModStats.STATE_HESITATION)} - tacticsMod: {hestiationReduction} => {reducedHesitation}");
+                if (reducedHesitation < 0) reducedHesitation = 0;
                 roundInitiative += reducedHesitation;
                 actor.StatCollection.Set<int>(ModStats.STATE_HESITATION, reducedHesitation);
             }
