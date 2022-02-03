@@ -21,7 +21,7 @@ namespace SkillBasedInit {
             Mod.Log.Trace?.Write($"AA:DU - entered.");
 
             int penalty = __instance.GetHesitationPenalty();
-            int newInit = __instance.Initiative - penalty;
+            int newInit = __instance.Initiative + penalty;
             if (newInit > Mod.MaxPhase) newInit = Mod.MaxPhase;
 
             Mod.Log.Debug?.Write($"  Deferring Actor:({__instance.DistinctId()}) initiative:{__instance.Initiative} by:{penalty} to:{newInit}");
