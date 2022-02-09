@@ -46,13 +46,13 @@ namespace SkillBasedInit.Helper
             UnitCfg unitConfig = actor.GetUnitConfig();
 
             // Set the base init by tonnage
-            int tonnageMod = actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE);
+            int tonnageMod = actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE_INIT_MOD);
             int roundInitiative = tonnageMod;
 
-            int typeMod = actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE);
+            int typeMod = actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE_INIT_MOD);
             roundInitiative += typeMod;
 
-            int pilotTagsMod = actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
+            int pilotTagsMod = actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS_INIT_MOD);
             roundInitiative += pilotTagsMod;
             Mod.Log.Info?.Write(
                 $"roundInit: {roundInitiative} <=" +

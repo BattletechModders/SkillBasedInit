@@ -81,10 +81,10 @@ namespace SBITests
         {
             // ModStats - should follow AbstractActorPatches::InitEffectStats
             int tonnageMod = actor.GetBaseInitByTonnage();
-            actor.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.STATE_TONNAGE, tonnageMod);
+            actor.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.STATE_TONNAGE_INIT_MOD, tonnageMod);
 
             int typeMod = actor.GetTypeModifier();
-            actor.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.STATE_UNIT_TYPE, typeMod);
+            actor.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.STATE_UNIT_TYPE_INIT_MOD, typeMod);
 
             actor.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.MOD_INJURY, 0);
             actor.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.MOD_MISC, 0);
@@ -160,7 +160,7 @@ namespace SBITests
             pilot.StatCollection.Set<int>("Tactics", 1);
             // Init any required stats
             int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
-            pilot.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.STATE_PILOT_TAGS, pilotTagsMod);
+            pilot.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.STATE_PILOT_TAGS_INIT_MOD, pilotTagsMod);
 
             pilot.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.MOD_SKILL_GUNNERY, 0);
             pilot.StatCollection.AddStatistic<int>(SkillBasedInit.ModStats.MOD_SKILL_GUTS, 0);

@@ -18,11 +18,14 @@ namespace SBITests
             TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsFuryInspired, prefix: TestGlobalInit.HM_AlwaysFalse);
             TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsMoraleInspired, prefix: TestGlobalInit.HM_AlwaysFalse);
 
-
             Mod.Config.Mech.TypeMod = 0;
 
-            Mod.Config.Mech.CalledShotRandMax = -6;
-            Mod.Config.Mech.CalledShotRandMin = -2;
+            Mod.Config.Pilot.PilotTagModifiers.Add("pilot_morale_high", +2);
+            Mod.Config.Pilot.PilotTagModifiers.Add("pilot_morale_low", -2);
+
+            Mod.Config.Pilot.PilotTagModifiers.Add("pilot_reckless", 1);
+            Mod.Config.Pilot.PilotTagModifiers.Add("pilot_lucky", 1);
+            Mod.Config.Pilot.PilotTagModifiers.Add("pilot_cautious", -1);
         }
 
         [TestCleanup]
@@ -59,6 +62,42 @@ namespace SBITests
 
         }
 
+        [TestMethod]
+        public void TestPilotTags()
+        {
+            Pilot pilot = TestHelper.BuildTestPilot();
+            Assert.AreEqual(0, PilotHelper.GetTagsModifier(pilot));
+
+            pilot.pilotDef.PilotTags.Add("pilot_morale_high");
+            Assert.AreEqual(-2, PilotHelper.GetTagsModifier(pilot));
+            pilot.pilotDef.PilotTags.Remove("pilot_morale_high");
+
+            pilot.pilotDef.PilotTags.Add("pilot_morale_low");
+            Assert.AreEqual(2, PilotHelper.GetTagsModifier(pilot));
+            pilot.pilotDef.PilotTags.Remove("pilot_morale_low");
+
+            pilot.pilotDef.PilotTags.Add("pilot_morale_high");
+            pilot.pilotDef.PilotTags.Add("pilot_reckless");
+            pilot.pilotDef.PilotTags.Add("pilot_lucky");
+            Assert.AreEqual(-4, PilotHelper.GetTagsModifier(pilot));
+            pilot.pilotDef.PilotTags.Remove("pilot_morale_high");
+            pilot.pilotDef.PilotTags.Remove("pilot_reckless");
+            pilot.pilotDef.PilotTags.Remove("pilot_lucky");
+
+            pilot.pilotDef.PilotTags.Add("pilot_morale_low");
+            pilot.pilotDef.PilotTags.Add("pilot_cautious");
+            Assert.AreEqual(3, PilotHelper.GetTagsModifier(pilot));
+            pilot.pilotDef.PilotTags.Remove("pilot_morale_low");
+            pilot.pilotDef.PilotTags.Remove("pilot_cautious");
+
+            pilot.pilotDef.PilotTags.Add("pilot_morale_low");
+            pilot.pilotDef.PilotTags.Add("pilot_morale_high");
+            pilot.pilotDef.PilotTags.Add("pilot_reckless");
+            pilot.pilotDef.PilotTags.Add("pilot_lucky");
+            pilot.pilotDef.PilotTags.Add("pilot_cautious");
+            Assert.AreEqual(-1, PilotHelper.GetTagsModifier(pilot));
+
+        }
     }
 
 

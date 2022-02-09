@@ -47,21 +47,22 @@ namespace SkillBasedInit.patches {
             UnitCfg unitCfg = actor.GetUnitConfig();
 
             // Tonnage
-            int tonnageMod = actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE);
-            int tonnagePhase = InitiativeHelper.InitiativeToPhase(tonnageMod);
+            int tonnageMod = actor.StatCollection.GetValue<int>(ModStats.STATE_TONNAGE_INIT_MOD);
+            int tonnagePhase = InitiativeHelper.InitiativeToPhase(tonnageMod); // PHASE VALUE HERE
             chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_MECH_TONNAGE], new object[] { tonnagePhase }).ToString());
             int initiativeBase = tonnageMod;
 
             // Type modifier
-            int typeMod = actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE);
+            int typeMod = actor.StatCollection.GetValue<int>(ModStats.STATE_UNIT_TYPE_INIT_MOD);
             initiativeBase += typeMod;
             string typeModColor = typeMod >= 0 ? "00FF00" : "FF0000";
             chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_UNIT_TYPE], new object[] { typeModColor, typeMod }).ToString());
 
             if (actor.StatCollection.GetValue<int>(ModStats.MOD_MISC) != 0)
             {
+                // Misc mod is a phase mod, so invert it for init
                 int miscMod = actor.StatCollection.GetValue<int>(ModStats.MOD_MISC);
-                initiativeBase += miscMod;
+                initiativeBase += (miscMod * -1);
                 string miscModColor = miscMod >= 0 ? "00FF00" : "FF0000";
                 chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_COMPONENTS], new object[] { miscModColor, miscMod }).ToString());
             }
@@ -99,10 +100,14 @@ namespace SkillBasedInit.patches {
                 pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_TACTICS], new object[] { tacticsMod }).ToString());
                 Mod.Log.Debug?.Write($"  tacticsMod: {tacticsMod}");
                 
-                if (actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS) != 0)
+                if (actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS_INIT_MOD) != 0)
                 {
-                    int pilotTagsMods = actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS);
+                    // Pilot tags are written by me, so already inverted
+                    int pilotTagsMods = actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS_INIT_MOD);
                     initiativeBase += pilotTagsMods;
+
+                    // Invert for display as a phase modifier
+                    pilotTagsMods *= -1;
                     string pilotTagsColor = pilotTagsMods >= 0 ? "00FF00" : "FF0000";
                     pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_PILOT_TAGS], new object[] { pilotTagsColor, pilotTagsMods }).ToString());
                 }

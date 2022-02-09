@@ -210,11 +210,11 @@ namespace SkillBasedInit {
             // Static init values that default to a specific value
             int tonnageMod = __instance.GetBaseInitByTonnage();
             Mod.Log.Info?.Write($"  -- tonnageMod: {tonnageMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_TONNAGE, tonnageMod);
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_TONNAGE_INIT_MOD, tonnageMod);
 
             int typeMod = __instance.GetTypeModifier();
             Mod.Log.Info?.Write($"  -- typeMod: {typeMod}");
-            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_UNIT_TYPE, typeMod);
+            __instance.StatCollection.AddStatistic<int>(ModStats.STATE_UNIT_TYPE_INIT_MOD, typeMod);
 
             // Modifiers to various effects
             __instance.StatCollection.AddStatistic<int>(ModStats.MOD_INJURY, 0);
@@ -235,7 +235,7 @@ namespace SkillBasedInit {
             {
                 int pilotTagsMod = PilotHelper.GetTagsModifier(pilot);
                 Mod.Log.Info?.Write($"  -- pilotTagsMod: {pilotTagsMod}");
-                __instance.StatCollection.AddStatistic<int>(ModStats.STATE_PILOT_TAGS, pilotTagsMod);
+                __instance.StatCollection.AddStatistic<int>(ModStats.STATE_PILOT_TAGS_INIT_MOD, pilotTagsMod);
 
                 pilot.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_GUNNERY, 0);
                 pilot.StatCollection.AddStatistic<int>(ModStats.MOD_SKILL_GUTS, 0);

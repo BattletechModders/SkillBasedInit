@@ -86,6 +86,7 @@ namespace SkillBasedInit
             { LT_TT_RANDOM, "\nRANDOM => <color=#FF0000>-{0} to -{1}</color> <i>(reduced by tactics)</i>" },
             { LT_TT_EXPECTED, "EXPECTED PHASE: <b>{0} to {1}</b>" },
             { LT_TT_HOVER, "<i>Hover initiative in Mechlab & Deploy for details.</i>" },
+
         };
     }
 }

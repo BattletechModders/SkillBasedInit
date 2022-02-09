@@ -33,11 +33,11 @@ namespace SkillBasedInit
         // Calculated by SBI - do not modify directly!
         public const string ROUND_INIT = "SBI_ROUND_INIT";
 
-        public const string STATE_TONNAGE = "SBI_STATE_TONNAGE";
-        public const string STATE_UNIT_TYPE = "SBI_STATE_UNIT_TYPE";
+        public const string STATE_TONNAGE_INIT_MOD = "SBI_STATE_TONNAGE";
+        public const string STATE_UNIT_TYPE_INIT_MOD = "SBI_STATE_UNIT_TYPE";
 
         // Pilot specific vallues
-        public const string STATE_PILOT_TAGS = "SBI_STATE_PILOT_TAGS";
+        public const string STATE_PILOT_TAGS_INIT_MOD = "SBI_STATE_PILOT_TAGS";
         public const string MOD_SKILL_GUNNERY = "SBI_MOD_GUNNERY";
         public const string MOD_SKILL_GUTS = "SBI_MOD_GUTS";
         public const string MOD_SKILL_PILOT = "SBI_MOD_PILOTING";
