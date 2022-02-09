@@ -151,7 +151,9 @@ namespace SkillBasedInit.Helper
                     mod += tagMod;
                 }
             }
-            return mod;
+
+            // Pilot tags are phase modifiers, so invert
+            return mod * -1;
         }
 
         // Generates tooltip details for tags that provide modifiers
