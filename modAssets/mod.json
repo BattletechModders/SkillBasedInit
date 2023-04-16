@@ -2,7 +2,7 @@
     "Name": "SkillBasedInit",
     "Enabled": true,
 	"Hidden": true,
-    "Version": "2.0.0",
+    "Version": "3.0.0",
     "Description": "Introduces 30 initiative phases with supporting modifiers",
     "Author": "IceRaptor",
     "Website": "https://github.com/BattletechModders/SkillBasedInit",
