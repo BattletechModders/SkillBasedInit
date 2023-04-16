@@ -26,14 +26,12 @@ namespace SkillBasedInit.patches
                 if (isPlayer)
                 {
                     Type[] iconMethodParams = new Type[] { typeof(SVGAsset), typeof(Text), typeof(Text), typeof(Vector3), typeof(bool) };
-                    Traverse showBuffIconMethod = Traverse.Create(__instance).Method("ShowBuff", iconMethodParams);
+                    //Traverse showBuffIconMethod = Traverse.Create(__instance).Method("ShowBuff", iconMethodParams);
 
                     DataManager dm = __instance.DisplayedCombatant.Combat.DataManager;
                     SVGAsset icon = dm.GetObjectOfType<SVGAsset>(Mod.Config.Icons.Stopwatch, BattleTechResourceType.SVGAsset);
-                    Text tooltipText = new Text(BuildTooltipText(actor));
-                    showBuffIconMethod.GetValue(new object[]
-                        { icon, new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_TITLE]), tooltipText, __instance.effectIconScale, false }
-                    );
+                    Text tooltipText = new (BuildTooltipText(actor));
+                    __instance.ShowBuff(icon, new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_TITLE]), tooltipText, __instance.effectIconScale, false);
                 }
 
             }

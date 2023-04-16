@@ -11,13 +11,9 @@ namespace SkillBasedInit.patches
         {
             Mod.Log.Debug?.Write("TD:ctor:post - entered.");
             Mod.Log.Debug?.Write($" TurnDirector init with phases: {__instance.FirstPhase} / {__instance.LastPhase}");
-
-            Traverse firstT = Traverse.Create(__instance).Property("FirstPhase");
-            firstT.SetValue(1);
-
-            Traverse lastT = Traverse.Create(__instance).Property("LastPhase");
-            lastT.SetValue(30);
-
+            
+            __instance.FirstPhase = 1;
+            __instance.LastPhase = 30;
             Mod.Log.Debug?.Write($" TurnDirector updated to phases: {__instance.FirstPhase} / {__instance.LastPhase}");
         }
     }

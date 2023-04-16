@@ -12,15 +12,9 @@ namespace SkillBasedInit.patches
      *   However, there are suspicions that this behavior pushes the AI towards non-ranged attack behaviors. To allow testing of that theory, this 
      *     method replaces the logic to support all phases in this mod.
      */
-    [HarmonyPatch()]
+    [HarmonyPatch(typeof(AttackEvaluator), "AdditionalDamageFromFriendsGainedByAttackingEvasiveTarget")]
     public static class AttackEvaluator_AdditionalDamageFromFriendsGainedByAttackingEvasiveTarget
     {
-
-        public static MethodInfo TargetMethod()
-        {
-            return AccessTools.Method(typeof(AttackEvaluator), "AdditionalDamageFromFriendsGainedByAttackingEvasiveTarget");
-        }
-
         static void Prefix(ref bool __runOriginal, ref float __result, AbstractActor unit, AbstractActor target, Vector3 targetPosition, int pipsRemoved)
         {
             if (!__runOriginal) return;
