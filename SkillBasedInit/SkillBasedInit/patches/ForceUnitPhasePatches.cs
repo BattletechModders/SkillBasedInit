@@ -1,10 +1,7 @@
-﻿using BattleTech;
-using Harmony;
+﻿using IRBTModUtils.Extension;
 using Localize;
-using System;
-using System.Collections.Generic;
 using SkillBasedInit.Helper;
-using IRBTModUtils.Extension;
+using System;
 
 namespace SkillBasedInit.Patches
 {
@@ -55,8 +52,10 @@ namespace SkillBasedInit.Patches
         public static bool IsMoraleAttack = false;
         public static AbstractActor Attacker = null;
 
-        public static void Prefix(AttackStackSequence __instance)
+        public static void Prefix(ref bool __runOriginal, AttackStackSequence __instance)
         {
+            if (!__runOriginal) return;
+
             Mod.Log.Trace?.Write("ASS:OA:pre - entered.");
             IsMoraleAttack = __instance.isMoraleAttack;
             Attacker = __instance.owningActor;
@@ -83,8 +82,10 @@ namespace SkillBasedInit.Patches
         //   We have to persist the actorInit during this time.
         public static int PreInvokeInitiative;
 
-        public static void Prefix(AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf)
+        public static void Prefix(ref bool __runOriginal, AbstractActor __instance, string sourceID, int stackItemUID, bool addedBySelf)
         {
+            if (!__runOriginal) return;
+
             Mod.Log.Trace?.Write("AA:FUOPD:pre - entered.");
 
             InvokeIsCalledShot = AttackStackSequence_OnAdded.IsMoraleAttack ? true : false;
@@ -147,8 +148,10 @@ namespace SkillBasedInit.Patches
         public static string MoraleDefendSourceId;
         public static int MoraleDefendStackItemId;
 
-        public static void Prefix(Mech __instance, string sourceID, int stackItemID)
+        public static void Prefix(ref bool __runOriginal, Mech __instance, string sourceID, int stackItemID)
         {
+            if (!__runOriginal) return;
+
             Mod.Log.Trace?.Write("M:AMDE:post - entered.");
 
             MoraleDefendSourceId = sourceID;
@@ -174,8 +177,10 @@ namespace SkillBasedInit.Patches
         static bool InvokeIsVigilance = false;
         static int PreInvokeInitiative = 0;
 
-        public static void Prefix(AbstractActor __instance, string sourceID, int stackItemUID)
+        static void Prefix(ref bool __runOriginal, AbstractActor __instance, string sourceID, int stackItemUID)
         {
+            if (!__runOriginal) return;
+
             Mod.Log.Trace?.Write("AA:FUOPU:pre - entered.");
             Mod.Log.Info?.Write($"AbstractActor:ForceUnitOnePhaseUp:prefix - sourceID:{sourceID} vs actor: {__instance.GUID}");
             if (sourceID == Mech_ApplyMoraleDefendEffects.MoraleDefendSourceId && stackItemUID == Mech_ApplyMoraleDefendEffects.MoraleDefendStackItemId)

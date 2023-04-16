@@ -1,6 +1,4 @@
-﻿using BattleTech;
-using BattleTech.Data;
-using Harmony;
+﻿using BattleTech.Data;
 using SVGImporter;
 
 namespace SkillBasedInit.patches

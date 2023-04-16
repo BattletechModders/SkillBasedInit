@@ -1,5 +1,4 @@
-﻿using BattleTech;
-using IRBTModUtils.Extension;
+﻿using IRBTModUtils.Extension;
 
 namespace SkillBasedInit.Helper
 {

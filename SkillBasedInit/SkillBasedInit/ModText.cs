@@ -41,7 +41,7 @@ namespace SkillBasedInit
         public const string LT_TT_EXPECTED = "TOOLTIP_EXPECTED";
         public const string LT_TT_HOVER = "TOOLTIP_HOVER";
 
-        public Dictionary<string, string> Floaties = new Dictionary<string, string>() 
+        public Dictionary<string, string> Floaties = new Dictionary<string, string>()
         {
             // Floaties
             { LT_FT_KNOCKDOWN, "GOING DOWN! -{0} INIT" },
@@ -50,7 +50,7 @@ namespace SkillBasedInit
             { LT_FT_VIGILANCE, "VIGILANCE! +{0} INIT NEXT ROUND!" },
         };
 
-        public Dictionary<string, string> MechBay = new Dictionary<string, string>() 
+        public Dictionary<string, string> MechBay = new Dictionary<string, string>()
         {
             // Mech Bay
             { LT_MB_TONNAGE, "<b>BASE</b>: {0} (<i>from tonnage</i>)" },
@@ -63,7 +63,7 @@ namespace SkillBasedInit
             { LT_MB_EXPECTED, "<b>EXPECTED PHASE</b>: {0} to {1}" },
         };
 
-        public Dictionary<string, string> Tooltip = new Dictionary<string, string>() 
+        public Dictionary<string, string> Tooltip = new Dictionary<string, string>()
         {
             // Tooltip
             { LT_TT_TITLE, "INITIATIVE" },
@@ -82,7 +82,7 @@ namespace SkillBasedInit
             { LT_TT_HESITATION, "<color=#FF0000>{0} hesitation</color>" },
             { LT_TT_CALLED_SHOT, "<color=#FF0000>{0} called shot</color>" },
             { LT_TT_VIGILANCE, "<color=#00FF00>{0} vigilance</color>" },
-            
+
             { LT_TT_RANDOM, "\nRANDOM => <color=#FF0000>-{0} to -{1}</color> <i>(reduced by tactics)</i>" },
             { LT_TT_EXPECTED, "EXPECTED PHASE: <b>{0} to {1}</b>" },
             { LT_TT_HOVER, "<i>Hover initiative in Mechlab & Deploy for details.</i>" },

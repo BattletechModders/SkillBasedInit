@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BattleTech;
 using us.frostraptor.modUtils;
 
 namespace SkillBasedInit.Helper
@@ -12,7 +11,7 @@ namespace SkillBasedInit.Helper
         //  invert them for calculation purposes
         public static int[] RandomnessBounds(this Pilot pilot, int min, int max)
         {
-            if (pilot == null) return new int[]{ 0, 0 };
+            if (pilot == null) return new int[] { 0, 0 };
 
             Mod.Log.Debug?.Write($"Calculating randomness bounds for pilot: {pilot.Name}");
 
@@ -61,7 +60,7 @@ namespace SkillBasedInit.Helper
             // Invert, because we expect this to be a bonus
             int skillMod = pilot.SBITacticsMod() * -1;
 
-            int adjustedMin = invertedMin + skillMod; 
+            int adjustedMin = invertedMin + skillMod;
             int adjustedMax = invertedMax + skillMod;
 
             // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
@@ -180,7 +179,7 @@ namespace SkillBasedInit.Helper
             return details;
         }
 
-        
+
     }
 
 

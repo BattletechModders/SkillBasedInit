@@ -1,13 +1,14 @@
-﻿using Harmony;
-using IRBTModUtils.Logging;
+﻿using IRBTModUtils.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 
-namespace SkillBasedInit {
-    public class Mod {
+namespace SkillBasedInit
+{
+    public class Mod
+    {
 
         public const string HarmonyPackage = "us.frostraptor.SkillBasedInit";
         public const string LogName = "skill_based_init";
@@ -22,16 +23,22 @@ namespace SkillBasedInit {
         public const int MaxPhase = 30;
         public const int MinPhase = 1;
 
-        public static void Init(string modDirectory, string settingsJSON) {
+        public static void Init(string modDirectory, string settingsJSON)
+        {
             ModDir = modDirectory;
 
             Exception configE;
-            try {
+            try
+            {
                 Mod.Config = JsonConvert.DeserializeObject<ModConfig>(settingsJSON);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 configE = e;
                 Mod.Config = new ModConfig();
-            } finally {
+            }
+            finally
+            {
                 Mod.Config.Init();
             }
 
@@ -57,8 +64,7 @@ namespace SkillBasedInit {
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(asm.Location);
             Log.Info?.Write($"Assembly version: {fvi.ProductVersion}");
 
-            var harmony = HarmonyInstance.Create(HarmonyPackage);
-            harmony.PatchAll(Assembly.GetExecutingAssembly());            
+            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), HarmonyPackage);
         }
 
     }

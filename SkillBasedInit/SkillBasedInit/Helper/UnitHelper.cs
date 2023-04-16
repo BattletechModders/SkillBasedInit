@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using BattleTech;
-using CustAmmoCategories;
+﻿using CustAmmoCategories;
 using CustomUnits;
 using HBS.Collections;
 using IRBTModUtils.Extension;
+using System;
+using System.Collections.Generic;
 
 namespace SkillBasedInit.Helper
 {
@@ -18,7 +17,7 @@ namespace SkillBasedInit.Helper
             {
                 if (mech.FakeVehicle()) return Mod.Config.Vehicle;
                 else if (mech.NavalUnit()) return Mod.Config.Naval;
-                else if (mech.TrooperSquad()) return Mod.Config.Trooper;                
+                else if (mech.TrooperSquad()) return Mod.Config.Trooper;
                 else return Mod.Config.Mech;
             }
             else return Mod.Config.Mech;
@@ -367,7 +366,7 @@ namespace SkillBasedInit.Helper
 
     public static class UnitHelper
     {
-        
+
         // Prone only applies to mechs and quads
         public static int ProneInitMod(this AbstractActor actor)
         {
@@ -410,18 +409,18 @@ namespace SkillBasedInit.Helper
             if (actor is Turret) return 0;
 
             UnitCustomInfo customInfo = actor.GetCustomInfo();
-            
+
             // Troopers cannot be crippled
             if (customInfo != null && customInfo.SquadInfo != null && customInfo.SquadInfo.Troopers > 1) return 0;
 
-            
+
             bool isCrippled = false;
             if (actor is Vehicle vehicle)
             {
                 Mod.Log.Debug?.Write($"Checking true vehicle for crippled");
                 if (vehicle.IsLocationDestroyed(VehicleChassisLocations.Left) || vehicle.IsLocationDestroyed(VehicleChassisLocations.Right))
                     isCrippled = true;
-            }            
+            }
             else if (actor is Mech mech)
             {
                 // CU treats legs as vehicle sides, so this works for our purposes
@@ -462,7 +461,7 @@ namespace SkillBasedInit.Helper
         public static int ShutdownInitMod(this AbstractActor actor)
         {
             if (!(actor is Mech)) return 0;
-            
+
             Mech mech = actor as Mech;
             if (!mech.IsShutDown) return 0;
 
@@ -491,7 +490,7 @@ namespace SkillBasedInit.Helper
 
             int adjustedMin = boundsMin - pilotMod;
             if (adjustedMin < 0)
-                    adjustedMin = 0;
+                adjustedMin = 0;
 
             int adjustedMax = boundsMax - pilotMod;
             if (adjustedMax <= adjustedMin)
@@ -517,10 +516,10 @@ namespace SkillBasedInit.Helper
             // Invert because we assume the range is negative
             // Add +1 to max BECUASE MICROSOFT SUCKS (see https://docs.microsoft.com/en-us/dotnet/api/system.random.next?view=net-6.0#system-random-next(system-int32-system-int32)
             int rawMod = Mod.Random.Next(invertedMin, invertedMax + 1);
-            
+
             // Assume the stat is a phase mod, and invert
             int actorMod = actor.StatCollection.GetValue<int>(ModStats.MOD_HESITATION) * -1;
-            
+
             int finalMod = rawMod + actorMod;
             Mod.Log.Debug?.Write($"Hesitation penalty: {finalMod} = rawMod: {rawMod} + actorMod: {actorMod}");
             if (finalMod < 0)
@@ -556,7 +555,7 @@ namespace SkillBasedInit.Helper
             Mod.Log.Debug?.Write($"Attacker calledShotMod: {attackerMod} = calledShotMod: {attackerCSMod} + skillMod: {attackerSkillMod}");
 
             int actorDelta = attackerMod - targetMod;
-            if (actorDelta < 0) 
+            if (actorDelta < 0)
                 actorDelta = 0;
             Mod.Log.Debug?.Write($"actor delta: {actorDelta} = attackerMod: {attackerMod} - targetMod: {targetMod}");
 

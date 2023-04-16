@@ -1,7 +1,4 @@
-﻿using BattleTech;
-using BattleTech.UI;
-using BattleTech.UI.Tooltips;
-using Harmony;
+﻿using BattleTech.UI.Tooltips;
 using Localize;
 using SkillBasedInit.Helper;
 using System;
@@ -9,25 +6,32 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-namespace SkillBasedInit.Patches {
+namespace SkillBasedInit.Patches
+{
 
     // Sets the initiative value in the mech-bay
     [HarmonyPatch(typeof(MechBayMechInfoWidget), "SetInitiative")]
     [HarmonyPatch(new Type[] { })]
-    public static class MechBayMechInfoWidget_SetInitiative {
+    public static class MechBayMechInfoWidget_SetInitiative
+    {
         public static void Postfix(MechBayMechInfoWidget __instance, MechDef ___selectedMech,
-            GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText, HBSTooltip ___initiativeTooltip) {
+            GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText, HBSTooltip ___initiativeTooltip)
+        {
             Mod.Log.Trace?.Write("MBMIW:SI:post - entered.");
 
-            if (___initiativeObj == null || ___initiativeText == null) {
+            if (___initiativeObj == null || ___initiativeText == null)
+            {
                 return;
             }
 
             //SkillBasedInit.Logger.Log($"MechBayMechInfoWidget::SetInitiative::post - disabling text");
-            if (___selectedMech == null) {
+            if (___selectedMech == null)
+            {
                 ___initiativeObj.SetActive(true);
                 ___initiativeText.SetText("-");
-            } else {
+            }
+            else
+            {
                 List<string> details = new List<string>();
 
                 // Static initiative from tonnage
@@ -36,7 +40,7 @@ namespace SkillBasedInit.Patches {
 
                 // Type modifier
                 int typeMod = ___selectedMech.GetTypeModifier();
-                string typeModColor = typeMod >= 0 ? "00FF00" : "FF0000";                
+                string typeModColor = typeMod >= 0 ? "00FF00" : "FF0000";
                 details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_UNIT_TYPE], new object[] { typeModColor, typeMod }).ToString());
 
                 // Any modifiers that come from the chassis/mech/vehicle defs
@@ -70,21 +74,27 @@ namespace SkillBasedInit.Patches {
     //  invert the values so they reflect the phase IDs, not the actual value
     [HarmonyPatch(typeof(LanceLoadoutSlot), "RefreshInitiativeData")]
     [HarmonyPatch(new Type[] { })]
-    public static class LanceLoadoutSlot_RefreshInitiativeData {
+    public static class LanceLoadoutSlot_RefreshInitiativeData
+    {
         public static void Postfix(LanceLoadoutSlot __instance, GameObject ___initiativeObj, TextMeshProUGUI ___initiativeText,
-            UIColorRefTracker ___initiativeColor, HBSTooltip ___initiativeTooltip, LanceConfiguratorPanel ___LC) {
+            UIColorRefTracker ___initiativeColor, HBSTooltip ___initiativeTooltip, LanceConfiguratorPanel ___LC)
+        {
             Mod.Log.Trace?.Write("LLS:RID:post - entered.");
 
-            if (___initiativeObj == null || ___initiativeText == null || ___initiativeColor == null || ___initiativeTooltip == null) {
+            if (___initiativeObj == null || ___initiativeText == null || ___initiativeColor == null || ___initiativeTooltip == null)
+            {
                 return;
             }
-            
+
             //SkillBasedInit.Logger.Log($"LanceLoadoutSlot::RefreshInitiativeData::post - disabling text");
             bool bothSelected = __instance.SelectedMech != null && __instance.SelectedPilot != null;
-            if (!bothSelected) {
+            if (!bothSelected)
+            {
                 ___initiativeText.SetText("-");
                 ___initiativeColor.SetUIColor(UIColor.MedGray);
-            } else {
+            }
+            else
+            {
                 Mod.Log.Debug?.Write($"Building init data for mechdef: {__instance.SelectedMech.name} with pilot: {__instance.SelectedPilot.name}");
 
                 int initValue = 0;
@@ -120,7 +130,8 @@ namespace SkillBasedInit.Patches {
                 int[] randomnessBounds = selectedPilot.RandomnessBounds(unitCfg.RandomnessMin, unitCfg.RandomnessMax);
 
                 // --- LANCE ---
-                if (___LC != null) {
+                if (___LC != null)
+                {
                     initValue += ___LC.lanceInitiativeModifier;
                     string lanceColor = ___LC.lanceInitiativeModifier >= 0 ? "00FF00" : "FF0000";
                     details.Add(new Text(Mod.LocalizedText.MechBay[ModText.LT_MB_LANCE], new object[] { lanceColor, ___LC.lanceInitiativeModifier }).ToString());

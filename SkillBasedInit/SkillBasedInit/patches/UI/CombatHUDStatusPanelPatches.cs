@@ -1,7 +1,4 @@
-﻿using BattleTech;
-using BattleTech.Data;
-using BattleTech.UI;
-using Harmony;
+﻿using BattleTech.Data;
 using IRBTModUtils.Extension;
 using Localize;
 using SkillBasedInit.Helper;
@@ -10,19 +7,24 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SkillBasedInit.patches {
+namespace SkillBasedInit.patches
+{
     [HarmonyPatch(typeof(CombatHUDStatusPanel), "ShowActorStatuses")]
-    public static class CombatHUDStatusPanel_ShowActorStatuses {
+    public static class CombatHUDStatusPanel_ShowActorStatuses
+    {
 
         // Display the initiative modifiers for the current unit as a buff that folks can hover over for details.
-        public static void Postfix(CombatHUDStatusPanel __instance) {
+        public static void Postfix(CombatHUDStatusPanel __instance)
+        {
             Mod.Log.Trace?.Write("___ CombatHUDStatusPanel:ShowActorStatuses:post - entered.");
 
-            if (__instance.DisplayedCombatant != null) {
+            if (__instance.DisplayedCombatant != null)
+            {
 
                 AbstractActor actor = __instance.DisplayedCombatant as AbstractActor;
                 bool isPlayer = actor.team == actor.Combat.LocalPlayerTeam;
-                if (isPlayer) {
+                if (isPlayer)
+                {
                     Type[] iconMethodParams = new Type[] { typeof(SVGAsset), typeof(Text), typeof(Text), typeof(Vector3), typeof(bool) };
                     Traverse showBuffIconMethod = Traverse.Create(__instance).Method("ShowBuff", iconMethodParams);
 
@@ -33,12 +35,13 @@ namespace SkillBasedInit.patches {
                         { icon, new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_TITLE]), tooltipText, __instance.effectIconScale, false }
                     );
                 }
-                
+
             }
         }
 
-        private static string BuildTooltipText(AbstractActor actor) {
-            
+        private static string BuildTooltipText(AbstractActor actor)
+        {
+
             Mod.Log.Debug?.Write($"Building tooltip for {actor.DistinctId()}");
 
             List<string> chassisDetails = new List<string> { };
@@ -81,7 +84,7 @@ namespace SkillBasedInit.patches {
                 initiativeBase += crippledMod;
             }
 
-            int shutdownMod =  actor.ShutdownInitMod();
+            int shutdownMod = actor.ShutdownInitMod();
             if (shutdownMod != 0)
             {
                 chassisDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_SHUTDOWN], new object[] { shutdownMod }).ToString());
@@ -99,7 +102,7 @@ namespace SkillBasedInit.patches {
                 initiativeBase -= tacticsMod;
                 pilotDetails.Add(new Text(Mod.LocalizedText.Tooltip[ModText.LT_TT_TACTICS], new object[] { tacticsMod }).ToString());
                 Mod.Log.Debug?.Write($"  tacticsMod: {tacticsMod}");
-                
+
                 if (actor.StatCollection.GetValue<int>(ModStats.STATE_PILOT_TAGS_INIT_MOD) != 0)
                 {
                     // Pilot tags are written by me, so already inverted
@@ -162,7 +165,7 @@ namespace SkillBasedInit.patches {
             // Finally, randomness bounds. These should be negatives
             int minRandomMod = randomnessBounds[0];
             int maxRandomMod = randomnessBounds[1];
-            
+
             // Highest init = base + minimumRandomness => base + minRandom
             int maxInitVal = Math.Min(initiativeBase + minRandomMod, Mod.MaxPhase);
             Mod.Log.Debug?.Write($"  initiativeBase: {initiativeBase} + minRandomMod: {minRandomMod} = maxInit: {maxInitVal}");

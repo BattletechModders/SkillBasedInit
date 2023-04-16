@@ -60,7 +60,8 @@ namespace SkillBasedInit
     public class PilotCfg
     {
         // Definition of any tags that should result in a flat initiative modifier
-        public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int> {
+        public Dictionary<string, int> PilotTagModifiers = new Dictionary<string, int>
+        {
 
         };
     }
@@ -209,17 +210,17 @@ namespace SkillBasedInit
 
         private void InitializeColors()
         {
-            this.Colors.FriendlyUnactivated = new Color(this.Colors.ColorFriendlyUnactivated[0], this.Colors.ColorFriendlyUnactivated[1], 
+            this.Colors.FriendlyUnactivated = new Color(this.Colors.ColorFriendlyUnactivated[0], this.Colors.ColorFriendlyUnactivated[1],
                 this.Colors.ColorFriendlyUnactivated[2], this.Colors.ColorFriendlyUnactivated[3]);
-            this.Colors.FriendlyAlreadyActivated = new Color(this.Colors.ColorFriendlyAlreadyActivated[0], this.Colors.ColorFriendlyAlreadyActivated[1], 
+            this.Colors.FriendlyAlreadyActivated = new Color(this.Colors.ColorFriendlyAlreadyActivated[0], this.Colors.ColorFriendlyAlreadyActivated[1],
                 this.Colors.ColorFriendlyAlreadyActivated[2], this.Colors.ColorFriendlyAlreadyActivated[3]);
 
-            this.Colors.AlliedUnactivated = new Color(this.Colors.ColorAlliedUnactivated[0], this.Colors.ColorAlliedUnactivated[1], 
+            this.Colors.AlliedUnactivated = new Color(this.Colors.ColorAlliedUnactivated[0], this.Colors.ColorAlliedUnactivated[1],
                 this.Colors.ColorAlliedUnactivated[2], this.Colors.ColorAlliedUnactivated[3]);
-            this.Colors.AlliedAlreadyActivated = new Color(this.Colors.ColorAlliedAlreadyActivated[0], this.Colors.ColorAlliedAlreadyActivated[1], 
+            this.Colors.AlliedAlreadyActivated = new Color(this.Colors.ColorAlliedAlreadyActivated[0], this.Colors.ColorAlliedAlreadyActivated[1],
                 this.Colors.ColorAlliedAlreadyActivated[2], this.Colors.ColorAlliedAlreadyActivated[3]);
 
-            this.Colors.NeutralUnactivated = new Color(this.Colors.ColorNeutralUnactivated[0], this.Colors.ColorNeutralUnactivated[1], 
+            this.Colors.NeutralUnactivated = new Color(this.Colors.ColorNeutralUnactivated[0], this.Colors.ColorNeutralUnactivated[1],
                 this.Colors.ColorNeutralUnactivated[2], this.Colors.ColorNeutralUnactivated[3]);
             this.Colors.NeutralAlreadyActivated = new Color(this.Colors.ColorNeutralAlreadyActivated[0], this.Colors.ColorNeutralAlreadyActivated[1],
                 this.Colors.ColorNeutralAlreadyActivated[2], this.Colors.ColorNeutralAlreadyActivated[3]);
@@ -253,7 +254,7 @@ namespace SkillBasedInit
 
             Mod.Log.Info?.Write($"  == TROOPER ==");
             Mod.Log.Info?.Write($"  TypeMod: {this.Trooper.TypeMod}");
-            Mod.Log.Info?.Write(""); 
+            Mod.Log.Info?.Write("");
 
             Mod.Log.Info?.Write($"  == VEHICLE ==");
             Mod.Log.Info?.Write($"  TypeMod: {this.Vehicle.TypeMod}" +
