@@ -1,10 +1,5 @@
-﻿using BattleTech;
-using Harmony;
-using IRBTModUtils.Extension;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SkillBasedInit;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SkillBasedInit.Helper;
-using System;
 
 namespace SBITests
 {

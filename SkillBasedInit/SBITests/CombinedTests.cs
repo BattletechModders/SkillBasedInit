@@ -1,7 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-using IRBTModUtils.Extension;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SkillBasedInit;
 using SkillBasedInit.Helper;
 using System;
@@ -11,12 +8,10 @@ namespace SBITests
     [TestClass]
     public class CombinedTests
     {
-        [TestInitialize]
-        public void ClassInitialize()
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext testContext)
         {
             // Patch isMoraleInspired to return true
-
-
             Mod.Config.Mech.CrippledModifierMax = -6;
             Mod.Config.Mech.CrippledModifierMin = -2;
             Mod.Config.Mech.InspiredMax = 3;
@@ -31,16 +26,28 @@ namespace SBITests
             Mod.Config.Mech.TypeMod = 0;
         }
 
-        [TestCleanup]
-        public void TestCleanup()
+        [ClassCleanup]
+        public static void TestCleanup()
         {
             TestGlobalInit.HarmonyInst.Unpatch(TestGlobalInit.MI_IsFuryInspired, HarmonyPatchType.Prefix);
             TestGlobalInit.HarmonyInst.Unpatch(TestGlobalInit.MI_IsMoraleInspired, HarmonyPatchType.Prefix);
             TestGlobalInit.HarmonyInst.Unpatch(TestGlobalInit.MI_IsLegged, HarmonyPatchType.Prefix);
             TestGlobalInit.HarmonyInst.Unpatch(TestGlobalInit.MI_IsProne, HarmonyPatchType.Prefix);
             TestGlobalInit.HarmonyInst.Unpatch(TestGlobalInit.MI_IsShutdown, HarmonyPatchType.Prefix);
+
+            Mod.Config.Mech.CrippledModifierMax = -6;
+            Mod.Config.Mech.CrippledModifierMin = -2;
+            Mod.Config.Mech.InspiredMax = 3;
+            Mod.Config.Mech.InspiredMin = 1;
+            Mod.Config.Mech.ProneModifierMax = -6;
+            Mod.Config.Mech.ProneModifierMin = -2;
+            Mod.Config.Mech.RandomnessMax = 0;
+            Mod.Config.Mech.RandomnessMin = 0;
+            Mod.Config.Mech.ShutdownModifierMax = -6;
+            Mod.Config.Mech.ShutdownModifierMin = -2;
+
+            Mod.Config.Mech.TypeMod = 0;
         }
-        
 
         [TestMethod]
         public void TestCombined_NoState()

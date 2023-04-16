@@ -1,33 +1,40 @@
-﻿using BattleTech;
-using Harmony;
-using IRBTModUtils.Extension;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SkillBasedInit;
 using SkillBasedInit.Helper;
-using System;
 
 namespace SBITests
 {
     [TestClass]
     public class GeneralTests
     {
-        [TestInitialize]
-        public void ClassInitialize()
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext testContext)
         {
             // Patch isMoraleInspired to return true
             TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsFuryInspired, prefix: TestGlobalInit.HM_AlwaysFalse);
             TestGlobalInit.HarmonyInst.Patch(TestGlobalInit.MI_IsMoraleInspired, prefix: TestGlobalInit.HM_AlwaysFalse);
 
+            Mod.Config.Mech.CrippledModifierMax = -6;
+            Mod.Config.Mech.CrippledModifierMin = -2;
+            Mod.Config.Mech.InspiredMax = 3;
+            Mod.Config.Mech.InspiredMin = 1;
+            Mod.Config.Mech.ProneModifierMax = -6;
+            Mod.Config.Mech.ProneModifierMin = -2;
+            Mod.Config.Mech.RandomnessMax = 0;
+            Mod.Config.Mech.RandomnessMin = 0;
+            Mod.Config.Mech.ShutdownModifierMax = -6;
+            Mod.Config.Mech.ShutdownModifierMin = -2;
+
             Mod.Config.Mech.TypeMod = 0;
+
         }
 
-        [TestCleanup]
-        public void TestCleanup()
+        [ClassCleanup]
+        public static void TestCleanup()
         {
             TestGlobalInit.HarmonyInst.Unpatch(TestGlobalInit.MI_IsFuryInspired, HarmonyPatchType.Prefix);
             TestGlobalInit.HarmonyInst.Unpatch(TestGlobalInit.MI_IsMoraleInspired, HarmonyPatchType.Prefix);
         }
-        
 
         [TestMethod]
         public void TestTonnageMod()
@@ -92,17 +99,18 @@ namespace SBITests
         public void TestInjuryMod()
         {
             Mech mech50 = TestHelper.BuildTestMech(tonnage: 50);
-
             mech50.StatCollection.Set<int>(ModStats.MOD_INJURY, 0);
             InitiativeHelper.UpdateInitiative(mech50);
             // Tonnage = phase 14 => init 17, 0 type, -0 tactics, +0 random, +0 injury => 17 init 
             Assert.AreEqual(17, mech50.Initiative);
 
+            mech50 = TestHelper.BuildTestMech(tonnage: 50);
             mech50.StatCollection.Set<int>(ModStats.MOD_INJURY, 2);
             InitiativeHelper.UpdateInitiative(mech50);
             // Tonnage = phase 14 => init 17, 0 type, -0 tactics, +0 random, +2 injury -> -2 => 15 init 
             Assert.AreEqual(15, mech50.Initiative);
 
+            mech50 = TestHelper.BuildTestMech(tonnage: 50);
             mech50.StatCollection.Set<int>(ModStats.MOD_INJURY, -2);
             InitiativeHelper.UpdateInitiative(mech50);
             // Tonnage = phase 14 => init 17, 0 type, -0 tactics, +0 random, -2 injury -> +2 => 19 init

@@ -1,6 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SkillBasedInit;
 using SkillBasedInit.Helper;
 using System;
@@ -16,7 +14,7 @@ namespace SBITests
             Mod.Config.Mech.TypeMod = 0;
 
             Mod.Config.Mech.HesitationMax = -6;
-            Mod.Config.Mech.HesitationMin= -2;
+            Mod.Config.Mech.HesitationMin = -2;
         }
 
         [TestCleanup]
@@ -28,7 +26,7 @@ namespace SBITests
         public void TestHesitation()
         {
             Mech mech = TestHelper.BuildTestMech(tonnage: 50);
-            
+
             mech.StatCollection.Set<int>(ModStats.MOD_HESITATION, 0);
             Console.WriteLine("Expected: [2,6]");
             for (int i = 0; i < 30; i++)

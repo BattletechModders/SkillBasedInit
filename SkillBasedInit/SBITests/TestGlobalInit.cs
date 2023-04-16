@@ -1,15 +1,9 @@
-﻿using BattleTech;
-using CustomUnits;
-using Harmony;
+﻿using CustomUnits;
 using IRBTModUtils.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SkillBasedInit;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SBITests
 {
@@ -98,7 +92,7 @@ namespace SBITests
     [TestClass]
     public static class TestGlobalInit
     {
-        public static HarmonyInstance HarmonyInst;
+        public static Harmony HarmonyInst;
 
         public static MethodInfo MI_IsMoraleInspired;
         public static MethodInfo MI_IsFuryInspired;
@@ -144,7 +138,7 @@ namespace SBITests
             IRBTModUtils.Mod.Config.Init();
 
             // Initialize Harmony
-            TestGlobalInit.HarmonyInst = HarmonyInstance.Create("us.frostraptor.sbi.test");
+            TestGlobalInit.HarmonyInst = Harmony.CreateAndPatchAll(typeof(Patch), "us.frostraptor.sbi.test");
             PropertyInfo isMoraleInspiredProp = AccessTools.Property(typeof(AbstractActor), "IsMoraleInspired");
             MI_IsMoraleInspired = isMoraleInspiredProp.GetMethod;
             PropertyInfo isFuryInspired = AccessTools.Property(typeof(AbstractActor), "IsFuryInspired");

@@ -1,6 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SkillBasedInit;
 using SkillBasedInit.Helper;
 using System;

@@ -1,6 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SkillBasedInit;
 using SkillBasedInit.Helper;
 using System;
@@ -54,7 +52,7 @@ namespace SBITests
 
             Mod.Config.Mech.VigilanceRandMax = 8;
             Mod.Config.Mech.VigilanceRandMin = 6;
-            Console.WriteLine($"Expected: -6 to -8"); 
+            Console.WriteLine($"Expected: -6 to -8");
             for (int i = 0; i < 30; i++)
             {
                 int vigilanceMod = mech.VigilanceInitMod();

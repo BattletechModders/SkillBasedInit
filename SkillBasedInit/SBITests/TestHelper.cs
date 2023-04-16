@@ -1,7 +1,4 @@
-﻿using BattleTech;
-using Harmony;
-using HBS.Collections;
-using IRBTModUtils;
+﻿using HBS.Collections;
 using SkillBasedInit.Helper;
 using System;
 using System.Reflection;
@@ -13,7 +10,6 @@ namespace SBITests
         public static Mech BuildTestMech(float tonnage)
         {
             Mech mech = new Mech();
-
 
             DescriptionDef descriptionDef = new DescriptionDef("foo", "bar", "raboof", "", 100, 0, true, "", "", "");
             ChassisDef chassisDef = new ChassisDef(descriptionDef, "", "", "", "", "", tonnage, tonnage, WeightClass.ASSAULT,
