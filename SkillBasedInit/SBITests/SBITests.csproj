@@ -1,45 +1,82 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Target Name="ValidateBattleTechGameDir" Condition="'$(BattleTechGameDir)' == '' Or !Exists('$(BattleTechGameDir)')">
+    <Error Text="BattleTechGameDir variable not set properly" />
+  </Target>
+
+  <PropertyGroup Condition="'$(DeployedModPath)' == '' And Exists('$(BattleTechGameDir)\Mods\Core\SkillBasedInit')">
+    <!-- Modpack -->
+    <DeployedModPath>$(BattleTechGameDir)\Mods\Core\SkillBasedInit</DeployedModPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DeployedModPath)' == '' And Exists('$(BattleTechGameDir)\Mods\SkillBasedInit')">
+    <!-- flat dir -->
+    <DeployedModPath>$(BattleTechGameDir)\Mods\SkillBasedInit</DeployedModPath>
+  </PropertyGroup>
+
   <PropertyGroup>
+    <OutputType>Library</OutputType>
     <TargetFramework>net472</TargetFramework>
-    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <AssemblySearchPaths>
+      $(ReferencePath);
+      {HintPathFromItem};
+      $(BattleTechGameDir)\BattleTech_Data\Managed
+    </AssemblySearchPaths>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
+
     <AssemblyTitle>SBITests</AssemblyTitle>
     <Product>SBITests</Product>
-    <Copyright>Copyright ©  2022</Copyright>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <Copyright>Copyright ©  2023</Copyright>
+    <AssemblyVersion>2.0.0</AssemblyVersion>
+    <FileVersion>2.0.0</FileVersion>
+    <LangVersion>11</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugType>full</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-  </PropertyGroup>
-  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+
+
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets"
+		Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <ItemGroup>
-    <PackageReference Include="MSTest.TestAdapter" Version="2.1.2" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
-    <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.0.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <!-- avoids IgnoresAccessChecksToAttribute warnings -->
+    <PublicizerRuntimeStrategies>Unsafe</PublicizerRuntimeStrategies>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>E:\steam\SteamApps\common\BATTLETECH\BattleTech_Data\Managed\0Harmony.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Krafs.Publicizer" Version="2.2.1" />
+    <Publicize Include="Assembly-CSharp;UnityEngine.UI" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Assets need to be private / included for testing purposes. Do not ship them-->
+    <PackageReference Include="HarmonyX" Version="2.10.1">
+    </PackageReference>
+
     <Reference Include="Assembly-CSharp">
-      <HintPath>E:\steam\SteamApps\common\BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="CustomUnits, Version=0.0.0.100, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>E:\steam\SteamApps\common\BATTLETECH\Mods\CustomUnits\CustomUnits.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="CustomAmmoCategories">
+      <HintPath>$(DeployedModPath)\..\CustomAmmoCategories\CustomAmmoCategories.dll</HintPath>
+    </Reference>
+    <Reference Include="CustomUnits">
+      <HintPath>$(DeployedModPath)\..\CustomUnits\CustomUnits.dll</HintPath>
     </Reference>
     <Reference Include="IRBTModUtils">
-      <HintPath>E:\steam\SteamApps\common\BATTLETECH\Mods\IRBTModUtils\IRBTModUtils.dll</HintPath>
+      <HintPath>$(DeployedModPath)\..\IRBTModUtils\IRBTModUtils.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\SkillBasedInit\SkillBasedInit.csproj" />
   </ItemGroup>

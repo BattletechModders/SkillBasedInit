@@ -103,9 +103,4 @@
     </Reference>
   </ItemGroup>
 
-    <!--<Reference Include="BattleTech.Common">
-      <HintPath>E:\steam\SteamApps\common\BATTLETECH\BattleTech_Data\Managed\BattleTech.Common.dll</HintPath>
-    </Reference>-->
-    
-
 </Project>
