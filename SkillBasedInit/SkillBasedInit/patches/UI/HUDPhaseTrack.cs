@@ -67,10 +67,43 @@ namespace SkillBasedInit
 
             Mod.Log.Trace?.Write($"CHUDPT:STP - entered at phase: {phase}.");
 
-            int[] bounds = InitiativeHelper.CalcPhaseIconBounds(___currentPhase);
-            int phaseAsInit = (Mod.MaxPhase + 1) - phase;
-            Mod.Log.Trace?.Write($"Phase {phase} is init {phaseAsInit} within currentPhase: {___currentPhase} with bounds: {bounds[0]}-{bounds[4]}");
+            if (__instance == null || tracker == null || ___PhaseIcons == null)
+            {
+                Mod.Log.Warn?.Write("Invalid state detect, __instance, tracker, or ___PhaseIcons were null. This should not happen!");
+                return;
+            }
+            if (___PhaseIcons.Count < 5)
+            {
+                Mod.Log.Warn?.Write("___PhaseIcons has less than 5 selections, this should not happen!");
+                return;
+            }
+            if (!SharedState.Combat.TurnDirector.IsInterleaved)
+            {
+                Mod.Log.Warn?.Write("Asked to SetTrackerPhase, but combat is not interleaved - this should not happen!");
+                return;
+            }
 
+            // Incoming phase value is Actor.Initiative, need to convert it figure out what pahse is represents
+            int phaseAsInit = (Mod.MaxPhase + 1) - phase;
+            if (phaseAsInit > Mod.MaxPhase)
+            {
+                phaseAsInit = Mod.MaxPhase;
+                Mod.Log.Info?.Write($"Invalid phase {phase} supplied, greater than MaxPhase: {Mod.MaxPhase}. Normalizing.");
+            }
+            else if (phaseAsInit < Mod.MinPhase)
+            {
+                phaseAsInit = Mod.MinPhase;
+                Mod.Log.Info?.Write($"Invalid phase {phase} supplied, less than MinPhase: {Mod.MinPhase}. Normalizing.");
+            }
+            
+            int[] bounds = InitiativeHelper.CalcPhaseIconBounds(___currentPhase);
+            if (bounds == null || bounds.Length < 5)
+            {
+                Mod.Log.Warn?.Write($"Calculated bounds are null or less than 5 for phase {phase}, this should not happen!");
+                return;
+            }
+            Mod.Log.Trace?.Write($"Phase {phase} is init {phaseAsInit} within currentPhase: {___currentPhase} with bounds: {bounds[0]}-{bounds[4]}");
+            
             if (phaseAsInit > bounds[1])
             {
                 Mod.Log.Trace?.Write($"  -- Phase icon is higher than {bounds[1]}, setting to P phase.");
@@ -96,5 +129,6 @@ namespace SkillBasedInit
             __runOriginal = false;
         }
     }
+
 
 }

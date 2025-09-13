@@ -150,17 +150,17 @@ namespace SkillBasedInit.Helper
 
         // Calculate the left and right phase boundaries *as initiative* 
         //   Will calculate 
-        // 30, 29, 28, 27, 26 (red 30)
-        // 30, 29, 28, 27, 26 (red 29)
-        // 30, 29, 28, 27, 26 (red 28)
-        // 29, 28, 27, 26, 25 (red 27)
-        // 28, 27, 26, 25, 24 (red 26)
+        // 30, 29, 28, 27, 26 (red 30) -> phase 1
+        // 30, 29, 28, 27, 26 (red 29) -> phase 2
+        // 30, 29, 28, 27, 26 (red 28) -> phase 3
+        // 29, 28, 27, 26, 25 (red 27) -> phase 4
+        // 28, 27, 26, 25, 24 (red 26) -> phase 5
         // ...
-        //  7,  6,  5,  4,  3 (red 5)
-        //  6,  5,  4,  3,  2 (red 4)
-        //  5,  4,  3,  2,  1 (red 3)
-        //  5,  4,  3,  2,  1 (red 2)
-        //  5,  4,  3,  2,  1 (red 1)
+        //  7,  6,  5,  4,  3 (red 5) -> phase 26
+        //  6,  5,  4,  3,  2 (red 4) -> phase 27
+        //  5,  4,  3,  2,  1 (red 3) -> phase 28
+        //  5,  4,  3,  2,  1 (red 2) -> phase 29
+        //  5,  4,  3,  2,  1 (red 1) -> phase 30
         public static int[] CalcPhaseIconBounds(int currentPhase)
         {
 

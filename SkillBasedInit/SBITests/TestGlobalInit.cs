@@ -106,8 +106,13 @@ namespace SBITests
         [AssemblyInitialize]
         public static void TestInitialize(TestContext testContext)
         {
-            Mod.Log = new DeferringLogger(testContext.TestResultsDirectory,
-                "SBI_Tests", "SBITEST", true, true);
+
+            IRBTModUtils.Mod.Config = new IRBTModUtils.ModConfig();
+            IRBTModUtils.Mod.Config.Init();
+
+            IRBTModUtils.Mod.Log = new DeferringLogger(null, string.Empty, string.Empty, false, false);
+
+            Mod.Log = new DeferringLogger(null, string.Empty, string.Empty, false, false);
 
             Mod.Config = new ModConfig();
 
@@ -131,12 +136,6 @@ namespace SBITests
             testCUSettings.AllowRotateWhileJumpByDefault = false;
             CustomUnits.Core.Settings = testCUSettings;
 
-            IRBTModUtils.Mod.Log = new DeferringLogger(testContext.TestResultsDirectory,
-                "IRBTMODUTIL_Tests", "IRBTMODUTILTEST", false, false);
-
-            IRBTModUtils.Mod.Config = new IRBTModUtils.ModConfig();
-            IRBTModUtils.Mod.Config.Init();
-
             // Initialize Harmony
             TestGlobalInit.HarmonyInst = Harmony.CreateAndPatchAll(typeof(Patch), "us.frostraptor.sbi.test");
             PropertyInfo isMoraleInspiredProp = AccessTools.Property(typeof(AbstractActor), "IsMoraleInspired");
@@ -144,7 +143,7 @@ namespace SBITests
             PropertyInfo isFuryInspired = AccessTools.Property(typeof(AbstractActor), "IsFuryInspired");
             MI_IsFuryInspired = isFuryInspired.GetMethod;
 
-            PropertyInfo isShutdown = AccessTools.Property(typeof(Mech), "IsShutDown");
+            PropertyInfo isShutdown = AccessTools.Property(typeof(AbstractActor), "IsShutDown");
             MI_IsShutdown = isShutdown.GetMethod;
 
             PropertyInfo isProne = AccessTools.Property(typeof(Mech), "IsProne");

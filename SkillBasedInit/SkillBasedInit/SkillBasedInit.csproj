@@ -4,9 +4,9 @@
     <Error Text="BattleTechGameDir variable not set properly" />
   </Target>
 
-  <PropertyGroup Condition="'$(DeployedModPath)' == '' And Exists('$(BattleTechGameDir)\Mods\Core\CBTBehaviorsEnhanced')">
+  <PropertyGroup Condition="'$(DeployedModPath)' == '' And Exists('$(BattleTechGameDir)\Mods\Core\SkillBasedInit')">
     <!-- Modpack -->
-    <DeployedModPath>$(BattleTechGameDir)\Mods\Core\CBTBehaviorsEnhanced</DeployedModPath>
+    <DeployedModPath>$(BattleTechGameDir)\Mods\Core\SkillBasedInit</DeployedModPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DeployedModPath)' == '' And Exists('$(BattleTechGameDir)\Mods\SkillBasedInit')">
     <!-- flat dir -->
@@ -28,8 +28,8 @@
     <AssemblyTitle>SkillBasedInit</AssemblyTitle>
     <Product>SkillBasedInit</Product>
     <Copyright>Copyright © 2023</Copyright>
-    <AssemblyVersion>3.0.0</AssemblyVersion>
-    <FileVersion>3.0.0</FileVersion>
+    <AssemblyVersion>3.1.0</AssemblyVersion>
+    <FileVersion>3.1.0</FileVersion>
     <LangVersion>11</LangVersion>
   </PropertyGroup>
 
